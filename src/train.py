@@ -6,11 +6,17 @@ from absl import app, flags
 import torch
 from datasets import WeedsGaloreDataset
 from torch.utils.data import DataLoader
-from nets import deeplabv3plus_resnet50, deeplabv3plus_resnet50_do
+from nets import deeplabv3plus_resnet50, deeplabv3plus_resnet50_do, deeplabv3plus_resnet50_attn
 from pathlib import Path
 from torchmetrics.classification import MulticlassJaccardIndex
 from torch.utils.tensorboard import SummaryWriter
 import os
+import time
+try:
+    from thop import profile
+    THOP_AVAILABLE = True
+except ImportError:
+    THOP_AVAILABLE = False
 
 FLAGS = flags.FLAGS
 
@@ -20,6 +26,7 @@ flags.DEFINE_integer('in_channels', 5, 'options: 3 (RGB), 5 (MSI)')
 flags.DEFINE_integer('num_classes', 6, 'options: 3 (uni-weed), 6 (multi-weed)')
 flags.DEFINE_integer('ignore_index', -1, 'ignore during loss and iou calculation')
 flags.DEFINE_boolean('dlv3p_do', False, 'set True to use probabilistic variant of DLv3+ with dropout')
+flags.DEFINE_boolean('use_attention', True, 'set True to insert a CBAM attention module between ASPP and the decoder')
 flags.DEFINE_boolean('pretrained_backbone', True, 'set True to use pretrained ResNet50 backbone')
 flags.DEFINE_string('ckpt_resnet', 'ckpts/resnet50-19c8e357.pth', 'ckpt path for pretrained backbone')
 flags.DEFINE_integer('batch_size', 2, 'batch size')
@@ -29,6 +36,61 @@ flags.DEFINE_integer('epochs', 10, 'number of epochs for training')
 flags.DEFINE_string('out_dir', 'out_dir', 'directory to save logs and ckpts')
 flags.DEFINE_integer('log_interval', 25, 'number of iterations to log scalars')
 flags.DEFINE_integer('ckpt_interval', 500, 'number of iterations to save ckpts')
+
+def count_parameters(model):
+    """Count total trainable and non-trainable parameters"""
+    total_params = sum(p.numel() for p in model.parameters())
+    trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    non_trainable_params = total_params - trainable_params
+    return total_params, trainable_params, non_trainable_params
+
+
+def measure_model_stats(model, device, in_channels, input_size=(512, 512)):
+    """Measure model parameters, FLOPs, and inference time"""
+    # Count parameters
+    total_params, trainable_params, non_trainable_params = count_parameters(model)
+    print(f"\n{'='*60}")
+    print(f"MODEL STATISTICS")
+    print(f"{'='*60}")
+    print(f"Total Parameters: {total_params:,}")
+    print(f"Trainable Parameters: {trainable_params:,}")
+    print(f"Non-trainable Parameters: {non_trainable_params:,}")
+   
+    # Measure FLOPs
+    if THOP_AVAILABLE:
+        try:
+            dummy_input = torch.randn(1, in_channels, input_size[0], input_size[1]).to(device)
+            flops, params = profile(model, inputs=(dummy_input,), verbose=False)
+            print(f"FLOPs (forward pass): {flops:,.0f} (~{flops/1e9:.2f}G)")
+            print(f"FLOPs per pixel: {flops / (input_size[0] * input_size[1]):,.0f}")
+        except Exception as e:
+            print(f"FLOPs calculation failed: {e}")
+    else:
+        print("FLOPs calculation requires 'thop' library. Install with: pip install thop")
+   
+    # Measure inference time
+    model.eval()
+    with torch.no_grad():
+        dummy_input = torch.randn(1, in_channels, input_size[0], input_size[1]).to(device)
+        # Warmup
+        for _ in range(5):
+            _ = model(dummy_input)
+       
+        # Time measurement
+        start_time = time.time()
+        num_runs = 100
+        for _ in range(num_runs):
+            _ = model(dummy_input)
+        end_time = time.time()
+       
+        avg_inference_time = (end_time - start_time) / num_runs * 1000  # in ms
+        throughput = 1000 / avg_inference_time  # images per second
+       
+        print(f"Inference time (avg {num_runs} runs): {avg_inference_time:.2f} ms")
+        print(f"Throughput: {throughput:.2f} img/s")
+    print(f"{'='*60}\n")
+
+
 
 def main(_):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -53,6 +115,8 @@ def main(_):
     # Network
     if FLAGS.dlv3p_do:
         net = deeplabv3plus_resnet50_do(num_classes=FLAGS.num_classes, pretrained_backbone=FLAGS.pretrained_backbone)  # probabilistic DeepLabv3+
+    elif FLAGS.use_attention:
+        net = deeplabv3plus_resnet50_attn(num_classes=FLAGS.num_classes, pretrained_backbone=FLAGS.pretrained_backbone)  # DeepLabv3+ with CBAM attention (ASPP -> Attention -> Decoder)
     else:
         net = deeplabv3plus_resnet50(num_classes=FLAGS.num_classes, pretrained_backbone=FLAGS.pretrained_backbone)  # (determinsitic) DeepLabv3+
 
@@ -62,6 +126,9 @@ def main(_):
 
     # Model to device
     net.to(device=device)
+
+    # Measure model statistics
+    measure_model_stats(net, device, in_channels=FLAGS.in_channels)
 
     # Loss criterion
     criterion = torch.nn.CrossEntropyLoss(ignore_index=FLAGS.ignore_index).to(device)

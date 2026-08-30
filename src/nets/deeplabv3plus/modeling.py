@@ -2,11 +2,11 @@
 # props to: https://github.com/VainF/DeepLabV3Plus-Pytorch
 
 from .utils import IntermediateLayerGetter
-from ._deeplab import DeepLabHead, DeepLabHeadV3Plus, DeepLabV3
+from ._deeplab import DeepLabHead, DeepLabHeadV3Plus, DeepLabHeadV3PlusAttention, DeepLabV3
 from .backbones import resnet
 
 
-def _segm_resnet(name, backbone_name, num_classes, output_stride, pretrained_backbone):
+def _segm_resnet(name, backbone_name, num_classes, output_stride, pretrained_backbone, use_attention=False):
 
   if output_stride == 8:
     replace_stride_with_dilation = [False, True, True]
@@ -23,7 +23,10 @@ def _segm_resnet(name, backbone_name, num_classes, output_stride, pretrained_bac
 
   if name == 'deeplabv3plus':
     return_layers = {'layer4': 'out', 'layer1': 'low_level'}
-    classifier = DeepLabHeadV3Plus(inplanes, low_level_planes, num_classes, aspp_dilate)
+    if use_attention:
+      classifier = DeepLabHeadV3PlusAttention(inplanes, low_level_planes, num_classes, aspp_dilate)
+    else:
+      classifier = DeepLabHeadV3Plus(inplanes, low_level_planes, num_classes, aspp_dilate)
   elif name == 'deeplabv3':
     return_layers = {'layer4': 'out'}
     classifier = DeepLabHead(inplanes, num_classes, aspp_dilate)
@@ -32,14 +35,14 @@ def _segm_resnet(name, backbone_name, num_classes, output_stride, pretrained_bac
   model = DeepLabV3(backbone, classifier)
   return model
 
-def _load_model(arch_type, backbone, num_classes, output_stride, pretrained_backbone):
+def _load_model(arch_type, backbone, num_classes, output_stride, pretrained_backbone, use_attention=False):
 
   if backbone == 'mobilenetv2':
     model = _segm_mobilenet(
         arch_type, backbone, num_classes, output_stride=output_stride, pretrained_backbone=pretrained_backbone)
   elif backbone.startswith('resnet'):
     model = _segm_resnet(
-        arch_type, backbone, num_classes, output_stride=output_stride, pretrained_backbone=pretrained_backbone)
+        arch_type, backbone, num_classes, output_stride=output_stride, pretrained_backbone=pretrained_backbone, use_attention=use_attention)
   elif backbone.startswith('hrnetv2'):
     model = _segm_hrnet(arch_type, backbone, num_classes, pretrained_backbone=pretrained_backbone)
   else:
@@ -91,3 +94,17 @@ def deeplabv3plus_resnet101(num_classes=21, output_stride=8, pretrained_backbone
     """
   return _load_model(
       'deeplabv3plus', 'resnet101', num_classes, output_stride=output_stride, pretrained_backbone=pretrained_backbone)
+
+def deeplabv3plus_resnet50_attn(num_classes=21, output_stride=8, pretrained_backbone=False):
+  """Constructs a DeepLabV3+ model with a ResNet-50 backbone and a CBAM attention
+    module inserted between the ASPP module and the decoder
+    (backbone -> ASPP -> attention -> decoder -> segmentation mask).
+    Args:
+        num_classes (int): number of classes.
+        output_stride (int): output stride for deeplab.
+        pretrained_backbone (bool): If True, use the pretrained backbone.
+    """
+  return _load_model(
+      'deeplabv3plus', 'resnet50', num_classes, output_stride=output_stride, pretrained_backbone=pretrained_backbone,
+      use_attention=True)
+
