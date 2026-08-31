@@ -6,7 +6,7 @@ from ._deeplab import DeepLabHead, DeepLabHeadV3Plus, DeepLabHeadV3PlusAttention
 from .backbones import resnet
 
 
-def _segm_resnet(name, backbone_name, num_classes, output_stride, pretrained_backbone, use_attention=False):
+def _segm_resnet(name, backbone_name, num_classes, output_stride, pretrained_backbone, use_attention=False, attention_type='cbam', num_bands=5):
 
   if output_stride == 8:
     replace_stride_with_dilation = [False, True, True]
@@ -24,7 +24,7 @@ def _segm_resnet(name, backbone_name, num_classes, output_stride, pretrained_bac
   if name == 'deeplabv3plus':
     return_layers = {'layer4': 'out', 'layer1': 'low_level'}
     if use_attention:
-      classifier = DeepLabHeadV3PlusAttention(inplanes, low_level_planes, num_classes, aspp_dilate)
+      classifier = DeepLabHeadV3PlusAttention(inplanes, low_level_planes, num_classes, aspp_dilate, attention_type=attention_type, num_bands=num_bands)
     else:
       classifier = DeepLabHeadV3Plus(inplanes, low_level_planes, num_classes, aspp_dilate)
   elif name == 'deeplabv3':
@@ -35,14 +35,14 @@ def _segm_resnet(name, backbone_name, num_classes, output_stride, pretrained_bac
   model = DeepLabV3(backbone, classifier)
   return model
 
-def _load_model(arch_type, backbone, num_classes, output_stride, pretrained_backbone, use_attention=False):
+def _load_model(arch_type, backbone, num_classes, output_stride, pretrained_backbone, use_attention=False, attention_type='cbam', num_bands=5):
 
   if backbone == 'mobilenetv2':
     model = _segm_mobilenet(
         arch_type, backbone, num_classes, output_stride=output_stride, pretrained_backbone=pretrained_backbone)
   elif backbone.startswith('resnet'):
     model = _segm_resnet(
-        arch_type, backbone, num_classes, output_stride=output_stride, pretrained_backbone=pretrained_backbone, use_attention=use_attention)
+        arch_type, backbone, num_classes, output_stride=output_stride, pretrained_backbone=pretrained_backbone, use_attention=use_attention, attention_type=attention_type, num_bands=num_bands)
   elif backbone.startswith('hrnetv2'):
     model = _segm_hrnet(arch_type, backbone, num_classes, pretrained_backbone=pretrained_backbone)
   else:
