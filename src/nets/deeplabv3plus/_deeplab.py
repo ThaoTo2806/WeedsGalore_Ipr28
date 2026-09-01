@@ -178,10 +178,10 @@ class TinySpectralEncoder(nn.Module):
   """Extremely lightweight encoder for the NIR + Red-Edge bands.
     A depthwise conv (spatial context per band) followed by a 1x1 pointwise conv
     (cheap cross-band mixing, e.g. NDVI/NDRE-like contrasts) extracts local
-    spectral-spatial patterns, then global average pooling compresses this into a
-    compact 'spectral descriptor' vector that summarizes the vegetation-relevant
-    signal for the whole image. Cost: O(H*W*embed_channels) instead of routing
-    NIR/RE through a full ResNet branch."""
+    spectral-spatial patterns,  Returns a full-resolution spectral feature map
+    (NOT globally pooled) so that downstream gating can use *where* the
+    vegetation-relevant signal is, not just a single whole-image summary.
+    Cost: O(H*W*embed_channels) instead of routing NIR/RE through a full ResNet branch."""
 
   def __init__(self, in_channels=2, embed_channels=32):
     super(TinySpectralEncoder, self).__init__()
@@ -189,36 +189,48 @@ class TinySpectralEncoder(nn.Module):
     self.pointwise = nn.Conv2d(in_channels, embed_channels, kernel_size=1, bias=False)
     self.bn = nn.BatchNorm2d(embed_channels)
     self.act = nn.ReLU(inplace=True)
-    self.pool = nn.AdaptiveAvgPool2d(1)
+    #self.pool = nn.AdaptiveAvgPool2d(1)
   def forward(self, x):
     x = self.dwconv(x)
     x = self.pointwise(x)
     x = self.bn(x)
-    x = self.act(x)
-    return self.pool(x)  # (B, embed_channels, 1, 1) spectral descriptor
+    #x = self.act(x)
+    #return self.pool(x)  # (B, embed_channels, 1, 1) spectral descriptor
+    return self.act(x)  # (B, embed_channels, H, W) full-resolution spectral feature map
 class SpectralGate(nn.Module):
-  """Turns the spectral descriptor into a per-channel gate (sigmoid) matching a given
-    RGB feature map's channel count, then rescales that feature map.
-    NIR/RE acts purely as a lightweight *guidance signal* telling the network which
-    RGB feature channels to emphasize/suppress for this image, instead of being
-    processed by the full backbone alongside RGB ("Spectral-guided Fusion" in the
-    README). Cost: a single 1x1 conv (`descriptor_channels x feature_channels`
-    parameters), independent of spatial resolution."""
+  """Cross-modal channel + spatial gate: uses the (spatially-resolved) NIR/RE spectral
+    feature map to modulate a given RGB feature map both per-channel ("what" to
+    emphasize, e.g. vegetation-sensitive channels) and per-location ("where", e.g.
+    which pixels look like living vegetation vs soil per an NDVI/NDRE-like contrast).
+    This is the cross-modal analogue of CBAM (self-attention) -- here the *guidance*
+    signal comes from NIR/RE instead of from the RGB features themselves, which is
+    what makes this genuine "Spectral-guided Fusion" rather than a single global
+    recalibration (a plain global-pooled SE-style gate discards all spatial NIR/RE
+    information, which is exactly what a dense-prediction task like segmentation needs).
+    Cost: two 1x1 convs (`descriptor_channels x feature_channels` for the channel branch,
+    `descriptor_channels x 1` for the spatial branch), independent of spatial resolution."""
   def __init__(self, descriptor_channels, feature_channels):
     super(SpectralGate, self).__init__()
-    self.fc = nn.Conv2d(descriptor_channels, feature_channels, kernel_size=1, bias=True)
+    #self.fc = nn.Conv2d(descriptor_channels, feature_channels, kernel_size=1, bias=True)
+    self.channel_fc = nn.Conv2d(descriptor_channels, feature_channels, kernel_size=1, bias=True)
+    self.spatial_conv = nn.Conv2d(descriptor_channels, 1, kernel_size=1, bias=True)
     self.sigmoid = nn.Sigmoid()
-  def forward(self, descriptor, feature):
-    gate = self.sigmoid(self.fc(descriptor))  # (B, feature_channels, 1, 1)
-    return feature * gate
+  def forward(self, spectral_map, feature):
+    # Downsample the (full-resolution) spectral map to this feature map's spatial size,
+    # via average pooling over each receptive-field region (correct for large downsampling
+    # factors, e.g. layer4 features are typically 32x smaller than the input image).
+    spectral_map = F.adaptive_avg_pool2d(spectral_map, feature.shape[-2:])
+    channel_gate = self.sigmoid(self.channel_fc(F.adaptive_avg_pool2d(spectral_map, 1)))  # (B, C, 1, 1)
+    spatial_gate = self.sigmoid(self.spatial_conv(spectral_map))  # (B, 1, H, W)
+    return feature * channel_gate * spatial_gate
 class SpectralGuidedBackbone(nn.Module):
   """Two-branch backbone described in the README:
       RGB (3 bands)      -> standard ResNet (IntermediateLayerGetter -> 'out'/'low_level')
-      NIR + RE (2 bands) -> TinySpectralEncoder -> spectral descriptor -> SpectralGate
-    The spectral descriptor gates both the 'out' (ASPP input) and 'low_level' (decoder
-    skip connection) RGB feature maps, so NIR/RE information reaches every stage of the
-    decoder without ever passing through the (expensive) RGB backbone itself.
-    Expects input with 5 channels ordered (R, G, B, NIR, RE) -- matches WeedsGaloreDataset."""
+      NIR + RE (2 bands) -> TinySpectralEncoder -> spatial spectral feature map -> SpectralGate
+    The spectral feature map gates both the 'out' (ASPP input) and 'low_level' (decoder
+    skip connection) RGB feature maps -- per-channel AND per-location -- so NIR/RE
+    information reaches every stage of the decoder without ever passing through the
+    (expensive) RGB backbone itself."""
   def __init__(self, rgb_backbone, out_channels, low_level_channels, spectral_embed=32):
     super(SpectralGuidedBackbone, self).__init__()
     self.rgb_backbone = rgb_backbone  # IntermediateLayerGetter -> {'out': ..., 'low_level': ...}
@@ -228,9 +240,9 @@ class SpectralGuidedBackbone(nn.Module):
   def forward(self, x):
     rgb, nir_re = x[:, :3], x[:, 3:5]
     features = self.rgb_backbone(rgb)
-    descriptor = self.spectral_encoder(nir_re)
-    features['out'] = self.gate_out(descriptor, features['out'])
-    features['low_level'] = self.gate_low_level(descriptor, features['low_level'])
+    spectral_map = self.spectral_encoder(nir_re)  # (B, spectral_embed, H, W), full input resolution
+    features['out'] = self.gate_out(spectral_map, features['out'])
+    features['low_level'] = self.gate_low_level(spectral_map, features['low_level'])
     return features
 class LiteASPPConv(nn.Sequential):
   """Depthwise-separable atrous conv branch: same receptive field as a standard 3x3
