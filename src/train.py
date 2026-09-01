@@ -26,12 +26,7 @@ flags.DEFINE_integer('in_channels', 5, 'options: 3 (RGB), 5 (MSI)')
 flags.DEFINE_integer('num_classes', 6, 'options: 3 (uni-weed), 6 (multi-weed)')
 flags.DEFINE_integer('ignore_index', -1, 'ignore during loss and iou calculation')
 flags.DEFINE_boolean('dlv3p_do', False, 'set True to use probabilistic variant of DLv3+ with dropout')
-flags.DEFINE_boolean('use_attention', True, 'set True to insert an attention module between ASPP and the decoder')
-flags.DEFINE_enum('attention_type', 'cbam', ['cbam', 'sr_cbam'],
-                   'attention module used when use_attention=True: '
-                   'cbam (original CBAM) or sr_cbam (Spectral-Relation CBAM, conditions channel/spatial '
-                   'attention gates on the raw multispectral input, see README)')
-
+flags.DEFINE_boolean('use_attention', True, 'set True to insert a CBAM attention module between ASPP and the decoder')
 flags.DEFINE_boolean('pretrained_backbone', True, 'set True to use pretrained ResNet50 backbone')
 flags.DEFINE_string('ckpt_resnet', 'ckpts/resnet50-19c8e357.pth', 'ckpt path for pretrained backbone')
 flags.DEFINE_integer('batch_size', 2, 'batch size')
@@ -121,9 +116,7 @@ def main(_):
     if FLAGS.dlv3p_do:
         net = deeplabv3plus_resnet50_do(num_classes=FLAGS.num_classes, pretrained_backbone=FLAGS.pretrained_backbone)  # probabilistic DeepLabv3+
     elif FLAGS.use_attention:
-        net = deeplabv3plus_resnet50_attn(num_classes=FLAGS.num_classes, pretrained_backbone=FLAGS.pretrained_backbone,
-                                           attention_type=FLAGS.attention_type, num_bands=FLAGS.in_channels)  # DeepLabv3+ with attention (ASPP -> Attention -> Decoder)
-
+        net = deeplabv3plus_resnet50_attn(num_classes=FLAGS.num_classes, pretrained_backbone=FLAGS.pretrained_backbone)  # DeepLabv3+ with CBAM attention (ASPP -> Attention -> Decoder)
     else:
         net = deeplabv3plus_resnet50(num_classes=FLAGS.num_classes, pretrained_backbone=FLAGS.pretrained_backbone)  # (determinsitic) DeepLabv3+
 

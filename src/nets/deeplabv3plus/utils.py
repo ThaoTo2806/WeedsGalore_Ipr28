@@ -17,7 +17,6 @@ class _SimpleSegmentationModel(nn.Module):
   def forward(self, x):
     input_shape = x.shape[-2:]
     features = self.backbone(x)
-    features['input'] = x  # SR-CBAM: give attention-based heads access to the raw multispectral input
     x = self.classifier(features)
     x = F.interpolate(x, size=input_shape, mode='bilinear', align_corners=False)
     return x
