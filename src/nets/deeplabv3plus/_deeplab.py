@@ -134,7 +134,13 @@ class DeepLabHeadV3PlusAttention(nn.Module):
   """DeepLabV3+ decoder head with a CBAM attention module inserted right after ASPP
     (i.e. between the multi-scale ASPP features and the decoder), so that the model
     can select the most informative channels/regions before fusing with the
-    low-level features and reconstructing the segmentation mask."""
+    low-level features and reconstructing the segmentation mask.
+    
+    NOTE: CBAM is currently DISABLED (commented out below). The spectral-guided
+    architecture (see TinySpectralEncoder / SpectralGate / SpectralGuidedBackbone below)
+    replaces CBAM's role with a NIR/RE-driven Spectral Gate applied directly on the
+    backbone features, per the project README. Re-enable by uncommenting
+    `self.attention = CBAM(256)` and the call in forward()."""
 
   def __init__(self, in_channels, low_level_channels, num_classes, aspp_dilate=[12, 24, 36]):
     super(DeepLabHeadV3PlusAttention, self).__init__()
@@ -145,7 +151,7 @@ class DeepLabHeadV3PlusAttention(nn.Module):
     )
 
     self.aspp = ASPP(in_channels, aspp_dilate)
-    self.attention = CBAM(256)  # 256 == ASPP output channels
+    #self.attention = CBAM(256)  # 256 == ASPP output channels
 
     self.classifier = nn.Sequential(
         nn.Conv2d(304, 256, 3, padding=1, bias=False), nn.BatchNorm2d(256), nn.ReLU(inplace=True),
@@ -155,7 +161,136 @@ class DeepLabHeadV3PlusAttention(nn.Module):
   def forward(self, feature):
     low_level_feature = self.project(feature['low_level'])
     output_feature = self.aspp(feature['out'])
-    output_feature = self.attention(output_feature)  # <- attention applied between ASPP and decoder
+    #output_feature = self.attention(output_feature)  # <- attention applied between ASPP and decoder
+
+    output_feature = F.interpolate(
+        output_feature, size=low_level_feature.shape[2:], mode='bilinear', align_corners=False)
+    return self.classifier(torch.cat([low_level_feature, output_feature], dim=1))
+
+  def _init_weight(self):
+    for m in self.modules():
+      if isinstance(m, nn.Conv2d):
+        nn.init.kaiming_normal_(m.weight)
+      elif isinstance(m, (nn.BatchNorm2d, nn.GroupNorm)):
+        nn.init.constant_(m.weight, 1)
+        nn.init.constant_(m.bias, 0)
+class TinySpectralEncoder(nn.Module):
+  """Extremely lightweight encoder for the NIR + Red-Edge bands.
+    A depthwise conv (spatial context per band) followed by a 1x1 pointwise conv
+    (cheap cross-band mixing, e.g. NDVI/NDRE-like contrasts) extracts local
+    spectral-spatial patterns, then global average pooling compresses this into a
+    compact 'spectral descriptor' vector that summarizes the vegetation-relevant
+    signal for the whole image. Cost: O(H*W*embed_channels) instead of routing
+    NIR/RE through a full ResNet branch."""
+
+  def __init__(self, in_channels=2, embed_channels=32):
+    super(TinySpectralEncoder, self).__init__()
+    self.dwconv = nn.Conv2d(in_channels, in_channels, kernel_size=3, padding=1, groups=in_channels, bias=False)
+    self.pointwise = nn.Conv2d(in_channels, embed_channels, kernel_size=1, bias=False)
+    self.bn = nn.BatchNorm2d(embed_channels)
+    self.act = nn.ReLU(inplace=True)
+    self.pool = nn.AdaptiveAvgPool2d(1)
+  def forward(self, x):
+    x = self.dwconv(x)
+    x = self.pointwise(x)
+    x = self.bn(x)
+    x = self.act(x)
+    return self.pool(x)  # (B, embed_channels, 1, 1) spectral descriptor
+class SpectralGate(nn.Module):
+  """Turns the spectral descriptor into a per-channel gate (sigmoid) matching a given
+    RGB feature map's channel count, then rescales that feature map.
+    NIR/RE acts purely as a lightweight *guidance signal* telling the network which
+    RGB feature channels to emphasize/suppress for this image, instead of being
+    processed by the full backbone alongside RGB ("Spectral-guided Fusion" in the
+    README). Cost: a single 1x1 conv (`descriptor_channels x feature_channels`
+    parameters), independent of spatial resolution."""
+  def __init__(self, descriptor_channels, feature_channels):
+    super(SpectralGate, self).__init__()
+    self.fc = nn.Conv2d(descriptor_channels, feature_channels, kernel_size=1, bias=True)
+    self.sigmoid = nn.Sigmoid()
+  def forward(self, descriptor, feature):
+    gate = self.sigmoid(self.fc(descriptor))  # (B, feature_channels, 1, 1)
+    return feature * gate
+class SpectralGuidedBackbone(nn.Module):
+  """Two-branch backbone described in the README:
+      RGB (3 bands)      -> standard ResNet (IntermediateLayerGetter -> 'out'/'low_level')
+      NIR + RE (2 bands) -> TinySpectralEncoder -> spectral descriptor -> SpectralGate
+    The spectral descriptor gates both the 'out' (ASPP input) and 'low_level' (decoder
+    skip connection) RGB feature maps, so NIR/RE information reaches every stage of the
+    decoder without ever passing through the (expensive) RGB backbone itself.
+    Expects input with 5 channels ordered (R, G, B, NIR, RE) -- matches WeedsGaloreDataset."""
+  def __init__(self, rgb_backbone, out_channels, low_level_channels, spectral_embed=32):
+    super(SpectralGuidedBackbone, self).__init__()
+    self.rgb_backbone = rgb_backbone  # IntermediateLayerGetter -> {'out': ..., 'low_level': ...}
+    self.spectral_encoder = TinySpectralEncoder(in_channels=2, embed_channels=spectral_embed)
+    self.gate_out = SpectralGate(spectral_embed, out_channels)
+    self.gate_low_level = SpectralGate(spectral_embed, low_level_channels)
+  def forward(self, x):
+    rgb, nir_re = x[:, :3], x[:, 3:5]
+    features = self.rgb_backbone(rgb)
+    descriptor = self.spectral_encoder(nir_re)
+    features['out'] = self.gate_out(descriptor, features['out'])
+    features['low_level'] = self.gate_low_level(descriptor, features['low_level'])
+    return features
+class LiteASPPConv(nn.Sequential):
+  """Depthwise-separable atrous conv branch: same receptive field as a standard 3x3
+    atrous conv but far cheaper (depthwise 3x3 + pointwise 1x1 instead of a full dense
+    3x3), used to build the lighter ("Lite") ASPP."""
+  def __init__(self, in_channels, out_channels, dilation):
+    modules = [
+        nn.Conv2d(in_channels, in_channels, 3, padding=dilation, dilation=dilation, groups=in_channels, bias=False),
+        nn.Conv2d(in_channels, out_channels, 1, bias=False),
+        nn.BatchNorm2d(out_channels),
+        nn.ReLU(inplace=True),
+    ]
+    super(LiteASPPConv, self).__init__(*modules)
+class LiteASPP(nn.Module):
+  """Lightweight ASPP: depthwise-separable atrous branches + fewer output channels
+    (128 by default instead of 256) to cut params/FLOPs relative to the standard ASPP,
+    while keeping the same multi-scale-context design."""
+  def __init__(self, in_channels, atrous_rates, out_channels=128):
+    super(LiteASPP, self).__init__()
+    modules = []
+    modules.append(
+        nn.Sequential(
+            nn.Conv2d(in_channels, out_channels, 1, bias=False), nn.BatchNorm2d(out_channels), nn.ReLU(inplace=True)))
+    rate1, rate2, rate3 = tuple(atrous_rates)
+    modules.append(LiteASPPConv(in_channels, out_channels, rate1))
+    modules.append(LiteASPPConv(in_channels, out_channels, rate2))
+    modules.append(LiteASPPConv(in_channels, out_channels, rate3))
+    modules.append(ASPPPooling(in_channels, out_channels))
+    self.convs = nn.ModuleList(modules)
+    self.project = nn.Sequential(
+        nn.Conv2d(5 * out_channels, out_channels, 1, bias=False),
+        nn.BatchNorm2d(out_channels),
+        nn.ReLU(inplace=True),
+        nn.Dropout(0.1),
+    )
+  def forward(self, x):
+    res = []
+    for conv in self.convs:
+      res.append(conv(x))
+    res = torch.cat(res, dim=1)
+    return self.project(res)
+class DeepLabHeadV3PlusLite(nn.Module):
+  """Same decoder structure as DeepLabHeadV3Plus but built from LiteASPP (depthwise-
+    separable, `aspp_channels` output channels) instead of the standard ASPP (256
+    channels) -- the reduced-compute decoder half of the spectral-guided architecture."""
+  def __init__(self, in_channels, low_level_channels, num_classes, aspp_dilate=[12, 24, 36], aspp_channels=128):
+    super(DeepLabHeadV3PlusLite, self).__init__()
+    self.project = nn.Sequential(
+        nn.Conv2d(low_level_channels, 48, 1, bias=False),
+        nn.BatchNorm2d(48),
+        nn.ReLU(inplace=True),
+    )
+    self.aspp = LiteASPP(in_channels, aspp_dilate, out_channels=aspp_channels)
+    self.classifier = nn.Sequential(
+        nn.Conv2d(aspp_channels + 48, aspp_channels, 3, padding=1, bias=False), nn.BatchNorm2d(aspp_channels),
+        nn.ReLU(inplace=True), nn.Conv2d(aspp_channels, num_classes, 1))
+    self._init_weight()
+  def forward(self, feature):
+    low_level_feature = self.project(feature['low_level'])
+    output_feature = self.aspp(feature['out'])
 
     output_feature = F.interpolate(
         output_feature, size=low_level_feature.shape[2:], mode='bilinear', align_corners=False)

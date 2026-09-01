@@ -239,7 +239,13 @@ def _resnet(arch, block, layers, pretrained, progress, **kwargs):
   model = ResNet(block, layers, **kwargs)
   if pretrained:
     #state_dict = load_state_dict_from_url(model_urls[arch], progress=progress)
-    state_dict = load_state_dict_from_local(FLAGS.ckpt_resnet)
+    # FLAGS.ckpt_resnet points at a local checkpoint for one specific arch (resnet50 by
+    # default). Only use it when it actually matches this arch; otherwise download the
+    # correct torchvision-pretrained weights for this arch (e.g. resnet34).
+    if arch in FLAGS.ckpt_resnet:
+      state_dict = load_state_dict_from_local(FLAGS.ckpt_resnet)
+    else:
+      state_dict = load_state_dict_from_url(model_urls[arch], progress=progress)
     model.load_state_dict(state_dict)
   return model
 
@@ -254,14 +260,14 @@ def _resnet(arch, block, layers, pretrained, progress, **kwargs):
 #   return _resnet('resnet18', BasicBlock, [2, 2, 2, 2], pretrained, progress, **kwargs)
 
 
-# def resnet34(pretrained=False, progress=True, **kwargs):
-#   r"""ResNet-34 model from
-#     `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_
-#     Args:
-#         pretrained (bool): If True, returns a model pre-trained on ImageNet
-#         progress (bool): If True, displays a progress bar of the download to stderr
-#     """
-#   return _resnet('resnet34', BasicBlock, [3, 4, 6, 3], pretrained, progress, **kwargs)
+def resnet34(pretrained=False, progress=True, **kwargs):
+  r"""ResNet-34 model from
+    `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_
+    Args:
+        pretrained (bool): If True, returns a model pre-trained on ImageNet
+        progress (bool): If True, displays a progress bar of the download to stderr
+    """
+  return _resnet('resnet34', BasicBlock, [3, 4, 6, 3], pretrained, progress, **kwargs)
 
 
 def resnet50(pretrained=False, progress=True, **kwargs):

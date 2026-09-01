@@ -2,7 +2,7 @@
 # props to: https://github.com/VainF/DeepLabV3Plus-Pytorch
 
 from .utils import IntermediateLayerGetter
-from ._deeplab import DeepLabHead, DeepLabHeadV3Plus, DeepLabHeadV3PlusAttention, DeepLabV3
+from ._deeplab import (DeepLabHead, DeepLabHeadV3Plus, DeepLabHeadV3PlusAttention, DeepLabHeadV3PlusLite, DeepLabV3, SpectralGuidedBackbone)
 from .backbones import resnet
 
 
@@ -18,8 +18,14 @@ def _segm_resnet(name, backbone_name, num_classes, output_stride, pretrained_bac
   backbone = resnet.__dict__[backbone_name](
       pretrained=pretrained_backbone, replace_stride_with_dilation=replace_stride_with_dilation)
 
-  inplanes = 2048
-  low_level_planes = 256
+  # ResNet18/34 use BasicBlock (expansion=1) -> layer4=512, layer1=64.
+  # ResNet50/101 use Bottleneck (expansion=4) -> layer4=2048, layer1=256.
+  if backbone_name in ('resnet18', 'resnet34'):
+    inplanes = 512
+    low_level_planes = 64
+  else:
+    inplanes = 2048
+    low_level_planes = 256
 
   if name == 'deeplabv3plus':
     return_layers = {'layer4': 'out', 'layer1': 'low_level'}
@@ -32,6 +38,35 @@ def _segm_resnet(name, backbone_name, num_classes, output_stride, pretrained_bac
     classifier = DeepLabHead(inplanes, num_classes, aspp_dilate)
   backbone = IntermediateLayerGetter(backbone, return_layers=return_layers)
 
+  model = DeepLabV3(backbone, classifier)
+  return model
+
+def _segm_resnet_spectral(backbone_name, num_classes, output_stride, pretrained_backbone, spectral_embed=32,
+                          aspp_channels=128):
+  """Builds the spectral-guided model from the README: RGB (3ch) through a standard
+    ResNet backbone, NIR+RE (2ch) through a TinySpectralEncoder whose descriptor gates
+    the RGB backbone features (SpectralGuidedBackbone), then DeepLabHeadV3PlusLite
+    (LiteASPP + decoder) for the segmentation head. Expects 5-band (R,G,B,NIR,RE) input."""
+  if output_stride == 8:
+    replace_stride_with_dilation = [False, True, True]
+    aspp_dilate = [12, 24, 36]
+  else:
+    replace_stride_with_dilation = [False, False, True]
+    aspp_dilate = [6, 12, 18]
+  # RGB-only backbone: keeps the standard 3-channel conv1, so ImageNet-pretrained
+  # weights are used unmodified (no channel-count surgery needed).
+  rgb_backbone = resnet.__dict__[backbone_name](
+      pretrained=pretrained_backbone, replace_stride_with_dilation=replace_stride_with_dilation)
+  if backbone_name in ('resnet18', 'resnet34'):
+    inplanes = 512
+    low_level_planes = 64
+  else:
+    inplanes = 2048
+    low_level_planes = 256
+  return_layers = {'layer4': 'out', 'layer1': 'low_level'}
+  rgb_backbone = IntermediateLayerGetter(rgb_backbone, return_layers=return_layers)
+  backbone = SpectralGuidedBackbone(rgb_backbone, out_channels=inplanes, low_level_channels=low_level_planes, spectral_embed=spectral_embed)
+  classifier = DeepLabHeadV3PlusLite(inplanes, low_level_planes, num_classes, aspp_dilate, aspp_channels=aspp_channels)
   model = DeepLabV3(backbone, classifier)
   return model
 
@@ -107,4 +142,22 @@ def deeplabv3plus_resnet50_attn(num_classes=21, output_stride=8, pretrained_back
   return _load_model(
       'deeplabv3plus', 'resnet50', num_classes, output_stride=output_stride, pretrained_backbone=pretrained_backbone,
       use_attention=True)
+
+def deeplabv3plus_resnet34_spectral(num_classes=21, output_stride=8, pretrained_backbone=False, spectral_embed=32, aspp_channels=128):
+  """Constructs the spectral-guided DeepLabV3+ model described in the project README:
+    ResNet-34 RGB backbone + a tiny NIR/RE spectral branch (TinySpectralEncoder) whose
+    descriptor gates the RGB features (SpectralGuidedBackbone, replacing CBAM) +
+    LiteASPP (depthwise-separable, `aspp_channels` output channels) + decoder.
+    Expects 5-band input ordered (R, G, B, NIR, RE).
+    Args:
+        num_classes (int): number of classes.
+        output_stride (int): output stride for deeplab.
+        pretrained_backbone (bool): If True, use the ImageNet-pretrained ResNet-34 backbone
+            (only applied to the RGB branch, which keeps a standard 3-channel conv1).
+        spectral_embed (int): channel width of the NIR/RE spectral descriptor.
+        aspp_channels (int): output channels of LiteASPP (lower = fewer params/FLOPs).
+    """
+  return _segm_resnet_spectral(
+      'resnet34', num_classes, output_stride=output_stride, pretrained_backbone=pretrained_backbone,
+      spectral_embed=spectral_embed, aspp_channels=aspp_channels)
 
