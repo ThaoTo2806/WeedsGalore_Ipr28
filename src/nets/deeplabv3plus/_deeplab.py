@@ -198,31 +198,56 @@ class TinySpectralEncoder(nn.Module):
     #return self.pool(x)  # (B, embed_channels, 1, 1) spectral descriptor
     return self.act(x)  # (B, embed_channels, H, W) full-resolution spectral feature map
 class SpectralGate(nn.Module):
-  """Cross-modal channel + spatial gate: uses the (spatially-resolved) NIR/RE spectral
-    feature map to modulate a given RGB feature map both per-channel ("what" to
-    emphasize, e.g. vegetation-sensitive channels) and per-location ("where", e.g.
-    which pixels look like living vegetation vs soil per an NDVI/NDRE-like contrast).
-    This is the cross-modal analogue of CBAM (self-attention) -- here the *guidance*
-    signal comes from NIR/RE instead of from the RGB features themselves, which is
-    what makes this genuine "Spectral-guided Fusion" rather than a single global
-    recalibration (a plain global-pooled SE-style gate discards all spatial NIR/RE
-    information, which is exactly what a dense-prediction task like segmentation needs).
-    Cost: two 1x1 convs (`descriptor_channels x feature_channels` for the channel branch,
-    `descriptor_channels x 1` for the spatial branch), independent of spatial resolution."""
+  """Cross-modal channel + spatial gate with explicit alpha/beta balancing.
+
+    This keeps the original spectral-guided idea:
+      - channel gate: which RGB channels should be emphasized ("what")
+      - spatial gate: where the vegetation-like response is located ("where")
+
+    We expose two learnable parameters, alpha and beta, and normalize them so that
+    alpha + beta = 1. This allows the model to decide how much emphasis to give
+    to the per-channel gate versus the per-pixel gate during training. The gate is
+    fused as a weighted geometric mean, which is smoother and more stable than a
+    hard product of two gates.
+    """
+
   def __init__(self, descriptor_channels, feature_channels):
     super(SpectralGate, self).__init__()
-    #self.fc = nn.Conv2d(descriptor_channels, feature_channels, kernel_size=1, bias=True)
     self.channel_fc = nn.Conv2d(descriptor_channels, feature_channels, kernel_size=1, bias=True)
     self.spatial_conv = nn.Conv2d(descriptor_channels, 1, kernel_size=1, bias=True)
     self.sigmoid = nn.Sigmoid()
+
+    # Explicit per-branch weights. They are normalized to sum to 1 before use.
+    self.alpha = nn.Parameter(torch.tensor(0.5))
+    self.beta = nn.Parameter(torch.tensor(0.5))
+
+  def get_balanced_weights(self):
+    denom = self.alpha + self.beta + 1e-8
+    alpha = self.alpha / denom
+    beta = self.beta / denom
+    return alpha, beta
+
   def forward(self, spectral_map, feature):
-    # Downsample the (full-resolution) spectral map to this feature map's spatial size,
-    # via average pooling over each receptive-field region (correct for large downsampling
-    # factors, e.g. layer4 features are typically 32x smaller than the input image).
+    # Match the spectral feature map to the current feature map resolution.
     spectral_map = F.adaptive_avg_pool2d(spectral_map, feature.shape[-2:])
-    channel_gate = self.sigmoid(self.channel_fc(F.adaptive_avg_pool2d(spectral_map, 1)))  # (B, C, 1, 1)
-    spatial_gate = self.sigmoid(self.spatial_conv(spectral_map))  # (B, 1, H, W)
-    return feature * channel_gate * spatial_gate
+
+    # Channel gate: global summary across spatial positions -> emphasize useful channels.
+    channel_gate = self.sigmoid(self.channel_fc(F.adaptive_avg_pool2d(spectral_map, 1)))
+
+    # Spatial gate: per-pixel modulation -> emphasize vegetation-like regions.
+    spatial_gate = self.sigmoid(self.spatial_conv(spectral_map))
+
+    alpha, beta = self.get_balanced_weights()
+    alpha = alpha.to(device=channel_gate.device, dtype=channel_gate.dtype)
+    beta = beta.to(device=channel_gate.device, dtype=channel_gate.dtype)
+
+    # Weighted geometric fusion keeps both branches while letting the model adapt their
+    # relative importance. This is usually more stable than a hard product with equal
+    # weighting of the two gates.
+    gate = torch.pow(channel_gate.clamp_min(1e-6), alpha) * torch.pow(spatial_gate.clamp_min(1e-6), beta)
+    gate = gate.clamp_min(1e-6)
+
+    return feature * gate
 class SpectralGuidedBackbone(nn.Module):
   """Two-branch backbone described in the README:
       RGB (3 bands)      -> standard ResNet (IntermediateLayerGetter -> 'out'/'low_level')
