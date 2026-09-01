@@ -8,7 +8,14 @@ from .backbones import resnet
 
 def _segm_resnet(name, backbone_name, num_classes, output_stride, pretrained_backbone, use_attention=False):
 
-  if output_stride == 8:
+  if backbone_name in ('resnet18', 'resnet34'):
+    # BasicBlock (ResNet18/34) does not support dilated convolutions (raises
+    # NotImplementedError for dilation > 1 in BasicBlock.__init__), unlike Bottleneck
+    # (ResNet50/101). Keep standard strides (true output stride = 32) and use milder
+    # ASPP dilation rates sized for the resulting smaller feature map.
+    replace_stride_with_dilation = [False, False, False]
+    aspp_dilate = [6, 12, 18]
+  elif output_stride == 8:
     replace_stride_with_dilation = [False, True, True]
     aspp_dilate = [12, 24, 36]
   else:
@@ -47,7 +54,10 @@ def _segm_resnet_spectral(backbone_name, num_classes, output_stride, pretrained_
     ResNet backbone, NIR+RE (2ch) through a TinySpectralEncoder whose descriptor gates
     the RGB backbone features (SpectralGuidedBackbone), then DeepLabHeadV3PlusLite
     (LiteASPP + decoder) for the segmentation head. Expects 5-band (R,G,B,NIR,RE) input."""
-  if output_stride == 8:
+  if backbone_name in ('resnet18', 'resnet34'):
+    replace_stride_with_dilation = [False, False, False]
+    aspp_dilate = [6, 12, 18]
+  elif output_stride == 8:
     replace_stride_with_dilation = [False, True, True]
     aspp_dilate = [12, 24, 36]
   else:
