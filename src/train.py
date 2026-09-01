@@ -28,8 +28,9 @@ flags.DEFINE_integer('ignore_index', -1, 'ignore during loss and iou calculation
 flags.DEFINE_boolean('dlv3p_do', False, 'set True to use probabilistic variant of DLv3+ with dropout')
 flags.DEFINE_boolean('spectral_guided', True, 'set True to use the spectral-guided architecture: ResNet34 RGB backbone '
                      '+ tiny NIR/RE spectral branch (Spectral Gate, replaces CBAM) + Lite-ASPP')
-flags.DEFINE_boolean('use_attention', True, 'set True to insert a CBAM attention module between ASPP and the decoder '
-                     '(only used when spectral_guided=False; CBAM itself is currently disabled/commented out)')
+flags.DEFINE_boolean('use_attention', False, 'set True to insert a CBAM attention module between ASPP and the decoder '
+                     '(only used when spectral_guided=False; CBAM itself is currently disabled/commented out, so this '
+                     'defaults to False to avoid conflicting with spectral_guided regardless of branch order)')
 flags.DEFINE_boolean('pretrained_backbone', True, 'set True to use pretrained ResNet50 backbone')
 flags.DEFINE_string('ckpt_resnet', 'ckpts/resnet50-19c8e357.pth', 'ckpt path for pretrained backbone')
 flags.DEFINE_integer('batch_size', 2, 'batch size')
