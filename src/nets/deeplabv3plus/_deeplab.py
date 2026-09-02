@@ -174,6 +174,24 @@ class DeepLabHeadV3PlusAttention(nn.Module):
       elif isinstance(m, (nn.BatchNorm2d, nn.GroupNorm)):
         nn.init.constant_(m.weight, 1)
         nn.init.constant_(m.bias, 0)
+def compute_spectral_indices(red, nir, re, eps=1e-6):
+  """Computes NDVI-like and NDRE-like normalized-difference indices, the standard
+    vegetation-health signals in precision agriculture / remote sensing:
+      NDVI-like = (NIR - Red) / (NIR + Red)   -- overall vegetation vigor vs soil
+      NDRE-like = (NIR - RE)  / (NIR + RE)    -- finer-grained, sensitive to chlorophyll/
+                                                  canopy stress (Red-Edge saturates less
+                                                  than Red at high vegetation density)
+    These are parameter-free (a handful of elementwise ops, negligible FLOPs) but encode
+    ~decades of domain knowledge that the raw NIR/RE bands would otherwise force the tiny
+    spectral encoder to rediscover from scratch with very limited capacity. Values are
+    naturally bounded in [-1, 1], no extra normalization needed.
+    Args: red, nir, re: each (B, 1, H, W).
+    Returns: (B, 2, H, W) tensor of [ndvi_like, ndre_like]."""
+  ndvi = (nir - red) / (nir + red + eps)
+  ndre = (nir - re) / (nir + re + eps)
+  return torch.cat([ndvi, ndre], dim=1)
+
+
 class TinySpectralEncoder(nn.Module):
   """Extremely lightweight encoder for the NIR + Red-Edge bands.
     A depthwise conv (spatial context per band) followed by a 1x1 pointwise conv
@@ -231,16 +249,31 @@ class SpectralGuidedBackbone(nn.Module):
     skip connection) RGB feature maps -- per-channel AND per-location -- so NIR/RE
     information reaches every stage of the decoder without ever passing through the
     (expensive) RGB backbone itself."""
-  def __init__(self, rgb_backbone, out_channels, low_level_channels, spectral_embed=32):
+  def __init__(self, rgb_backbone, out_channels, low_level_channels, spectral_embed=32, use_spectral_indices=True):
+    """use_spectral_indices: if True (default), the spectral branch input is
+      [NIR, RE, NDVI-like, NDRE-like] (4 channels) instead of raw [NIR, RE] (2 channels).
+      The indices are cheap, parameter-free, and give the tiny encoder an explicit
+      vegetation-vs-soil contrast signal instead of forcing it to learn that contrast
+      from raw reflectance values with very limited capacity. Set False to reproduce
+      the earlier raw-NIR/RE-only behavior."""
     super(SpectralGuidedBackbone, self).__init__()
     self.rgb_backbone = rgb_backbone  # IntermediateLayerGetter -> {'out': ..., 'low_level': ...}
-    self.spectral_encoder = TinySpectralEncoder(in_channels=2, embed_channels=spectral_embed)
+    self.use_spectral_indices = use_spectral_indices
+    spectral_in_channels = 4 if use_spectral_indices else 2
+    self.spectral_encoder = TinySpectralEncoder(in_channels=spectral_in_channels, embed_channels=spectral_embed)
     self.gate_out = SpectralGate(spectral_embed, out_channels)
     self.gate_low_level = SpectralGate(spectral_embed, low_level_channels)
   def forward(self, x):
     rgb, nir_re = x[:, :3], x[:, 3:5]
     features = self.rgb_backbone(rgb)
-    spectral_map = self.spectral_encoder(nir_re)  # (B, spectral_embed, H, W), full input resolution
+    if self.use_spectral_indices:
+      red = rgb[:, 0:1]
+      nir, re = nir_re[:, 0:1], nir_re[:, 1:2]
+      indices = compute_spectral_indices(red, nir, re)  # (B, 2, H, W): [ndvi_like, ndre_like]
+      spectral_input = torch.cat([nir_re, indices], dim=1)  # (B, 4, H, W): [NIR, RE, NDVI, NDRE]
+    else:
+      spectral_input = nir_re
+    spectral_map = self.spectral_encoder(spectral_input)  # (B, spectral_embed, H, W), full input resolution
     features['out'] = self.gate_out(spectral_map, features['out'])
     features['low_level'] = self.gate_low_level(spectral_map, features['low_level'])
     return features

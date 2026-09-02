@@ -28,6 +28,9 @@ flags.DEFINE_integer('ignore_index', -1, 'ignore during loss and iou calculation
 flags.DEFINE_boolean('dlv3p_do', False, 'set True to use probabilistic variant of DLv3+ with dropout')
 flags.DEFINE_boolean('spectral_guided', True, 'set True to use the spectral-guided architecture: ResNet34 RGB backbone '
                      '+ tiny NIR/RE spectral branch (Spectral Gate, replaces CBAM) + Lite-ASPP')
+flags.DEFINE_boolean('use_spectral_indices', True, 'set True to feed the spectral encoder '
+                     '[NIR, RE, NDVI-like, NDRE-like] (4ch) instead of raw [NIR, RE] (2ch). Only used when '
+                     'spectral_guided=True. Set False to isolate/compare against the raw-band-only variant.')
 flags.DEFINE_boolean('use_attention', False, 'set True to insert a CBAM attention module between ASPP and the decoder '
                      '(only used when spectral_guided=False; CBAM itself is currently disabled/commented out, so this '
                      'defaults to False to avoid conflicting with spectral_guided regardless of branch order)')
@@ -122,7 +125,8 @@ def main(_):
     elif FLAGS.use_attention:
         net = deeplabv3plus_resnet50_attn(num_classes=FLAGS.num_classes, pretrained_backbone=FLAGS.pretrained_backbone)  # DeepLabv3+ (CBAM currently disabled, see _deeplab.py)
     elif FLAGS.spectral_guided:
-        net = deeplabv3plus_resnet34_spectral(num_classes=FLAGS.num_classes, pretrained_backbone=FLAGS.pretrained_backbone)  # ResNet34 RGB + NIR/RE Spectral Gate + Lite-ASPP
+        net = deeplabv3plus_resnet34_spectral(num_classes=FLAGS.num_classes, pretrained_backbone=FLAGS.pretrained_backbone,
+                                              use_spectral_indices=FLAGS.use_spectral_indices)  # ResNet34 RGB + NIR/RE(+NDVI/NDRE) Spectral Gate + Lite-ASPP
     else:
         net = deeplabv3plus_resnet50(num_classes=FLAGS.num_classes, pretrained_backbone=FLAGS.pretrained_backbone)  # (determinsitic) DeepLabv3+
 
