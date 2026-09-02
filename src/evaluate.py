@@ -8,7 +8,8 @@ from torchmetrics.classification import MulticlassJaccardIndex, MulticlassCalibr
 from datasets import WeedsGaloreDataset
 from torch.utils.data import DataLoader
 import torch.nn as nn
-from nets import deeplabv3plus_resnet50
+from nets import (deeplabv3plus_resnet50, deeplabv3plus_resnet50_do, deeplabv3plus_resnet50_attn,
+                   deeplabv3plus_resnet34_spectral)
 
 FLAGS = flags.FLAGS
 
@@ -23,6 +24,15 @@ flags.DEFINE_integer('in_channels', 5, 'options: 3 (RGB), 5 (MSI)')
 flags.DEFINE_integer('num_classes', 6, 'options: 3 (uni-weed), 6 (multi-weed)')
 flags.DEFINE_integer('ignore_index', -1, 'ignore during loss and iou calculation')
 
+# --- Must match the flags used at train time for this checkpoint's architecture ---
+flags.DEFINE_boolean('spectral_guided', False, 'set True if the checkpoint was trained with '
+                     '--spectral_guided=True (ResNet34 + spectral branch + Lite-ASPP). Must match '
+                     'the training run exactly, or state_dict loading will fail with key mismatches.')
+flags.DEFINE_boolean('use_attention', False, 'set True if the checkpoint was trained with '
+                     '--use_attention=True (ResNet50 + CBAM head). Ignored if spectral_guided=True.')
+flags.DEFINE_boolean('use_spectral_indices', True, 'set to match the value used at train time '
+                     '(only relevant if spectral_guided=True): whether the spectral encoder took '
+                     '[NIR, RE, NDVI-like, NDRE-like] (4ch, default) vs raw [NIR, RE] (2ch).')
 
 
 def main(_):
@@ -32,12 +42,24 @@ def main(_):
         print(f"Cuda current device: {torch.cuda.current_device()}")
         print(f"Cuda device name: {torch.cuda.get_device_name(0)}")
 
-
-    net = deeplabv3plus_resnet50(num_classes=FLAGS.num_classes)
+    # Build the SAME architecture used at train time -- this must mirror train.py's branch order.
+    if FLAGS.spectral_guided:
+        net = deeplabv3plus_resnet34_spectral(num_classes=FLAGS.num_classes, pretrained_backbone=False,
+                                              use_spectral_indices=FLAGS.use_spectral_indices)
+        print("Architecture: ResNet34 + spectral branch + Spectral Gate + Lite-ASPP")
+    elif FLAGS.use_attention:
+        net = deeplabv3plus_resnet50_attn(num_classes=FLAGS.num_classes, pretrained_backbone=False)
+        print("Architecture: ResNet50 + CBAM")
+    else:
+        net = deeplabv3plus_resnet50(num_classes=FLAGS.num_classes, pretrained_backbone=False)
+        print("Architecture: ResNet50 (baseline)")
     net = net.to(device)
 
-    # first conv to fit input channels
-    net.backbone.conv1 = nn.Conv2d(FLAGS.in_channels, net.backbone.conv1.out_channels, kernel_size=7, stride=2, padding=3, bias=False, device=device)
+    # first conv to fit input channels -- ONLY for the plain ResNet50 path. The spectral-guided
+    # backbone keeps a standard 3-channel conv1 (RGB only) and splits off NIR/RE internally, so
+    # patching conv1 here would corrupt it / break state_dict loading.
+    if FLAGS.in_channels == 5 and not FLAGS.spectral_guided:
+        net.backbone.conv1 = nn.Conv2d(FLAGS.in_channels, net.backbone.conv1.out_channels, kernel_size=7, stride=2, padding=3, bias=False, device=device)
 
     # load checkpoint
     model_weights_dir = FLAGS.ckpt
