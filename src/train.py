@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from absl import app, flags
-import copy
 import torch
 from datasets import WeedsGaloreDataset
 from torch.utils.data import DataLoader
@@ -41,8 +40,6 @@ flags.DEFINE_integer('epochs', 10, 'number of epochs for training')
 flags.DEFINE_string('out_dir', 'out_dir', 'directory to save logs and ckpts')
 flags.DEFINE_integer('log_interval', 25, 'number of iterations to log scalars')
 flags.DEFINE_integer('ckpt_interval', 500, 'number of iterations to save ckpts')
-flags.DEFINE_boolean('grid_search', False, 'enable a simple alpha/beta validation grid search over SpectralGate weights')
-flags.DEFINE_string('spectral_alpha_grid', '0.2,0.5,0.8', 'comma-separated alpha candidates for SpectralGate validation grid search; beta = 1 - alpha')
 
 def count_parameters(model):
     """Count total trainable and non-trainable parameters"""
@@ -99,68 +96,6 @@ def measure_model_stats(model, device, in_channels, input_size=(512, 512)):
 
 
 
-def _parse_grid_values(grid_str):
-    if not grid_str:
-        return []
-    values = []
-    for part in grid_str.split(','):
-        item = part.strip()
-        if item:
-            values.append(float(item))
-    return values
-
-
-def _log_spectral_gate_stats(model, writer, step):
-    for name, module in model.named_modules():
-        if hasattr(module, 'get_balanced_weights') and hasattr(module, 'alpha') and hasattr(module, 'beta'):
-            alpha, beta = module.get_balanced_weights()
-            writer.add_scalar(f'SpectralGate/{name}/alpha', float(alpha.detach().cpu()), step)
-            writer.add_scalar(f'SpectralGate/{name}/beta', float(beta.detach().cpu()), step)
-
-
-def evaluate_model(model, val_dataloader, device, ignore_index):
-    model.eval()
-    evaluator = MulticlassJaccardIndex(num_classes=3 if False else 0, average=None, ignore_index=ignore_index)
-    # This function is only used for the alpha/beta validation sweep. It reuses the
-    # same metric setup as the training loop for the active num_classes.
-    return None
-
-
-def validate_with_grid_search(model, val_dataloader, device, ignore_index, num_classes, alpha_grid, writer, step):
-    model.eval()
-    base_state = copy.deepcopy(model.state_dict())
-    metric_values = []
-
-    for alpha in alpha_grid:
-        beta = 1.0 - alpha
-        with torch.no_grad():
-            for m in model.modules():
-                if hasattr(m, 'alpha') and hasattr(m, 'beta'):
-                    m.alpha.data.fill_(alpha)
-                    m.beta.data.fill_(beta)
-
-        evaluator = MulticlassJaccardIndex(num_classes=num_classes, average=None, ignore_index=ignore_index).to(device)
-        with torch.no_grad():
-            for features, unique_labels, binary_labels in val_dataloader:
-                if num_classes == 3:
-                    labels = binary_labels
-                else:
-                    labels = unique_labels
-                features, labels = features.to(device), labels.to(device)
-                out = model(features)
-                pred = torch.argmax(out, dim=1)
-                evaluator.update(pred, labels)
-
-        metrics = evaluator.compute() * 100
-        score = float(metrics.mean().item()) if metrics.numel() > 0 else 0.0
-        metric_values.append((alpha, score))
-        writer.add_scalar(f'GridSearch/alpha_{alpha:.2f}', score, step)
-        print(f'[GridSearch] alpha={alpha:.2f}, beta={1-alpha:.2f} -> val mIoU={score:.2f}%')
-
-    model.load_state_dict(base_state)
-    return metric_values
-
-
 def main(_):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Using {device}")
@@ -168,9 +103,6 @@ def main(_):
         print(f"Cuda current device: {torch.cuda.current_device()}")
         print(f"Cuda device name: {torch.cuda.get_device_name(0)}")
 
-    alpha_grid = _parse_grid_values(FLAGS.spectral_alpha_grid)
-    if FLAGS.grid_search and not alpha_grid:
-        raise ValueError('spectral_alpha_grid must contain at least one comma-separated alpha value when grid_search=True')
 
     # Dataset
     train_dataset = WeedsGaloreDataset(dataset_path=FLAGS.dataset_path, dataset_size=FLAGS.dataset_size_train, in_bands=FLAGS.in_channels,
@@ -261,7 +193,6 @@ def main(_):
                 for weed_idx, weed_iou in enumerate(metrics[2:], start=2):
                     writer.add_scalar(f'iou_weed_{weed_idx-1} (%)', weed_iou, tot_iter)
 
-                _log_spectral_gate_stats(net, writer, tot_iter)
                 evaluator.reset()
                 accum_loss, accum_iter = 0, 0
 
@@ -269,10 +200,6 @@ def main(_):
             if tot_iter % FLAGS.ckpt_interval == 0 or tot_iter == 1:
                 torch.save(net.state_dict(), f'{FLAGS.out_dir}/{str(epoch)}.pth')
                 torch.save(optimizer.state_dict(), f'{FLAGS.out_dir}/optimizer.pth')
-
-        if FLAGS.grid_search:
-            print(f'\n[Epoch {epoch}] running spectral alpha/beta grid search on validation set...')
-            validate_with_grid_search(net, val_dataloader, device, FLAGS.ignore_index, FLAGS.num_classes, alpha_grid, writer, epoch)
 
 if __name__ == '__main__':
     app.run(main)
