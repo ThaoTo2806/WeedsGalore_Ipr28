@@ -30,9 +30,11 @@ flags.DEFINE_boolean('spectral_guided', False, 'set True if the checkpoint was t
                      'the training run exactly, or state_dict loading will fail with key mismatches.')
 flags.DEFINE_boolean('use_attention', False, 'set True if the checkpoint was trained with '
                      '--use_attention=True (ResNet50 + CBAM head). Ignored if spectral_guided=True.')
-flags.DEFINE_boolean('use_spectral_indices', True, 'set to match the value used at train time '
-                     '(only relevant if spectral_guided=True): whether the spectral encoder took '
-                     '[NIR, RE, NDVI-like, NDRE-like] (4ch, default) vs raw [NIR, RE] (2ch).')
+# NOTE: use_spectral_indices is NOT wired here on purpose. If your local nets/modeling.py already
+# supports NDVI/NDRE indices (4ch spectral input) but this checkpoint was trained BEFORE that
+# patch (2ch raw NIR/RE), passing use_spectral_indices=True here would build the WRONG shape
+# and state_dict loading would fail with a size mismatch on TinySpectralEncoder's first conv.
+# Only re-add this flag once you retrain a checkpoint with the NDVI/NDRE-enabled architecture.
 
 
 def main(_):
@@ -44,8 +46,7 @@ def main(_):
 
     # Build the SAME architecture used at train time -- this must mirror train.py's branch order.
     if FLAGS.spectral_guided:
-        net = deeplabv3plus_resnet34_spectral(num_classes=FLAGS.num_classes, pretrained_backbone=False,
-                                              use_spectral_indices=FLAGS.use_spectral_indices)
+        net = deeplabv3plus_resnet34_spectral(num_classes=FLAGS.num_classes, pretrained_backbone=False)
         print("Architecture: ResNet34 + spectral branch + Spectral Gate + Lite-ASPP")
     elif FLAGS.use_attention:
         net = deeplabv3plus_resnet50_attn(num_classes=FLAGS.num_classes, pretrained_backbone=False)
@@ -64,6 +65,15 @@ def main(_):
     # load checkpoint
     model_weights_dir = FLAGS.ckpt
     model_dict = torch.load(model_weights_dir, map_location=device)
+    # thop.profile() (used in train.py's measure_model_stats to count FLOPs) registers
+    # 'total_ops'/'total_params' buffers on every submodule to do its counting. These get
+    # saved into the checkpoint's state_dict as a side effect, but a freshly-constructed
+    # eval model (which never ran through thop) doesn't have them -> strip them here.
+    thop_keys = [k for k in model_dict if k.endswith('total_ops') or k.endswith('total_params')]
+    if thop_keys:
+        print(f"Stripping {len(thop_keys)} thop profiling buffer(s) from checkpoint (harmless, not model weights)")
+        for k in thop_keys:
+            del model_dict[k]
     net.load_state_dict(model_dict)
 
     # Dataset and dataloader
