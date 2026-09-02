@@ -47,9 +47,10 @@ def compute_class_weights(train_dataset, num_classes, ignore_index=-1):
     class_counts = torch.zeros(num_classes, dtype=torch.float32)
     for _, label, binary_label in train_dataset:
         cur_label = binary_label if num_classes == 3 else label
+        cur_label = torch.as_tensor(cur_label, dtype=torch.long)
         valid = (cur_label != ignore_index)
         if valid.any():
-            hist = torch.bincount(cur_label[valid].reshape(-1).long(), minlength=num_classes).float()
+            hist = torch.bincount(cur_label[valid].reshape(-1), minlength=num_classes).float()
             class_counts += hist
     class_counts = class_counts.clamp_min(1)
     inv_freq = class_counts.sum() / class_counts
