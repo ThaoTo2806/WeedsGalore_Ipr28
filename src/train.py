@@ -4,7 +4,6 @@
 
 from absl import app, flags
 import torch
-import torch.nn.functional as F
 from datasets import WeedsGaloreDataset
 from torch.utils.data import DataLoader
 from nets import deeplabv3plus_resnet50, deeplabv3plus_resnet50_do, deeplabv3plus_resnet50_attn, deeplabv3plus_resnet34_spectral
@@ -41,38 +40,6 @@ flags.DEFINE_integer('epochs', 10, 'number of epochs for training')
 flags.DEFINE_string('out_dir', 'out_dir', 'directory to save logs and ckpts')
 flags.DEFINE_integer('log_interval', 25, 'number of iterations to log scalars')
 flags.DEFINE_integer('ckpt_interval', 500, 'number of iterations to save ckpts')
-
-def compute_class_weights(train_dataset, num_classes, ignore_index=-1):
-    """Compute inverse-frequency class weights from training labels."""
-    class_counts = torch.zeros(num_classes, dtype=torch.float32)
-    for _, label, binary_label in train_dataset:
-        cur_label = binary_label if num_classes == 3 else label
-        valid = (cur_label != ignore_index)
-        if valid.any():
-            hist = torch.bincount(cur_label[valid].reshape(-1).long(), minlength=num_classes).float()
-            class_counts += hist
-    class_counts = class_counts.clamp_min(1)
-    inv_freq = class_counts.sum() / class_counts
-    weights = inv_freq / inv_freq.mean()
-    return weights
-
-
-def dice_loss_fn(logits, target, num_classes, ignore_index=-1):
-    """Soft dice over logits for segmentation; robust to ignore_index."""
-    probs = F.softmax(logits, dim=1)
-    target = target.clone()
-    valid_mask = (target != ignore_index)
-    safe_target = target.clamp(min=0, max=num_classes - 1)
-    one_hot = F.one_hot(safe_target.long(), num_classes=num_classes).permute(0, 3, 1, 2).float()
-    one_hot = one_hot * valid_mask.unsqueeze(1).float()
-    probs = probs * valid_mask.unsqueeze(1).float()
-
-    intersection = (probs * one_hot).sum(dim=(2, 3))
-    cardinality = (probs + one_hot).sum(dim=(2, 3))
-    dice = (2.0 * intersection + 1e-6) / (cardinality + 1e-6)
-    dice = 1.0 - dice.mean(dim=1)
-    return dice.mean()
-
 
 def count_parameters(model):
     """Count total trainable and non-trainable parameters"""
@@ -169,16 +136,11 @@ def main(_):
     # Measure model statistics
     measure_model_stats(net, device, in_channels=FLAGS.in_channels)
 
-    # Class weighting for imbalance mitigation.
-    class_weights = compute_class_weights(train_dataset, FLAGS.num_classes, FLAGS.ignore_index)
-    class_weights = class_weights.to(device)
-
-    # Loss criterion: CE + Dice to improve mIoU on small/weaker classes without increasing params.
-    criterion = torch.nn.CrossEntropyLoss(weight=class_weights, ignore_index=FLAGS.ignore_index).to(device)
+    # Loss criterion
+    criterion = torch.nn.CrossEntropyLoss(ignore_index=FLAGS.ignore_index).to(device)
 
     # Optimizer
-    optimizer = torch.optim.AdamW(net.parameters(), lr=FLAGS.lr, weight_decay=1e-4)
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=FLAGS.epochs)
+    optimizer = torch.optim.Adam(net.parameters(), lr=FLAGS.lr)
 
     # Metric
     evaluator = MulticlassJaccardIndex(num_classes=FLAGS.num_classes, average=None, ignore_index=FLAGS.ignore_index).to(device)
@@ -206,9 +168,7 @@ def main(_):
 
             optimizer.zero_grad()
             out = net(features)
-            ce_loss = criterion(out, labels.long())
-            dice_loss = dice_loss_fn(out, labels.long(), FLAGS.num_classes, FLAGS.ignore_index)
-            loss = 0.7 * ce_loss + 0.3 * dice_loss
+            loss = criterion(out, labels.long())
             loss.backward()
             optimizer.step()
 
@@ -240,8 +200,6 @@ def main(_):
             if tot_iter % FLAGS.ckpt_interval == 0 or tot_iter == 1:
                 torch.save(net.state_dict(), f'{FLAGS.out_dir}/{str(epoch)}.pth')
                 torch.save(optimizer.state_dict(), f'{FLAGS.out_dir}/optimizer.pth')
-
-        scheduler.step()
 
 if __name__ == '__main__':
     app.run(main)
