@@ -42,6 +42,9 @@ flags.DEFINE_string('ckpt_resnet', 'ckpts/resnet50-19c8e357.pth', 'ckpt path for
 flags.DEFINE_integer('batch_size', 2, 'batch size')
 flags.DEFINE_integer('num_workers', 4, 'number of subprocesses')
 flags.DEFINE_float('lr', 0.001, 'Learning rate')
+flags.DEFINE_float('weight_bg', 0.35, 'Cross-entropy weight for background')
+flags.DEFINE_float('weight_crop', 1.0, 'Cross-entropy weight for crop')
+flags.DEFINE_float('weight_weed', 1.5, 'Cross-entropy weight for weed')
 flags.DEFINE_integer('epochs', 10, 'number of epochs for training')
 flags.DEFINE_string('out_dir', 'out_dir', 'directory to save logs and ckpts')
 flags.DEFINE_integer('log_interval', 25, 'number of iterations to log scalars')
@@ -120,7 +123,7 @@ def main(_):
     train_dataloader = DataLoader(dataset=train_dataset, batch_size=FLAGS.batch_size, shuffle=True,
                                   num_workers=FLAGS.num_workers, collate_fn=None, drop_last=True)
     val_dataloader = DataLoader(dataset=val_dataset, batch_size=FLAGS.batch_size, shuffle=False,
-                                num_workers=FLAGS.num_workers, collate_fn=None, drop_last=True)
+                                num_workers=FLAGS.num_workers, collate_fn=None, drop_last=False)
 
     # Network
     if FLAGS.segformer:
@@ -146,13 +149,21 @@ def main(_):
     measure_model_stats(net, device, in_channels=FLAGS.in_channels)
 
     # Loss criterion
-    criterion = torch.nn.CrossEntropyLoss(ignore_index=FLAGS.ignore_index).to(device)
+    class_weights = None
+    if FLAGS.num_classes == 3:
+        class_weights = torch.tensor(
+            [FLAGS.weight_bg, FLAGS.weight_crop, FLAGS.weight_weed], device=device)
+    criterion = torch.nn.CrossEntropyLoss(
+        weight=class_weights, ignore_index=FLAGS.ignore_index).to(device)
 
     # Optimizer
     optimizer = torch.optim.Adam(net.parameters(), lr=FLAGS.lr)
 
     # Metric
     evaluator = MulticlassJaccardIndex(num_classes=FLAGS.num_classes, average=None, ignore_index=FLAGS.ignore_index).to(device)
+    val_evaluator = MulticlassJaccardIndex(
+        num_classes=FLAGS.num_classes, average=None, ignore_index=FLAGS.ignore_index).to(device)
+    best_val_miou = float('-inf')
 
     # Logging
     accum_loss, accum_iter, tot_iter = 0, 0, 0
@@ -181,7 +192,7 @@ def main(_):
             loss.backward()
             optimizer.step()
 
-            accum_loss += loss
+            accum_loss += loss.item()
             accum_iter += 1
             tot_iter += 1
 
@@ -209,6 +220,29 @@ def main(_):
             if tot_iter % FLAGS.ckpt_interval == 0 or tot_iter == 1:
                 torch.save(net.state_dict(), f'{FLAGS.out_dir}/{str(epoch)}.pth')
                 torch.save(optimizer.state_dict(), f'{FLAGS.out_dir}/optimizer.pth')
+
+        net.eval()
+        val_evaluator.reset()
+        with torch.no_grad():
+            for features, unique_labels, binary_labels in val_dataloader:
+                labels = binary_labels if FLAGS.num_classes == 3 else unique_labels
+                features, labels = features.to(device), labels.to(device)
+                predictions = net(features).argmax(dim=1)
+                val_evaluator.update(predictions, labels)
+
+        val_scores = val_evaluator.compute() * 100
+        val_miou = val_scores.mean().item()
+        print(f'Epoch: {epoch}, Val mIoU: {val_miou:.2f}%')
+        writer.add_scalar('val_miou (%)', val_miou, epoch + 1)
+        writer.add_scalar('val_iou_bg (%)', val_scores[0], epoch + 1)
+        writer.add_scalar('val_iou_crop (%)', val_scores[1], epoch + 1)
+        for weed_idx, weed_iou in enumerate(val_scores[2:], start=2):
+            writer.add_scalar(f'val_iou_weed_{weed_idx-1} (%)', weed_iou, epoch + 1)
+
+        if val_miou > best_val_miou:
+            best_val_miou = val_miou
+            torch.save(net.state_dict(), f'{FLAGS.out_dir}/best_val.pth')
+            print(f'Saved best_val.pth ({best_val_miou:.2f}%)')
 
 if __name__ == '__main__':
     app.run(main)
