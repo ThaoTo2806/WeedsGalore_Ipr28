@@ -240,7 +240,8 @@ class SpectralGate(nn.Module):
     spectral_map = F.adaptive_avg_pool2d(spectral_map, feature.shape[-2:])
     channel_gate = self.sigmoid(self.channel_fc(F.adaptive_avg_pool2d(spectral_map, 1)))  # (B, C, 1, 1)
     spatial_gate = self.sigmoid(self.spatial_conv(spectral_map))  # (B, 1, H, W)
-    return feature * channel_gate * spatial_gate
+    # Residual fusion preserves the RGB representation when spectral evidence is weak.
+    return feature * (1.0 + channel_gate * spatial_gate)
 class SpectralGuidedBackbone(nn.Module):
   """Two-branch backbone described in the README:
       RGB (3 bands)      -> standard ResNet (IntermediateLayerGetter -> 'out'/'low_level')

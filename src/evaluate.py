@@ -30,6 +30,7 @@ flags.DEFINE_boolean('spectral_guided', False, 'set True if the checkpoint was t
                      'the training run exactly, or state_dict loading will fail with key mismatches.')
 flags.DEFINE_boolean('use_attention', False, 'set True if the checkpoint was trained with '
                      '--use_attention=True (ResNet50 + CBAM head). Ignored if spectral_guided=True.')
+flags.DEFINE_boolean('use_spectral_indices', True, 'set True if the checkpoint used NDVI/NDRE channels')
 # NOTE: use_spectral_indices is NOT wired here on purpose. If your local nets/modeling.py already
 # supports NDVI/NDRE indices (4ch spectral input) but this checkpoint was trained BEFORE that
 # patch (2ch raw NIR/RE), passing use_spectral_indices=True here would build the WRONG shape
@@ -46,8 +47,10 @@ def main(_):
 
     # Build the SAME architecture used at train time -- this must mirror train.py's branch order.
     if FLAGS.spectral_guided:
-        net = deeplabv3plus_resnet34_spectral(num_classes=FLAGS.num_classes, pretrained_backbone=False)
-        print("Architecture: ResNet34 + spectral branch + Spectral Gate + Lite-ASPP")
+        net = deeplabv3plus_resnet34_spectral(
+            num_classes=FLAGS.num_classes, pretrained_backbone=False,
+            use_spectral_indices=FLAGS.use_spectral_indices)
+        print("Architecture: ResNet34 OS=8 + spectral branch + residual Spectral Gate + Lite-ASPP")
     elif FLAGS.use_attention:
         net = deeplabv3plus_resnet50_attn(num_classes=FLAGS.num_classes, pretrained_backbone=False)
         print("Architecture: ResNet50 + CBAM")
@@ -81,7 +84,7 @@ def main(_):
     dataset = WeedsGaloreDataset(dataset_path=dataset_path, dataset_size=None, in_bands=FLAGS.in_channels,
                                         num_classes=FLAGS.num_classes, is_training=False, split=FLAGS.split, augmentation=False)
 
-    dataloader = DataLoader(dataset=dataset, batch_size=1, shuffle=False, num_workers=1, collate_fn=None, drop_last=True)
+    dataloader = DataLoader(dataset=dataset, batch_size=1, shuffle=False, num_workers=1, collate_fn=None, drop_last=False)
     dataset_iter = iter(dataloader)
 
     # iou evaluator
