@@ -9,7 +9,7 @@ from datasets import WeedsGaloreDataset
 from torch.utils.data import DataLoader
 import torch.nn as nn
 from nets import (deeplabv3plus_resnet50, deeplabv3plus_resnet50_do, deeplabv3plus_resnet50_attn,
-                   deeplabv3plus_resnet34_spectral)
+                   deeplabv3plus_resnet34_spectral, SegFormer5Band)
 
 FLAGS = flags.FLAGS
 
@@ -28,6 +28,7 @@ flags.DEFINE_integer('ignore_index', -1, 'ignore during loss and iou calculation
 flags.DEFINE_boolean('spectral_guided', False, 'set True if the checkpoint was trained with '
                      '--spectral_guided=True (ResNet34 + spectral branch + Lite-ASPP). Must match '
                      'the training run exactly, or state_dict loading will fail with key mismatches.')
+flags.DEFINE_boolean('segformer', False, 'set True if the checkpoint was trained with SegFormer5Band')
 flags.DEFINE_boolean('use_attention', False, 'set True if the checkpoint was trained with '
                      '--use_attention=True (ResNet50 + CBAM head). Ignored if spectral_guided=True.')
 # NOTE: use_spectral_indices is NOT wired here on purpose. If your local nets/modeling.py already
@@ -45,7 +46,10 @@ def main(_):
         print(f"Cuda device name: {torch.cuda.get_device_name(0)}")
 
     # Build the SAME architecture used at train time -- this must mirror train.py's branch order.
-    if FLAGS.spectral_guided:
+    if FLAGS.segformer:
+        net = SegFormer5Band(num_classes=FLAGS.num_classes)
+        print("Architecture: 5-band SegFormer")
+    elif FLAGS.spectral_guided:
         net = deeplabv3plus_resnet34_spectral(num_classes=FLAGS.num_classes, pretrained_backbone=False)
         print("Architecture: ResNet34 + spectral branch + Spectral Gate + Lite-ASPP")
     elif FLAGS.use_attention:
@@ -59,7 +63,7 @@ def main(_):
     # first conv to fit input channels -- ONLY for the plain ResNet50 path. The spectral-guided
     # backbone keeps a standard 3-channel conv1 (RGB only) and splits off NIR/RE internally, so
     # patching conv1 here would corrupt it / break state_dict loading.
-    if FLAGS.in_channels == 5 and not FLAGS.spectral_guided:
+    if FLAGS.in_channels == 5 and not FLAGS.spectral_guided and not FLAGS.segformer:
         net.backbone.conv1 = nn.Conv2d(FLAGS.in_channels, net.backbone.conv1.out_channels, kernel_size=7, stride=2, padding=3, bias=False, device=device)
 
     # load checkpoint

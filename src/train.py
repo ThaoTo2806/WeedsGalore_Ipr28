@@ -6,7 +6,9 @@ from absl import app, flags
 import torch
 from datasets import WeedsGaloreDataset
 from torch.utils.data import DataLoader
-from nets import deeplabv3plus_resnet50, deeplabv3plus_resnet50_do, deeplabv3plus_resnet50_attn, deeplabv3plus_resnet34_spectral
+from nets import (deeplabv3plus_resnet50, deeplabv3plus_resnet50_do,
+                  deeplabv3plus_resnet50_attn, deeplabv3plus_resnet34_spectral,
+                  SegFormer5Band)
 from pathlib import Path
 from torchmetrics.classification import MulticlassJaccardIndex
 from torch.utils.tensorboard import SummaryWriter
@@ -26,6 +28,7 @@ flags.DEFINE_integer('in_channels', 5, 'options: 3 (RGB), 5 (MSI)')
 flags.DEFINE_integer('num_classes', 6, 'options: 3 (uni-weed), 6 (multi-weed)')
 flags.DEFINE_integer('ignore_index', -1, 'ignore during loss and iou calculation')
 flags.DEFINE_boolean('dlv3p_do', False, 'set True to use probabilistic variant of DLv3+ with dropout')
+flags.DEFINE_boolean('segformer', False, 'set True to use the 5-band SegFormer architecture')
 flags.DEFINE_boolean('spectral_guided', True, 'set True to use the spectral-guided architecture: ResNet34 RGB backbone '
                      '+ tiny NIR/RE spectral branch (Spectral Gate, replaces CBAM) + Lite-ASPP')
 flags.DEFINE_boolean('use_spectral_indices', True, 'set True to feed the spectral encoder '
@@ -120,7 +123,9 @@ def main(_):
                                 num_workers=FLAGS.num_workers, collate_fn=None, drop_last=True)
 
     # Network
-    if FLAGS.dlv3p_do:
+    if FLAGS.segformer:
+        net = SegFormer5Band(num_classes=FLAGS.num_classes)
+    elif FLAGS.dlv3p_do:
         net = deeplabv3plus_resnet50_do(num_classes=FLAGS.num_classes, pretrained_backbone=FLAGS.pretrained_backbone)  # probabilistic DeepLabv3+
     elif FLAGS.use_attention:
         net = deeplabv3plus_resnet50_attn(num_classes=FLAGS.num_classes, pretrained_backbone=FLAGS.pretrained_backbone)  # DeepLabv3+ (CBAM currently disabled, see _deeplab.py)
@@ -131,7 +136,7 @@ def main(_):
         net = deeplabv3plus_resnet50(num_classes=FLAGS.num_classes, pretrained_backbone=FLAGS.pretrained_backbone)  # (determinsitic) DeepLabv3+
 
     # Modify first layer
-    if FLAGS.in_channels == 5 and not FLAGS.spectral_guided:
+    if FLAGS.in_channels == 5 and not FLAGS.spectral_guided and not FLAGS.segformer:
         net.backbone.conv1 = torch.nn.Conv2d(FLAGS.in_channels, net.backbone.conv1.out_channels, kernel_size=7, stride=2, padding=3, bias=False, device=device)
 
     # Model to device
