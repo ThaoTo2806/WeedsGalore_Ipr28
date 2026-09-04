@@ -100,10 +100,51 @@ class MiTEncoder(nn.Module):
     return feature1, feature2, feature3, feature4
 
 
+class PretrainedMiTEncoder(nn.Module):
+  """Official SegFormer MiT-B0 encoder adapted from 3 to 5 input bands.
+
+  The first patch projection keeps the pretrained RGB filters. NIR and RE are
+  initialized with the mean RGB filter, then all weights can be fine-tuned.
+  """
+
+  def __init__(self, model_name='nvidia/mit-b0'):
+    super(PretrainedMiTEncoder, self).__init__()
+    try:
+      from transformers import SegformerModel
+    except ImportError as error:
+      raise ImportError(
+          'Pretrained SegFormer requires transformers. Install it with '
+          '`pip install transformers==4.45.2`.') from error
+
+    pretrained = SegformerModel.from_pretrained(model_name)
+    patch_projection = pretrained.encoder.patch_embeddings[0].proj
+    adapted_projection = nn.Conv2d(
+        5, patch_projection.out_channels, patch_projection.kernel_size,
+        patch_projection.stride, patch_projection.padding, bias=False)
+    with torch.no_grad():
+      adapted_projection.weight[:, :3].copy_(patch_projection.weight)
+      rgb_mean = patch_projection.weight.mean(dim=1, keepdim=True)
+      adapted_projection.weight[:, 3:5].copy_(rgb_mean.repeat(1, 2, 1, 1))
+    pretrained.encoder.patch_embeddings[0].proj = adapted_projection
+    self.encoder = pretrained.encoder
+    self.config = pretrained.config
+
+  def forward(self, x):
+    outputs = self.encoder(x, output_hidden_states=True, return_dict=True)
+    hidden_states = outputs.hidden_states
+    features = []
+    for hidden_state, (height, width) in zip(hidden_states, ((x.shape[-2] // 4, x.shape[-1] // 4),
+                                                              (x.shape[-2] // 8, x.shape[-1] // 8),
+                                                              (x.shape[-2] // 16, x.shape[-1] // 16),
+                                                              (x.shape[-2] // 32, x.shape[-1] // 32))):
+      features.append(hidden_state.transpose(1, 2).reshape(x.shape[0], hidden_state.shape[-1], height, width))
+    return tuple(features)
+
+
 class SegFormer5Band(nn.Module):
-  def __init__(self, num_classes=3, decoder_dim=128):
+  def __init__(self, num_classes=3, decoder_dim=128, pretrained_backbone=False):
     super(SegFormer5Band, self).__init__()
-    self.encoder = MiTEncoder()
+    self.encoder = PretrainedMiTEncoder() if pretrained_backbone else MiTEncoder()
     self.linear1 = nn.Conv2d(32, decoder_dim, 1, bias=False)
     self.linear2 = nn.Conv2d(64, decoder_dim, 1, bias=False)
     self.linear3 = nn.Conv2d(160, decoder_dim, 1, bias=False)

@@ -47,7 +47,7 @@ def main(_):
 
     # Build the SAME architecture used at train time -- this must mirror train.py's branch order.
     if FLAGS.segformer:
-        net = SegFormer5Band(num_classes=FLAGS.num_classes)
+        net = SegFormer5Band(num_classes=FLAGS.num_classes, pretrained_backbone=False)
         print("Architecture: 5-band SegFormer")
     elif FLAGS.spectral_guided:
         net = deeplabv3plus_resnet34_spectral(num_classes=FLAGS.num_classes, pretrained_backbone=False)
