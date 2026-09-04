@@ -132,12 +132,34 @@ class PretrainedMiTEncoder(nn.Module):
   def forward(self, x):
     outputs = self.encoder(x, output_hidden_states=True, return_dict=True)
     hidden_states = outputs.hidden_states
+    expected_dims = tuple(self.config.hidden_sizes)
+    stage_states = {}
+    for hidden_state in hidden_states:
+      if hidden_state.dim() == 4:
+        channels = hidden_state.shape[1]
+      else:
+        channels = hidden_state.shape[-1]
+      if channels in expected_dims:
+        stage_states[channels] = hidden_state
+
     features = []
-    for hidden_state, (height, width) in zip(hidden_states, ((x.shape[-2] // 4, x.shape[-1] // 4),
-                                                              (x.shape[-2] // 8, x.shape[-1] // 8),
-                                                              (x.shape[-2] // 16, x.shape[-1] // 16),
-                                                              (x.shape[-2] // 32, x.shape[-1] // 32))):
-      features.append(hidden_state.transpose(1, 2).reshape(x.shape[0], hidden_state.shape[-1], height, width))
+    missing = [channels for channels in expected_dims if channels not in stage_states]
+    if missing:
+      raise RuntimeError(
+          f'MiT hidden states do not match expected stage widths. '
+          f'Expected {expected_dims}, missing {missing}.')
+    for channels in expected_dims:
+      hidden_state = stage_states[channels]
+      if hidden_state.dim() == 4:
+        feature = hidden_state
+      else:
+        tokens = hidden_state.shape[1]
+        height = int(tokens ** 0.5)
+        if height * height != tokens:
+          raise RuntimeError(f'Cannot reshape MiT hidden state with {tokens} tokens')
+        feature = hidden_state.transpose(1, 2).reshape(
+            x.shape[0], channels, height, height)
+      features.append(feature)
     return tuple(features)
 
 

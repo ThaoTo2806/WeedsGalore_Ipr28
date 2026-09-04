@@ -29,6 +29,7 @@ flags.DEFINE_boolean('spectral_guided', False, 'set True if the checkpoint was t
                      '--spectral_guided=True (ResNet34 + spectral branch + Lite-ASPP). Must match '
                      'the training run exactly, or state_dict loading will fail with key mismatches.')
 flags.DEFINE_boolean('segformer', False, 'set True if the checkpoint was trained with SegFormer5Band')
+flags.DEFINE_boolean('pretrained_backbone', False, 'set True if SegFormer used pretrained MiT-B0')
 flags.DEFINE_boolean('use_attention', False, 'set True if the checkpoint was trained with '
                      '--use_attention=True (ResNet50 + CBAM head). Ignored if spectral_guided=True.')
 # NOTE: use_spectral_indices is NOT wired here on purpose. If your local nets/modeling.py already
@@ -47,7 +48,8 @@ def main(_):
 
     # Build the SAME architecture used at train time -- this must mirror train.py's branch order.
     if FLAGS.segformer:
-        net = SegFormer5Band(num_classes=FLAGS.num_classes, pretrained_backbone=False)
+        net = SegFormer5Band(num_classes=FLAGS.num_classes,
+                             pretrained_backbone=FLAGS.pretrained_backbone)
         print("Architecture: 5-band SegFormer")
     elif FLAGS.spectral_guided:
         net = deeplabv3plus_resnet34_spectral(num_classes=FLAGS.num_classes, pretrained_backbone=False)
