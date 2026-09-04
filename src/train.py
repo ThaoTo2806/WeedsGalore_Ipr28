@@ -117,7 +117,7 @@ def main(_):
     train_dataloader = DataLoader(dataset=train_dataset, batch_size=FLAGS.batch_size, shuffle=True,
                                   num_workers=FLAGS.num_workers, collate_fn=None, drop_last=True)
     val_dataloader = DataLoader(dataset=val_dataset, batch_size=FLAGS.batch_size, shuffle=False,
-                                num_workers=FLAGS.num_workers, collate_fn=None, drop_last=False)
+                                num_workers=FLAGS.num_workers, collate_fn=None, drop_last=True)
 
     # Network
     if FLAGS.dlv3p_do:

@@ -57,9 +57,8 @@ def _segm_resnet_spectral(backbone_name, num_classes, output_stride, pretrained_
     (LiteASPP + decoder) for the segmentation head. Expects 5-band (R,G,B,NIR,RE) input.
     use_spectral_indices: see SpectralGuidedBackbone docstring."""
   if backbone_name in ('resnet18', 'resnet34'):
-    # BasicBlock now supports dilation; keep layer3/layer4 at stride 1 for OS=8.
-    replace_stride_with_dilation = [False, True, True]
-    aspp_dilate = [12, 24, 36]
+    replace_stride_with_dilation = [False, False, False]
+    aspp_dilate = [6, 12, 18]
   elif output_stride == 8:
     replace_stride_with_dilation = [False, True, True]
     aspp_dilate = [12, 24, 36]
