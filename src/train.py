@@ -4,6 +4,7 @@
 
 from absl import app, flags
 import torch
+import torch.nn.functional as F
 from datasets import WeedsGaloreDataset
 from torch.utils.data import DataLoader
 from nets import (deeplabv3plus_resnet50, deeplabv3plus_resnet50_do,
@@ -19,6 +20,50 @@ try:
     THOP_AVAILABLE = True
 except ImportError:
     THOP_AVAILABLE = False
+
+
+def soft_dice_loss(logits, labels, num_classes, ignore_index=-1, class_weights=None, eps=1e-6):
+    """Multi-class soft Dice loss, computed directly on class probabilities (not hard
+    predictions), so it is differentiable. Dice = 2*|pred ∩ target| / (|pred| + |target|),
+    which is a smooth surrogate for IoU -- unlike CrossEntropy, it optimizes the actual
+    region-overlap quantity that mIoU measures, so it pushes directly on small/thin
+    minority classes (e.g. weed) instead of being diluted pixel-by-pixel by the
+    dominant background class.
+
+    Args:
+        logits: (N, C, H, W) raw network output (pre-softmax).
+        labels: (N, H, W) integer class labels, may contain ignore_index.
+        num_classes: number of classes C.
+        ignore_index: label value to exclude from the loss (e.g. unlabeled pixels).
+        class_weights: optional (C,) tensor to weight each class's Dice term (use the
+            same weights as your CrossEntropy for consistency, e.g. emphasize weed).
+        eps: numerical stability constant.
+    Returns:
+        scalar loss (1 - mean Dice over classes), lower is better, same convention as CE.
+    """
+    probs = F.softmax(logits, dim=1)  # (N, C, H, W)
+    valid_mask = (labels != ignore_index)  # (N, H, W)
+    safe_labels = labels.clone()
+    safe_labels[~valid_mask] = 0  # placeholder, excluded via valid_mask below
+    labels_onehot = F.one_hot(safe_labels.long(), num_classes=num_classes)  # (N, H, W, C)
+    labels_onehot = labels_onehot.permute(0, 3, 1, 2).float()  # (N, C, H, W)
+
+    valid_mask = valid_mask.unsqueeze(1).float()  # (N, 1, H, W), broadcasts over classes
+    probs = probs * valid_mask
+    labels_onehot = labels_onehot * valid_mask
+
+    dims = (0, 2, 3)  # sum over batch + spatial, keep per-class
+    intersection = torch.sum(probs * labels_onehot, dims)
+    cardinality = torch.sum(probs + labels_onehot, dims)
+    dice_per_class = (2. * intersection + eps) / (cardinality + eps)  # (C,)
+
+    if class_weights is not None:
+        weights = class_weights / class_weights.sum()
+        loss = 1. - torch.sum(dice_per_class * weights)
+    else:
+        loss = 1. - dice_per_class.mean()
+    return loss
+
 
 FLAGS = flags.FLAGS
 
@@ -45,6 +90,13 @@ flags.DEFINE_float('lr', 0.001, 'Learning rate')
 flags.DEFINE_float('weight_bg', 0.35, 'Cross-entropy weight for background')
 flags.DEFINE_float('weight_crop', 1.0, 'Cross-entropy weight for crop')
 flags.DEFINE_float('weight_weed', 1.5, 'Cross-entropy weight for weed')
+flags.DEFINE_boolean('use_dice_loss', True, 'set True to add soft Dice loss (optimizes region '
+                     'overlap / IoU directly) alongside CrossEntropy. Strongly recommended when '
+                     'the minority/thin class (weed) is underperforming, since CE alone does not '
+                     'optimize overlap and dilutes gradient for small classes.')
+flags.DEFINE_float('dice_weight', 0.5, 'weight of the Dice loss term: '
+                    'total_loss = (1 - dice_weight) * CE + dice_weight * Dice. '
+                    'Only used when use_dice_loss=True.')
 flags.DEFINE_integer('epochs', 10, 'number of epochs for training')
 flags.DEFINE_string('out_dir', 'out_dir', 'directory to save logs and ckpts')
 flags.DEFINE_integer('log_interval', 25, 'number of iterations to log scalars')
@@ -189,7 +241,13 @@ def main(_):
 
             optimizer.zero_grad()
             out = net(features)
-            loss = criterion(out, labels.long())
+            ce_loss = criterion(out, labels.long())
+            if FLAGS.use_dice_loss:
+                dice_loss = soft_dice_loss(out, labels, num_classes=FLAGS.num_classes,
+                                           ignore_index=FLAGS.ignore_index, class_weights=class_weights)
+                loss = (1 - FLAGS.dice_weight) * ce_loss + FLAGS.dice_weight * dice_loss
+            else:
+                loss = ce_loss
             loss.backward()
             optimizer.step()
 
