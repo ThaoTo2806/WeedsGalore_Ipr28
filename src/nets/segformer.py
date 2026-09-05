@@ -163,8 +163,30 @@ class PretrainedMiTEncoder(nn.Module):
     return tuple(features)
 
 
+class LowLevelRefine(nn.Module):
+  """Shallow conv branch applied directly to the raw 5-band input, kept at half
+  resolution (stride-2 conv, no further downsampling). Purpose: the MiT encoder's
+  shallowest feature (feature1) is already at 1/4 resolution, and the original decoder
+  upsamples straight from there to full resolution in one 4x bilinear step -- with no
+  conv in between to reconstruct edges. Thin/small objects (e.g. weed) lose their
+  boundary in that single big upsample. This branch gives the decoder a second,
+  higher-resolution (1/2) signal carrying raw edge/texture information (including
+  NIR/RE contrast) to fuse back in before the final 2x upsample, similar in spirit to
+  the low-level-feature fusion in DeepLabV3+'s decoder."""
+  def __init__(self, in_channels=5, out_channels=48):
+    super(LowLevelRefine, self).__init__()
+    self.proj = nn.Sequential(
+        nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=2, padding=1, bias=False),
+        nn.BatchNorm2d(out_channels),
+        nn.ReLU(inplace=True),
+    )
+
+  def forward(self, x):
+    return self.proj(x)  # (N, out_channels, H/2, W/2)
+
+
 class SegFormer5Band(nn.Module):
-  def __init__(self, num_classes=3, decoder_dim=128, pretrained_backbone=False):
+  def __init__(self, num_classes=3, decoder_dim=128, pretrained_backbone=False, low_level_channels=48):
     super(SegFormer5Band, self).__init__()
     self.encoder = PretrainedMiTEncoder() if pretrained_backbone else MiTEncoder()
     self.linear1 = nn.Conv2d(32, decoder_dim, 1, bias=False)
@@ -179,15 +201,39 @@ class SegFormer5Band(nn.Module):
         nn.BatchNorm2d(decoder_dim),
         nn.ReLU(inplace=True),
     )
+    # --- Refine stage (NEW) ---
+    # Raw-input low-level branch (1/2 resolution, carries fine edge/spectral detail
+    # that the 4x-downsampled coarse features have already lost).
+    self.low_level = LowLevelRefine(in_channels=5, out_channels=low_level_channels)
+    # Fuses the upsampled coarse decoder output (1/4 -> 1/2) with the low-level branch,
+    # then refines with a light depthwise-separable conv (cheap, adds little
+    # params/FLOPs) before the final classifier. This replaces the single 4x jump with
+    # a 2x jump + refine + 2x jump, giving the network a chance to reconstruct thin
+    # boundaries instead of just interpolating them away.
+    self.refine = nn.Sequential(
+        nn.Conv2d(decoder_dim + low_level_channels, decoder_dim, kernel_size=3, padding=1, bias=False),
+        nn.BatchNorm2d(decoder_dim),
+        nn.ReLU(inplace=True),
+        nn.Conv2d(decoder_dim, decoder_dim, kernel_size=3, padding=1, groups=decoder_dim, bias=False),
+        nn.BatchNorm2d(decoder_dim),
+        nn.ReLU(inplace=True),
+    )
     self.classifier = nn.Conv2d(decoder_dim, num_classes, 1)
 
   def forward(self, x):
     input_size = x.shape[-2:]
     feature1, feature2, feature3, feature4 = self.encoder(x)
-    target_size = feature1.shape[-2:]
+    target_size = feature1.shape[-2:]  # 1/4 resolution
     features = [self.linear1(feature1), self.linear2(feature2),
                 self.linear3(feature3), self.linear4(feature4)]
     features = [F.interpolate(feature, size=target_size, mode='bilinear', align_corners=False)
                 for feature in features]
-    output = self.classifier(self.fuse(torch.cat(features, dim=1)))
-    return F.interpolate(output, size=input_size, mode='bilinear', align_corners=False)
+    coarse = self.fuse(torch.cat(features, dim=1))  # (N, decoder_dim, H/4, W/4)
+
+    # --- Refine stage (NEW): 1/4 -> 1/2, fuse with raw-input low-level detail ---
+    low_level_feat = self.low_level(x)  # (N, low_level_channels, H/2, W/2)
+    coarse_up = F.interpolate(coarse, size=low_level_feat.shape[-2:], mode='bilinear', align_corners=False)
+    refined = self.refine(torch.cat([coarse_up, low_level_feat], dim=1))  # (N, decoder_dim, H/2, W/2)
+
+    output = self.classifier(refined)  # (N, num_classes, H/2, W/2)
+    return F.interpolate(output, size=input_size, mode='bilinear', align_corners=False)  # final: only 2x now
