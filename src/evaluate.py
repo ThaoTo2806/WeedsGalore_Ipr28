@@ -32,6 +32,10 @@ flags.DEFINE_boolean('segformer', False, 'set True if the checkpoint was trained
 flags.DEFINE_boolean('pretrained_backbone', False, 'set True if SegFormer used pretrained MiT-B0')
 flags.DEFINE_boolean('use_attention', False, 'set True if the checkpoint was trained with '
                      '--use_attention=True (ResNet50 + CBAM head). Ignored if spectral_guided=True.')
+flags.DEFINE_float('temperature', 1.0, 'temperature-scaling divisor applied to logits before '
+                    'softmax (logits_calibrated = logits / T), fit on the val split with '
+                    'calibrate_temperature.py. T=1.0 (default) is a no-op (uncalibrated). Does '
+                    'NOT change argmax predictions or mIoU -- only rescales confidence, i.e. ECE.')
 # NOTE: use_spectral_indices is NOT wired here on purpose. If your local nets/modeling.py already
 # supports NDVI/NDRE indices (4ch spectral input) but this checkpoint was trained BEFORE that
 # patch (2ch raw NIR/RE), passing use_spectral_indices=True here would build the WRONG shape
@@ -114,6 +118,7 @@ def main(_):
         with torch.no_grad():
             out = net(features)
 
+        out = out / FLAGS.temperature  # temperature scaling: no-op when temperature=1.0
         out = torch.nn.functional.softmax(out, dim=1)
 
         # pred
@@ -132,6 +137,7 @@ def main(_):
     print(f"{'=' * 40}")
     scores = evaluator.compute()
     print(f'Split: {FLAGS.split}')
+    print(f'Temperature: {FLAGS.temperature}')
     print(f'mIoU: {scores.mean() * 100:.2f}%')
     print(f'iou bg: {scores[0] * 100:.2f}%')
     print(f'iou crop: {scores[1] * 100:.2f}%')
