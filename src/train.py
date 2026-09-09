@@ -180,7 +180,8 @@ def main(_):
     # Network
     if FLAGS.segformer:
         net = SegFormer5Band(num_classes=FLAGS.num_classes,
-                             pretrained_backbone=FLAGS.pretrained_backbone)
+                             pretrained_backbone=FLAGS.pretrained_backbone,
+                             in_channels=FLAGS.in_channels)
     elif FLAGS.dlv3p_do:
         net = deeplabv3plus_resnet50_do(num_classes=FLAGS.num_classes, pretrained_backbone=FLAGS.pretrained_backbone)  # probabilistic DeepLabv3+
     elif FLAGS.use_attention:

@@ -79,9 +79,9 @@ class TransformerBlock(nn.Module):
 
 
 class MiTEncoder(nn.Module):
-  def __init__(self):
+  def __init__(self, in_channels=5):
     super(MiTEncoder, self).__init__()
-    self.stem = OverlapPatchEmbed(5, 32, kernel_size=7, stride=2)
+    self.stem = OverlapPatchEmbed(in_channels, 32, kernel_size=7, stride=2)
     self.embed1 = OverlapPatchEmbed(32, 32, stride=2)
     self.embed2 = OverlapPatchEmbed(32, 64, stride=2)
     self.embed3 = OverlapPatchEmbed(64, 160, stride=2)
@@ -107,7 +107,7 @@ class PretrainedMiTEncoder(nn.Module):
   initialized with the mean RGB filter, then all weights can be fine-tuned.
   """
 
-  def __init__(self, model_name='nvidia/mit-b0'):
+  def __init__(self, model_name='nvidia/mit-b0', in_channels=5):
     super(PretrainedMiTEncoder, self).__init__()
     try:
       from transformers import SegformerModel
@@ -118,14 +118,17 @@ class PretrainedMiTEncoder(nn.Module):
 
     pretrained = SegformerModel.from_pretrained(model_name)
     patch_projection = pretrained.encoder.patch_embeddings[0].proj
-    adapted_projection = nn.Conv2d(
-        5, patch_projection.out_channels, patch_projection.kernel_size,
-        patch_projection.stride, patch_projection.padding, bias=False)
-    with torch.no_grad():
-      adapted_projection.weight[:, :3].copy_(patch_projection.weight)
-      rgb_mean = patch_projection.weight.mean(dim=1, keepdim=True)
-      adapted_projection.weight[:, 3:5].copy_(rgb_mean.repeat(1, 2, 1, 1))
-    pretrained.encoder.patch_embeddings[0].proj = adapted_projection
+    if in_channels != 3:
+      adapted_projection = nn.Conv2d(
+          in_channels, patch_projection.out_channels, patch_projection.kernel_size,
+          patch_projection.stride, patch_projection.padding, bias=False)
+      with torch.no_grad():
+        adapted_projection.weight[:, :3].copy_(patch_projection.weight)
+        rgb_mean = patch_projection.weight.mean(dim=1, keepdim=True)
+        extra_channels = in_channels - 3
+        adapted_projection.weight[:, 3:].copy_(
+            rgb_mean.repeat(1, extra_channels, 1, 1))
+      pretrained.encoder.patch_embeddings[0].proj = adapted_projection
     self.encoder = pretrained.encoder
     self.config = pretrained.config
 
@@ -186,9 +189,11 @@ class LowLevelRefine(nn.Module):
 
 
 class SegFormer5Band(nn.Module):
-  def __init__(self, num_classes=3, decoder_dim=128, pretrained_backbone=False, low_level_channels=48):
+  def __init__(self, num_classes=3, decoder_dim=128, pretrained_backbone=False,
+               low_level_channels=48, in_channels=5):
     super(SegFormer5Band, self).__init__()
-    self.encoder = PretrainedMiTEncoder() if pretrained_backbone else MiTEncoder()
+    self.encoder = (PretrainedMiTEncoder(in_channels=in_channels)
+                    if pretrained_backbone else MiTEncoder(in_channels=in_channels))
     self.linear1 = nn.Conv2d(32, decoder_dim, 1, bias=False)
     self.linear2 = nn.Conv2d(64, decoder_dim, 1, bias=False)
     self.linear3 = nn.Conv2d(160, decoder_dim, 1, bias=False)
@@ -204,7 +209,7 @@ class SegFormer5Band(nn.Module):
     # --- Refine stage (NEW) ---
     # Raw-input low-level branch (1/2 resolution, carries fine edge/spectral detail
     # that the 4x-downsampled coarse features have already lost).
-    self.low_level = LowLevelRefine(in_channels=5, out_channels=low_level_channels)
+    self.low_level = LowLevelRefine(in_channels=in_channels, out_channels=low_level_channels)
     # Fuses the upsampled coarse decoder output (1/4 -> 1/2) with the low-level branch,
     # then refines with a light depthwise-separable conv (cheap, adds little
     # params/FLOPs) before the final classifier. This replaces the single 4x jump with
