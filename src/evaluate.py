@@ -10,6 +10,7 @@ from torch.utils.data import DataLoader
 import torch.nn as nn
 from nets import (deeplabv3plus_resnet50, deeplabv3plus_resnet50_do, deeplabv3plus_resnet50_attn,
                    deeplabv3plus_resnet34_spectral, SegFormer5Band)
+from nets import UNet
 
 FLAGS = flags.FLAGS
 
@@ -29,6 +30,7 @@ flags.DEFINE_boolean('spectral_guided', False, 'set True if the checkpoint was t
                      '--spectral_guided=True (ResNet34 + spectral branch + Lite-ASPP). Must match '
                      'the training run exactly, or state_dict loading will fail with key mismatches.')
 flags.DEFINE_boolean('segformer', False, 'set True if the checkpoint was trained with SegFormer5Band')
+flags.DEFINE_boolean('unet', False, 'set True if the checkpoint was trained with U-Net')
 flags.DEFINE_boolean('pretrained_backbone', False, 'set True if SegFormer used pretrained MiT-B0')
 flags.DEFINE_boolean('use_attention', False, 'set True if the checkpoint was trained with '
                      '--use_attention=True (ResNet50 + CBAM head). Ignored if spectral_guided=True.')
@@ -51,7 +53,10 @@ def main(_):
         print(f"Cuda device name: {torch.cuda.get_device_name(0)}")
 
     # Build the SAME architecture used at train time -- this must mirror train.py's branch order.
-    if FLAGS.segformer:
+    if FLAGS.unet:
+        net = UNet(in_channels=FLAGS.in_channels, num_classes=FLAGS.num_classes)
+        print("Architecture: U-Net")
+    elif FLAGS.segformer:
         net = SegFormer5Band(num_classes=FLAGS.num_classes,
                              pretrained_backbone=FLAGS.pretrained_backbone,
                              in_channels=FLAGS.in_channels)

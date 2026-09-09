@@ -9,7 +9,7 @@ from datasets import WeedsGaloreDataset
 from torch.utils.data import DataLoader
 from nets import (deeplabv3plus_resnet50, deeplabv3plus_resnet50_do,
                   deeplabv3plus_resnet50_attn, deeplabv3plus_resnet34_spectral,
-                  SegFormer5Band)
+                  SegFormer5Band, UNet)
 from pathlib import Path
 from torchmetrics.classification import MulticlassJaccardIndex
 from torch.utils.tensorboard import SummaryWriter
@@ -74,6 +74,7 @@ flags.DEFINE_integer('num_classes', 6, 'options: 3 (uni-weed), 6 (multi-weed)')
 flags.DEFINE_integer('ignore_index', -1, 'ignore during loss and iou calculation')
 flags.DEFINE_boolean('dlv3p_do', False, 'set True to use probabilistic variant of DLv3+ with dropout')
 flags.DEFINE_boolean('segformer', False, 'set True to use the 5-band SegFormer architecture')
+flags.DEFINE_boolean('unet', False, 'set True to use the U-Net baseline')
 flags.DEFINE_boolean('spectral_guided', True, 'set True to use the spectral-guided architecture: ResNet34 RGB backbone '
                      '+ tiny NIR/RE spectral branch (Spectral Gate, replaces CBAM) + Lite-ASPP')
 flags.DEFINE_boolean('use_spectral_indices', True, 'set True to feed the spectral encoder '
@@ -178,7 +179,9 @@ def main(_):
                                 num_workers=FLAGS.num_workers, collate_fn=None, drop_last=False)
 
     # Network
-    if FLAGS.segformer:
+    if FLAGS.unet:
+        net = UNet(in_channels=FLAGS.in_channels, num_classes=FLAGS.num_classes)
+    elif FLAGS.segformer:
         net = SegFormer5Band(num_classes=FLAGS.num_classes,
                              pretrained_backbone=FLAGS.pretrained_backbone,
                              in_channels=FLAGS.in_channels)
