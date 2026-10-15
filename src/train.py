@@ -11,6 +11,7 @@ from nets import (deeplabv3plus_resnet50, deeplabv3plus_resnet50_do,
                   deeplabv3plus_resnet50_attn, deeplabv3plus_resnet34_spectral,
                   SegFormer5Band, UNet)
 from pathlib import Path
+import random
 from torchmetrics.classification import MulticlassJaccardIndex
 from torch.utils.tensorboard import SummaryWriter
 import os
@@ -74,6 +75,7 @@ flags.DEFINE_integer('num_classes', 6, 'options: 3 (uni-weed), 6 (multi-weed)')
 flags.DEFINE_integer('ignore_index', -1, 'ignore during loss and iou calculation')
 flags.DEFINE_boolean('dlv3p_do', False, 'set True to use probabilistic variant of DLv3+ with dropout')
 flags.DEFINE_boolean('segformer', False, 'set True to use the 5-band SegFormer architecture')
+flags.DEFINE_boolean('use_low_level_refine', True, 'use the raw-input LowLevelRefine branch in SegFormer')
 flags.DEFINE_boolean('unet', False, 'set True to use the U-Net baseline')
 flags.DEFINE_boolean('spectral_guided', True, 'set True to use the spectral-guided architecture: ResNet34 RGB backbone '
                      '+ tiny NIR/RE spectral branch (Spectral Gate, replaces CBAM) + Lite-ASPP')
@@ -87,6 +89,7 @@ flags.DEFINE_boolean('pretrained_backbone', True, 'set True to use pretrained Re
 flags.DEFINE_string('ckpt_resnet', 'ckpts/resnet50-19c8e357.pth', 'ckpt path for pretrained backbone')
 flags.DEFINE_integer('batch_size', 2, 'batch size')
 flags.DEFINE_integer('num_workers', 4, 'number of subprocesses')
+flags.DEFINE_integer('seed', 0, 'random seed for model initialization, shuffling, and augmentation')
 flags.DEFINE_float('lr', 0.001, 'Learning rate')
 flags.DEFINE_float('weight_bg', 0.35, 'Cross-entropy weight for background')
 flags.DEFINE_float('weight_crop', 1.0, 'Cross-entropy weight for crop')
@@ -159,6 +162,11 @@ def measure_model_stats(model, device, in_channels, input_size=(512, 512)):
 
 
 def main(_):
+    random.seed(FLAGS.seed)
+    torch.manual_seed(FLAGS.seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(FLAGS.seed)
+
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Using {device}")
     if device.type == 'cuda':
@@ -184,7 +192,8 @@ def main(_):
     elif FLAGS.segformer:
         net = SegFormer5Band(num_classes=FLAGS.num_classes,
                              pretrained_backbone=FLAGS.pretrained_backbone,
-                             in_channels=FLAGS.in_channels)
+                             in_channels=FLAGS.in_channels,
+                             use_low_level_refine=FLAGS.use_low_level_refine)
     elif FLAGS.dlv3p_do:
         net = deeplabv3plus_resnet50_do(num_classes=FLAGS.num_classes, pretrained_backbone=FLAGS.pretrained_backbone)  # probabilistic DeepLabv3+
     elif FLAGS.use_attention:

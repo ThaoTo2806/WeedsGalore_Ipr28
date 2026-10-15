@@ -30,6 +30,7 @@ flags.DEFINE_boolean('spectral_guided', False, 'set True if the checkpoint was t
                      '--spectral_guided=True (ResNet34 + spectral branch + Lite-ASPP). Must match '
                      'the training run exactly, or state_dict loading will fail with key mismatches.')
 flags.DEFINE_boolean('segformer', False, 'set True if the checkpoint was trained with SegFormer5Band')
+flags.DEFINE_boolean('use_low_level_refine', True, 'must match the SegFormer checkpoint architecture')
 flags.DEFINE_boolean('unet', False, 'set True if the checkpoint was trained with U-Net')
 flags.DEFINE_boolean('pretrained_backbone', False, 'set True if SegFormer used pretrained MiT-B0')
 flags.DEFINE_boolean('use_attention', False, 'set True if the checkpoint was trained with '
@@ -59,7 +60,8 @@ def main(_):
     elif FLAGS.segformer:
         net = SegFormer5Band(num_classes=FLAGS.num_classes,
                              pretrained_backbone=FLAGS.pretrained_backbone,
-                             in_channels=FLAGS.in_channels)
+                             in_channels=FLAGS.in_channels,
+                             use_low_level_refine=FLAGS.use_low_level_refine)
         print("Architecture: 5-band SegFormer")
     elif FLAGS.spectral_guided:
         net = deeplabv3plus_resnet34_spectral(num_classes=FLAGS.num_classes, pretrained_backbone=False)

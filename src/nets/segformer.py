@@ -190,7 +190,7 @@ class LowLevelRefine(nn.Module):
 
 class SegFormer5Band(nn.Module):
   def __init__(self, num_classes=3, decoder_dim=128, pretrained_backbone=False,
-               low_level_channels=48, in_channels=5):
+               low_level_channels=48, in_channels=5, use_low_level_refine=True):
     super(SegFormer5Band, self).__init__()
     self.encoder = (PretrainedMiTEncoder(in_channels=in_channels)
                     if pretrained_backbone else MiTEncoder(in_channels=in_channels))
@@ -206,23 +206,17 @@ class SegFormer5Band(nn.Module):
         nn.BatchNorm2d(decoder_dim),
         nn.ReLU(inplace=True),
     )
-    # --- Refine stage (NEW) ---
-    # Raw-input low-level branch (1/2 resolution, carries fine edge/spectral detail
-    # that the 4x-downsampled coarse features have already lost).
-    self.low_level = LowLevelRefine(in_channels=in_channels, out_channels=low_level_channels)
-    # Fuses the upsampled coarse decoder output (1/4 -> 1/2) with the low-level branch,
-    # then refines with a light depthwise-separable conv (cheap, adds little
-    # params/FLOPs) before the final classifier. This replaces the single 4x jump with
-    # a 2x jump + refine + 2x jump, giving the network a chance to reconstruct thin
-    # boundaries instead of just interpolating them away.
-    self.refine = nn.Sequential(
+    self.use_low_level_refine = use_low_level_refine
+    if use_low_level_refine:
+      self.low_level = LowLevelRefine(in_channels=in_channels, out_channels=low_level_channels)
+      self.refine = nn.Sequential(
         nn.Conv2d(decoder_dim + low_level_channels, decoder_dim, kernel_size=3, padding=1, bias=False),
         nn.BatchNorm2d(decoder_dim),
         nn.ReLU(inplace=True),
         nn.Conv2d(decoder_dim, decoder_dim, kernel_size=3, padding=1, groups=decoder_dim, bias=False),
         nn.BatchNorm2d(decoder_dim),
         nn.ReLU(inplace=True),
-    )
+      )
     self.classifier = nn.Conv2d(decoder_dim, num_classes, 1)
 
   def forward(self, x):
@@ -235,10 +229,10 @@ class SegFormer5Band(nn.Module):
                 for feature in features]
     coarse = self.fuse(torch.cat(features, dim=1))  # (N, decoder_dim, H/4, W/4)
 
-    # --- Refine stage (NEW): 1/4 -> 1/2, fuse with raw-input low-level detail ---
-    low_level_feat = self.low_level(x)  # (N, low_level_channels, H/2, W/2)
-    coarse_up = F.interpolate(coarse, size=low_level_feat.shape[-2:], mode='bilinear', align_corners=False)
-    refined = self.refine(torch.cat([coarse_up, low_level_feat], dim=1))  # (N, decoder_dim, H/2, W/2)
+    if self.use_low_level_refine:
+      low_level_feat = self.low_level(x)
+      coarse_up = F.interpolate(coarse, size=low_level_feat.shape[-2:], mode='bilinear', align_corners=False)
+      coarse = self.refine(torch.cat([coarse_up, low_level_feat], dim=1))
 
-    output = self.classifier(refined)  # (N, num_classes, H/2, W/2)
-    return F.interpolate(output, size=input_size, mode='bilinear', align_corners=False)  # final: only 2x now
+    output = self.classifier(coarse)
+    return F.interpolate(output, size=input_size, mode='bilinear', align_corners=False)

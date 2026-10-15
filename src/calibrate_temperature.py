@@ -52,6 +52,7 @@ flags.DEFINE_integer('num_classes', 6, 'options: 3 (uni-weed), 6 (multi-weed)')
 flags.DEFINE_integer('ignore_index', -1, 'ignore during loss/ECE calculation')
 flags.DEFINE_boolean('spectral_guided', False, 'must match the checkpoint\'s training flags')
 flags.DEFINE_boolean('segformer', False, 'must match the checkpoint\'s training flags')
+flags.DEFINE_boolean('use_low_level_refine', True, 'must match the SegFormer checkpoint architecture')
 flags.DEFINE_boolean('pretrained_backbone', False, 'must match the checkpoint\'s training flags')
 flags.DEFINE_boolean('use_attention', False, 'must match the checkpoint\'s training flags')
 flags.DEFINE_integer('lbfgs_iters', 50, 'max LBFGS iterations to fit T')
@@ -61,7 +62,10 @@ flags.DEFINE_integer('ece_n_bins', None, 'bins for the reported ECE; defaults to
 
 def build_net(device):
     if FLAGS.segformer:
-        net = SegFormer5Band(num_classes=FLAGS.num_classes, pretrained_backbone=FLAGS.pretrained_backbone)
+        net = SegFormer5Band(num_classes=FLAGS.num_classes,
+                             pretrained_backbone=FLAGS.pretrained_backbone,
+                             in_channels=FLAGS.in_channels,
+                             use_low_level_refine=FLAGS.use_low_level_refine)
     elif FLAGS.spectral_guided:
         net = deeplabv3plus_resnet34_spectral(num_classes=FLAGS.num_classes, pretrained_backbone=False)
     elif FLAGS.use_attention:
