@@ -62,7 +62,8 @@ def main(_):
                              pretrained_backbone=FLAGS.pretrained_backbone,
                              in_channels=FLAGS.in_channels,
                              use_low_level_refine=FLAGS.use_low_level_refine)
-        print("Architecture: 5-band SegFormer")
+        print(f"Architecture: SegFormer ({FLAGS.in_channels}-channel, "
+              f"LowLevelRefine={FLAGS.use_low_level_refine})")
     elif FLAGS.spectral_guided:
         net = deeplabv3plus_resnet34_spectral(num_classes=FLAGS.num_classes, pretrained_backbone=False)
         print("Architecture: ResNet34 + spectral branch + Spectral Gate + Lite-ASPP")
