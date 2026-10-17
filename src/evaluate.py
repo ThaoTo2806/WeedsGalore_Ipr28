@@ -13,6 +13,11 @@ from nets import (deeplabv3plus_resnet50, deeplabv3plus_resnet50_do, deeplabv3pl
 from nets import UNet
 
 FLAGS = flags.FLAGS
+flags.DEFINE_integer(
+    'ece_n_bins',
+    15,
+    'Number of bins used to calculate ECE'
+)
 
 flags.DEFINE_string('dataset', 'weedsgalore', 'options: weedsgalore')
 flags.DEFINE_string('dataset_path', '/weedsgalore-dataset', 'dataset directory')
@@ -107,7 +112,13 @@ def main(_):
     evaluator = MulticlassJaccardIndex(num_classes=FLAGS.num_classes, average=None, ignore_index=FLAGS.ignore_index).to(device)
 
     # mcce evaluator
-    mcce = MulticlassCalibrationError(num_classes=FLAGS.num_classes, n_bins=FLAGS.num_classes, norm='l1', ignore_index=FLAGS.ignore_index).to(device)
+    # mcce = MulticlassCalibrationError(num_classes=FLAGS.num_classes, n_bins=FLAGS.num_classes, norm='l1', ignore_index=FLAGS.ignore_index).to(device)
+    mcce = MulticlassCalibrationError(
+    num_classes=FLAGS.num_classes,
+    n_bins=FLAGS.ece_n_bins,
+    norm='l1',
+    ignore_index=FLAGS.ignore_index
+).to(device)
 
     # confusion matrix
     confmat = MulticlassConfusionMatrix(num_classes=FLAGS.num_classes, normalize='true', ignore_index=FLAGS.ignore_index).to(device)
