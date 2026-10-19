@@ -76,6 +76,7 @@ flags.DEFINE_integer('ignore_index', -1, 'ignore during loss and iou calculation
 flags.DEFINE_boolean('dlv3p_do', False, 'set True to use probabilistic variant of DLv3+ with dropout')
 flags.DEFINE_boolean('segformer', False, 'set True to use the 5-band SegFormer architecture')
 flags.DEFINE_boolean('use_low_level_refine', True, 'use the raw-input LowLevelRefine branch in SegFormer')
+flags.DEFINE_boolean('use_multiscale_fusion', True, 'use multi-scale feature fusion in SegFormer')
 flags.DEFINE_boolean('unet', False, 'set True to use the U-Net baseline')
 flags.DEFINE_boolean('spectral_guided', True, 'set True to use the spectral-guided architecture: ResNet34 RGB backbone '
                      '+ tiny NIR/RE spectral branch (Spectral Gate, replaces CBAM) + Lite-ASPP')
@@ -193,7 +194,8 @@ def main(_):
         net = SegFormer5Band(num_classes=FLAGS.num_classes,
                              pretrained_backbone=FLAGS.pretrained_backbone,
                              in_channels=FLAGS.in_channels,
-                             use_low_level_refine=FLAGS.use_low_level_refine)
+                             use_low_level_refine=FLAGS.use_low_level_refine,
+                             use_multiscale_fusion=FLAGS.use_multiscale_fusion)
     elif FLAGS.dlv3p_do:
         net = deeplabv3plus_resnet50_do(num_classes=FLAGS.num_classes, pretrained_backbone=FLAGS.pretrained_backbone)  # probabilistic DeepLabv3+
     elif FLAGS.use_attention:

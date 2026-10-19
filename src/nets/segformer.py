@@ -190,22 +190,25 @@ class LowLevelRefine(nn.Module):
 
 class SegFormer5Band(nn.Module):
   def __init__(self, num_classes=3, decoder_dim=128, pretrained_backbone=False,
-               low_level_channels=48, in_channels=5, use_low_level_refine=True):
+               low_level_channels=48, in_channels=5, use_low_level_refine=True,
+               use_multiscale_fusion=True):
     super(SegFormer5Band, self).__init__()
     self.encoder = (PretrainedMiTEncoder(in_channels=in_channels)
                     if pretrained_backbone else MiTEncoder(in_channels=in_channels))
     self.linear1 = nn.Conv2d(32, decoder_dim, 1, bias=False)
-    self.linear2 = nn.Conv2d(64, decoder_dim, 1, bias=False)
-    self.linear3 = nn.Conv2d(160, decoder_dim, 1, bias=False)
-    self.linear4 = nn.Conv2d(256, decoder_dim, 1, bias=False)
-    self.fuse = nn.Sequential(
+    self.use_multiscale_fusion = use_multiscale_fusion
+    if use_multiscale_fusion:
+      self.linear2 = nn.Conv2d(64, decoder_dim, 1, bias=False)
+      self.linear3 = nn.Conv2d(160, decoder_dim, 1, bias=False)
+      self.linear4 = nn.Conv2d(256, decoder_dim, 1, bias=False)
+      self.fuse = nn.Sequential(
         nn.Conv2d(decoder_dim * 4, decoder_dim, 1, bias=False),
         nn.BatchNorm2d(decoder_dim),
         nn.ReLU(inplace=True),
         nn.Conv2d(decoder_dim, decoder_dim, 3, padding=1, groups=decoder_dim, bias=False),
         nn.BatchNorm2d(decoder_dim),
         nn.ReLU(inplace=True),
-    )
+      )
     self.use_low_level_refine = use_low_level_refine
     if use_low_level_refine:
       self.low_level = LowLevelRefine(in_channels=in_channels, out_channels=low_level_channels)
@@ -223,11 +226,14 @@ class SegFormer5Band(nn.Module):
     input_size = x.shape[-2:]
     feature1, feature2, feature3, feature4 = self.encoder(x)
     target_size = feature1.shape[-2:]  # 1/4 resolution
-    features = [self.linear1(feature1), self.linear2(feature2),
-                self.linear3(feature3), self.linear4(feature4)]
-    features = [F.interpolate(feature, size=target_size, mode='bilinear', align_corners=False)
-                for feature in features]
-    coarse = self.fuse(torch.cat(features, dim=1))  # (N, decoder_dim, H/4, W/4)
+    if self.use_multiscale_fusion:
+      features = [self.linear1(feature1), self.linear2(feature2),
+                  self.linear3(feature3), self.linear4(feature4)]
+      features = [F.interpolate(feature, size=target_size, mode='bilinear', align_corners=False)
+                  for feature in features]
+      coarse = self.fuse(torch.cat(features, dim=1))
+    else:
+      coarse = self.linear1(feature1)
 
     if self.use_low_level_refine:
       low_level_feat = self.low_level(x)

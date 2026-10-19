@@ -36,6 +36,7 @@ flags.DEFINE_boolean('spectral_guided', False, 'set True if the checkpoint was t
                      'the training run exactly, or state_dict loading will fail with key mismatches.')
 flags.DEFINE_boolean('segformer', False, 'set True if the checkpoint was trained with SegFormer5Band')
 flags.DEFINE_boolean('use_low_level_refine', True, 'must match the SegFormer checkpoint architecture')
+flags.DEFINE_boolean('use_multiscale_fusion', True, 'must match the SegFormer checkpoint architecture')
 flags.DEFINE_boolean('unet', False, 'set True if the checkpoint was trained with U-Net')
 flags.DEFINE_boolean('pretrained_backbone', False, 'set True if SegFormer used pretrained MiT-B0')
 flags.DEFINE_boolean('use_attention', False, 'set True if the checkpoint was trained with '
@@ -66,9 +67,11 @@ def main(_):
         net = SegFormer5Band(num_classes=FLAGS.num_classes,
                              pretrained_backbone=FLAGS.pretrained_backbone,
                              in_channels=FLAGS.in_channels,
-                             use_low_level_refine=FLAGS.use_low_level_refine)
+                             use_low_level_refine=FLAGS.use_low_level_refine,
+                             use_multiscale_fusion=FLAGS.use_multiscale_fusion)
         print(f"Architecture: SegFormer ({FLAGS.in_channels}-channel, "
-              f"LowLevelRefine={FLAGS.use_low_level_refine})")
+              f"LowLevelRefine={FLAGS.use_low_level_refine}, "
+              f"MultiScaleFusion={FLAGS.use_multiscale_fusion})")
     elif FLAGS.spectral_guided:
         net = deeplabv3plus_resnet34_spectral(num_classes=FLAGS.num_classes, pretrained_backbone=False)
         print("Architecture: ResNet34 + spectral branch + Spectral Gate + Lite-ASPP")
