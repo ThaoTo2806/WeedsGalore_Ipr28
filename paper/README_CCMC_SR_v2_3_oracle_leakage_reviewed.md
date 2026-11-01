@@ -1,7 +1,7 @@
-# Weed-Aware Spatially Weighted K/V Reduction cho SegFormer MiT-B0 trên ảnh UAV đa phổ
+# CCMC-SR: Class-Conditioned Mass-Conserving Spatial Reduction cho SegFormer MiT-B0 trên ảnh UAV đa phổ
 
-> Tên làm việc: **WeedAware-SR**. Phát triển từ LiteSent (SegFormer MiT-B0 5 băng + LowLevelRefine).
-> **Phiên bản 2.1.** Trạng thái: **kế hoạch nghiên cứu, chưa có kết quả nào của phương pháp đề xuất.** Mọi mục `[ ]` chưa thực hiện.
+> Tên thống nhất: **CCMC-SR** (tên cũ/alias: WeedAware-SR). Phát triển từ LiteSent (SegFormer MiT-B0 5 băng + LowLevelRefine).
+> **Phiên bản 2.2 (02/11/2026).** Trạng thái: **kế hoạch nghiên cứu, chưa có kết quả nào của phương pháp đề xuất.** Mọi mục `[ ]` chưa thực hiện.
 
 ## 0. Thay đổi so với phiên bản 1
 
@@ -24,12 +24,16 @@
 |---|---|---|
 | Giới hạn `c` | Clip `ŵ ≤ c` | Bỏ ở pilot (cách A). Sau clip, trung bình cửa sổ không còn bằng 1; nếu cần clip phải chuẩn hóa lại (cách B) |
 | `lambda` | Khởi tạo đúng 0 | `lam = sigmoid(a)` trong [0,1], khởi tạo nhỏ dương; prior head khởi tạo đồng đều để vẫn tương đương baseline; tránh gradient bằng 0 qua nhánh SR |
-| D1 (quét `R`) | Bằng chứng cho G1 | Hạ xuống thí nghiệm thăm dò; G1 dựa chủ yếu vào D0 và D2 |
+| D1 (quét `R`) | Bằng chứng cho G1 | Hạ xuống thí nghiệm thăm dò; G1 dựa chủ yếu vào Diag-D0 và Diag-D2 |
 | D2 (probe) | So probe trước/sau SR chưa rõ | Định nghĩa lại: pooling cùng chiều `C`, cùng probe, AUROC/AP; gọi là linear decodability |
 | Kích thước feature map | Chưa nêu | Bảng cho ảnh 600 × 600, lưu ý SR bỏ hàng/cột cuối, kiểm tra shape |
 | FLOPs và latency | Chỉ nêu công cụ | Quy ước đo thống nhất, phân biệt MACs/FLOPs |
 | G2 | Cần learned head | Bước 1 dùng mô hình ceiling C2/C3 (không cần learned head) |
 | Bảng quyết định | Chưa có | Thêm bảng theo kết quả K1–K3 |
+
+**Changelog v2.2:** thống nhất prior output stage 1 → stage 2–3; sửa chuẩn hóa chính xác; thêm đặc tả HuggingFace, K5/K6, ánh xạ ID, thứ tự oracle trước L3, metric bin/seed và sprint 7 ngày nhất quán. Các thiết kế mới vẫn là đề xuất chưa kiểm thử.
+
+**Changelog v2.3 (03/11/2026):** kiểm toán leakage oracle; G2 chuyển thành gate loại bỏ một chiều; H2 kiểm bằng L3–L2; thêm C3-K5/C3-K6 và paired interaction; HR oracle chỉ báo cáo thăm dò; đặc tả hook HF có điều kiện xác minh mã pin; thống nhất ID/tên và timeline. Không có kết quả thực nghiệm mới.
 
 ## 1. Bối cảnh
 
@@ -55,48 +59,37 @@ Efficient Self-Attention của MiT-B0 nén K/V bằng conv có kernel và stride
 
 | ID | Giả thuyết | Bác bỏ nếu |
 |---|---|---|
-| **H1** | Cá thể Weed nhỏ bị suy giảm tín hiệu ở SR các stage đầu nhiều hơn cá thể lớn | Không có chênh lệch theo kích thước, hoặc giảm `R` không cải thiện Weed recall nhóm nhỏ |
-| **H2** | Prior Weed bảo toàn thông tin có ích cho Weed tốt hơn prior thực vật (Crop ∪ Weed) | GT-Weed không vượt GT-Veg ở Small Weed Recall |
-| **H3** | Prior Weed **dự đoán được** tái tạo phần đáng kể lợi ích của oracle mà không cần GT | Hệ số khôi phục HR dưới ngưỡng đã đăng ký |
+| **H1** | Cá thể Weed nhỏ có mức suy giảm khả năng giải mã tuyến tính qua SR cao hơn cá thể lớn ở ít nhất một stage (D2 đo cả stage 1–3) | Không có chênh lệch theo kích thước, hoặc giảm `R` không cải thiện Weed recall nhóm nhỏ |
+| **H2** | **Prior Weed dự đoán được** mang lại lợi ích hơn prior Vegetation dự đoán được khi giữ nguyên SR, kiến trúc và ngân sách train | L3 không vượt L2 theo paired seeds/ảnh; C3/C2 chỉ dùng sàng lọc vì chứa GT leakage |
+| **H3** | Prior Weed **dự đoán được** đem lại hiệu ứng có ý nghĩa và ổn định, không chỉ hưởng lợi từ aux supervision hoặc spatial gate | L3 không vượt L0/K1/K5/K6 với CI phù hợp; HR oracle chỉ là mô tả phụ, không dùng làm gate |
 
-Nếu H1 không có bằng chứng thì không kết luận SR là nguyên nhân chính. Nếu H2 không đạt thì dừng hướng Weed-specific.
+Nếu H1 không có bằng chứng thì không kết luận SR là nguyên nhân chính. **H2 quyết định bằng L3 vs L2, không quyết định bằng C3 vs C2.** C3/C2 chứa thông tin nhãn thật ở validation nên chỉ là stress test loại bỏ một chiều; không phải bằng chứng H2 hay upper bound toán học.
 
 ## 3. Phương pháp đề xuất
 
-**Đối tượng:** lớp Spatial Reduction (SR) trong Efficient Self-Attention của MiT-B0, **stage 1–3**; stage 4 (`R = 1`) giữ nguyên.
+**Pilot khóa thiết kế:** prior lấy từ **output stage 1** (sau toàn bộ block stage 1); chỉ điều biến **K/V Spatial Reduction ở stage 2 và stage 3, trong mọi attention block**; stage 1 và 4 giữ nguyên. **Biến thể nghiên cứu riêng:** prior lấy từ output patch embedding trước các attention block stage 1 để thử stage 1–3, không dùng trong pilot. Không lấy output stage 1 để tác động ngược stage 1 (vòng phụ thuộc).
 
-```
-5 băng -> patch embedding -> F1 (H/4)
-                               |
-                     Weed prior head (có giám sát)
-                               |
-                         p = P(Weed), soft
-                               |
-          resize theo stage + chuẩn hóa theo cửa sổ R x R
-                               |
-   Feature (stage i) -> điều biến -> SR conv pretrained -> LayerNorm -> K/V
+```text
+5 bands → patch embedding stage 1 → attention stage 1 → F1 (output stage 1)
+                                                       ├→ Weed prior head → p
+                                                       └→ stage 2 (K/V SR được điều biến bằng p)
+                                                               └→ stage 3 (K/V SR được điều biến bằng p)
+Q và residual path: không điều biến; stage 4: giữ nguyên.
 ```
 
-Công thức cho stage `i` (cửa sổ `R_i x R_i`; `AvgPool_R` dùng đúng kernel và stride của SR conv, không padding):
+Với mỗi cửa sổ SR đầy đủ, `w = eps + (1-eps)*p`, `eps > 0`, `mu = mean_window(w) >= eps`, `w_norm = w/mu` (không cộng `delta`), `X_mod = X*(1+lambda_i*(w_norm-1))`, rồi `SRConv_i(X_mod) → LayerNorm → K/V`. `lambda_i = sigmoid(a_i)` khởi tạo gần 0,05. Vùng rìa không nằm trong cửa sổ SR có hệ số 1. **Mean theo từng cửa sổ của `w_norm` bằng 1 trong sai số floating-point**, và mean của hệ số điều biến cũng bằng 1. Đây là bảo toàn tổng **trọng số**, không phải bảo toàn tổng feature. Với mixed precision, tính `mu` và phép chia bằng FP32 trước khi cast lại dtype của feature. Nếu `eps` được chọn quá nhỏ, đo độ ổn định gradient; không dùng `clamp(mu, min=eps)` như một thay thế cho kiểm thử số học, dù clamp không đổi giá trị trong số học chính xác.
 
-```
-p      = sigmoid( g(F1) )                       # prior Weed, resize về độ phân giải stage i
-w      = eps + (1 - eps) * p                    # sàn eps bảo vệ vùng prior thấp
-w_hat  = w / (AvgPool_R(w) + delta)             # chuẩn hóa theo cửa sổ (pilot: không clip)
-lam_i  = sigmoid(a_i)                           # lambda_i trong [0,1], khởi tạo nhỏ (ví dụ 0,05)
-X'     = X * ( 1 + lam_i * (w_hat - 1) )
-Z      = SRConv_i(X')                           # trọng số pretrained giữ nguyên
-```
+**Chú ý:** K/V SR của stage 3 có cửa sổ 2×2, chỉ bốn vị trí được phân phối lại; stage 2 là 4×4. Stage 1 có 8×8 nhưng chưa có prior từ output stage 1. Effective stride × R tại stage 1/2/3 lần lượt `4×8 = 8×4 = 16×2 = 32 px` trên ảnh gốc (bỏ qua sai khác do padding/biên). Đây là lý do chẩn đoán cả ba stage, **không** là bằng chứng H1 đã đúng.
 
 Tính chất cần nhớ:
 
-- **Khởi tạo tương đương baseline:** lớp cuối của prior head khởi tạo để `p` đồng đều, suy ra `w_hat ≈ 1` và `X' = X` với mọi `lam`. Nhờ vậy dùng được `lam` khởi tạo **dương nhỏ**, và prior head nhận gradient từ segmentation loss ngay từ đầu. Nếu để `lam = 0` đúng thì đạo hàm theo `w_hat` bằng 0: head chỉ học từ aux loss ở bước đầu, còn cấu hình không có aux loss (K3) bị kẹt ở điểm yên ngựa. `lam = 0` chỉ dùng cho unit test (đầu ra phải trùng baseline).
-- Chuẩn hóa theo cửa sổ làm trung bình của `w_hat` trong cửa sổ xấp xỉ 1: cơ chế chỉ **phân phối lại đóng góp bên trong cửa sổ**, không loại cả cửa sổ nền. Cửa sổ có prior thấp đều nhau thì `w_hat ≈ 1`, giữ nguyên ngữ cảnh Background.
-- Một pixel Weed (`p = 1`) trong cửa sổ 8 × 8 với `eps = 0,1` cho `w_hat ≈ 8,77`, khá lớn nếu `lam` cao; vì vậy `lam` bị chặn trong [0, 1] và phải báo cáo giá trị `lam_i` sau huấn luyện của từng stage.
-- **Về giới hạn trên `c`:** chuẩn hóa chỉ giữ trung bình `w_hat` bằng 1 **trước** khi clip. Sau `min(·, c)` tính chất này mất, cửa sổ có thể giảm đóng góp tổng thể thay vì chỉ phân phối lại. Bản pilot **bỏ clip** (cách A). Nếu về sau cần clip (cách B), phải chuẩn hóa lại sau clip (hoặc chiếu lên tập trọng số bị chặn có tổng cố định) và kiểm tra giới hạn trên còn đúng.
+- **Khởi tạo tương đương baseline:** lớp cuối của prior head khởi tạo để `p` đồng đều, suy ra `w_norm = 1` và `X' = X` với mọi `lam`. Nhờ vậy dùng được `lam` khởi tạo **dương nhỏ**, và prior head nhận gradient từ segmentation loss ngay từ đầu. Nếu để `lam = 0` đúng thì đạo hàm theo `w_norm` bằng 0: head chỉ học từ aux loss ở bước đầu, còn cấu hình không có aux loss (K3) bị kẹt ở điểm yên ngựa. `lam = 0` chỉ dùng cho unit test (đầu ra phải trùng baseline).
+- Chuẩn hóa theo cửa sổ làm trung bình của `w_norm` trong cửa sổ bằng 1 (trong sai số số học): cơ chế chỉ **phân phối lại đóng góp bên trong cửa sổ**, không loại cả cửa sổ nền. Cửa sổ có prior thấp đều nhau thì `w_norm = 1`, giữ nguyên ngữ cảnh Background.
+- Một pixel Weed (`p = 1`) trong cửa sổ 8 × 8 với `eps = 0,1` cho `w_norm ≈ 8,77`, khá lớn nếu `lam` cao; vì vậy `lam` bị chặn trong [0, 1] và phải báo cáo giá trị `lam_i` sau huấn luyện của từng stage.
+- **Về giới hạn trên `c`:** chuẩn hóa chỉ giữ trung bình `w_norm` bằng 1 **trước** khi clip. Sau `min(·, c)` tính chất này mất, cửa sổ có thể giảm đóng góp tổng thể thay vì chỉ phân phối lại. Bản pilot **bỏ clip** (cách A). Nếu về sau cần clip (cách B), phải chuẩn hóa lại sau clip (hoặc chiếu lên tập trọng số bị chặn có tổng cố định) và kiểm tra giới hạn trên còn đúng.
 - **Không phải token pruning:** số K/V tokens không đổi. Tên mô tả chính xác: *Weed-Aware Spatially Weighted K/V Reduction*.
 - **Rủi ro cơ chế:** SR vẫn là ánh xạ tuyến tính `R²·C -> C`. Điều biến chỉ đổi **ưu tiên**, không tăng dung lượng. Phải chứng minh bằng đo trực tiếp (probe ở 6.1), không chỉ bằng mIoU.
-- **Rủi ro prior:** head dùng đặc trưng stage 1 (mức thấp) nên khó phân biệt Crop và Weed. Nếu G3 không đạt, thử head cho stage 2–3 lấy đầu vào từ đầu ra stage trước (ablation 6.5).
+- **Rủi ro prior:** head dùng **output stage 1 (stride 4, sau các attention block của stage 1)** nên khó phân biệt Crop và Weed. Nếu G3 không đạt, thử head cho stage 2–3 lấy đầu vào từ đầu ra stage trước (ablation 6.5).
 - **Hiệu quả:** số K/V tokens và `R` không đổi, nên FLOPs của MiT **không giảm** so với baseline không LLR (head và phép nhân thêm một lượng nhỏ). Lợi ích FLOPs chỉ có khi **thay LLR** (17,09 G) bằng cơ chế này.
 
 ### 3.1 Ghi chú triển khai (ảnh 600 × 600)
@@ -150,8 +143,8 @@ Kích thước tính từ tham số conv của MiT-B0 (patch embedding 7×7/stri
 
 **Chỉ là working name, không claim hoàn toàn mới.** Cải tiến trực tiếp `sr` trong Efficient Self-Attention của MiT-B0, không ghép backbone khác.
 
-- **Prototype an toàn luồng dữ liệu:** sinh `p_weed` từ output stage 1 rồi chỉ áp dụng CCMC-SR cho stage 2–3. Stage 1 không được dùng output của chính stage 1 để điều biến attention trong stage 1 (circular dependency). Biến thể sau: prior từ patch embedding trước block attention stage 1.
-- Tại stage i, `w = eps + (1-eps)*p_weed`, `mu = AvgPool2d(w, kernel=R_i, stride=R_i, padding=0)`, `w_norm = w / clamp_min(upsample_repeat(mu, R_i), eps)` **trong vùng các cửa sổ SR đầy đủ**. Phần rìa không thuộc cửa sổ giữ trọng số 1. Dùng `delta` chỉ như numerical floor nhỏ hơn `eps`, không cộng `delta` vào mẫu số nếu muốn bảo toàn mean chính xác.
+- **Pilot thống nhất với mục 3:** sinh `p_weed` từ output stage 1 rồi chỉ áp dụng CCMC-SR cho stage 2–3. Stage 1 không được dùng output của chính stage 1 để điều biến attention trong stage 1 (circular dependency). Biến thể sau: prior từ patch embedding trước block attention stage 1.
+- Tại stage i, `w = eps + (1-eps)*p_weed`, `mu = AvgPool2d(w, kernel=R_i, stride=R_i, padding=0)`, `w_norm = w / upsample_repeat(mu, R_i)` **trong vùng các cửa sổ SR đầy đủ**. Phần rìa không thuộc cửa sổ giữ trọng số 1. Không dùng `delta` cộng mẫu số; `mu >= eps` trong số học chính xác.
 - `X_mod = X * (1 + sigmoid(a_i)*(w_norm-1))`; dùng pretrained SR conv và LayerNorm cũ. Init prior head đồng đều, `sigmoid(a_i)` khoảng 0.05; không clip trong pilot. Assert mean của `w_norm` theo từng cửa sổ xấp xỉ 1 và output trùng baseline khi prior đồng đều/`lambda=0`.
 - **Không nhầm mass-conservation với feature-conservation:** SR conv có kernel learned không đều, nên mean trọng số bằng 1 không đảm bảo tổng đóng góp feature hay norm K/V được bảo toàn. Đo activation norms và feature distortion.
 - **Cảnh báo kích thước:** 600x600 -> stage 1 150x150 R8 và stage 2 75x75 R4: SR bỏ rìa; không repeat rồi crop một cách vô tình điều biến phần rìa; kiểm tra output `sr` thực tế.
@@ -220,11 +213,11 @@ Kích thước tính từ tham số conv của MiT-B0 (patch embedding 7×7/stri
 
 | ID | Thí nghiệm | Mục đích |
 |---|---|---|
-| D0 | Weed recall theo bin kích thước, ma trận nhầm lẫn, lỗi theo ngày bay, trên checkpoint LiteSent và baseline không LLR | Cỏ nhỏ có bị bỏ sót nhiều hơn không |
-| D1 | Quét `R` ở stage 1–2 (ví dụ 8→4→2): nội suy kernel SR, bảo toàn tổng trọng số, fine-tune cùng protocol | **Thăm dò (exploratory), không phải bằng chứng nhân quả.** Đổi `R` đồng thời đổi kích thước kernel, số K/V tokens, phạm vi gom và biểu diễn pretrained, rồi còn fine-tune |
-| D2 | Linear decodability probe (protocol bên dưới) | Cỏ nhỏ có khó giải mã tuyến tính hơn sau SR không |
+| Diag-D0 | Weed recall theo bin kích thước, ma trận nhầm lẫn, lỗi theo ngày bay, trên checkpoint LiteSent và baseline không LLR | Cỏ nhỏ có bị bỏ sót nhiều hơn không |
+| Diag-D1 | Quét `R` ở stage 1–2 (ví dụ 8→4→2): nội suy kernel SR, bảo toàn tổng trọng số, fine-tune cùng protocol | **Thăm dò (exploratory), không phải bằng chứng nhân quả.** Đổi `R` đồng thời đổi kích thước kernel, số K/V tokens, phạm vi gom và biểu diễn pretrained, rồi còn fine-tune |
+| Diag-D2 | Linear decodability probe (protocol bên dưới) | Cỏ nhỏ có khó giải mã tuyến tính hơn sau SR không |
 
-**Protocol D2:**
+**Protocol Diag-D2:**
 
 1. Nhãn theo cửa sổ SR của từng stage: dương = cửa sổ chứa Weed thuộc bin nhỏ; âm = cửa sổ không có Weed (biến thể: âm gồm cả cửa sổ chỉ có Weed lớn).
 2. Đặc trưng cùng chiều `C`: (a) trước SR, average pooling trong cửa sổ; (b) sau SR, vector tại đúng cửa sổ đó; (c) đối chứng: max pooling trước SR.
@@ -259,6 +252,10 @@ Mỗi checkpoint chỉ từng thấy prior cùng loại với lúc huấn luyệ
 
 Diễn giải H2: GT-Weed vượt GT-Veg ở cả hai hàng (L2 và L3) và C3 vượt C2 thì ủng hộ mạnh. Nếu chỉ thắng ở hàng L3 thì có thể là hiệu ứng thiên lệch, cần dựa vào C2 so C3. Nhiễu cho GT-Weed gồm xói mòn, giãn nở, xóa ngẫu nhiên cá thể.
 
+**Cảnh báo oracle leakage:** C2/C3 sử dụng GT mask của chính ảnh đang đánh giá để tạo trọng số, nên có thể tiết lộ sự hiện diện và vị trí lớp mục tiêu ngay cả khi số token K/V không đổi. C3 > C2 có thể chỉ phản ánh GT-Weed gần với nhãn dự đoán hơn GT-Veg; Small-Weed Recall đặc biệt dễ bị thổi phồng. **Không coi C3 là upper bound của learned prior, không gọi C3−C2 là hiệu ứng bảo toàn thông tin SR.** C3/C2 là kiểm tra loại bỏ một chiều: nếu GT-Weed vẫn không tốt hơn GT-Veg thì thiếu động lực cho prior Weed; nếu tốt hơn thì **chưa đủ điều kiện GO**.
+
+**Đối chứng leakage có cùng nguồn nhãn:** C3-K5 = huấn luyện/đánh giá GT-Weed qua gate trước SR không window normalization; C3-K6 = GT-Weed gate sau SR (tùy ngân sách). So sánh paired `C3(SR) − C3-K5` để **kiểm tra hiệu ứng vị trí/toán tử trong điều kiện cùng leakage**, không được tự gọi là hiệu ứng SR thuần túy nếu hai cơ chế chưa match về biên độ gate và train budget. Báo cáo interaction theo difference-in-differences `[(C3_SR−C3_K5)−(C2_SR−C2_K5)]` như phân tích bổ trợ; vẫn chịu GT leakage và không thay thế L3 vs K5. K2 shuffle trong cửa sổ **giữ lại cờ có Weed ở cấp cửa sổ**, chỉ kiểm tra định vị trong cửa sổ; K7 random/frozen prior là placebo không mang nhãn, nhưng cần match phân phối để tránh confounding.
+
 ### 6.4 Đối chứng cơ chế
 
 | ID | Cấu hình | Điều cần chứng minh |
@@ -266,15 +263,19 @@ Diễn giải H2: GT-Weed vượt GT-Veg ở cả hai hàng (L2 và L3) và C3 v
 | K1 | Head và aux loss giữ nguyên, **không nối** vào SR | Lợi ích không chỉ do auxiliary supervision |
 | K2 | Prior bị hoán vị **trong từng cửa sổ SR** (giữ trung bình và phân phối giá trị của cửa sổ, phá tương ứng vị trí) | Cần đúng vị trí cỏ, không chỉ cần map có cùng phân phối. K2b (tùy chọn): hoán vị toàn ảnh làm placebo yếu hơn |
 | K3 | Cùng head, **chỉ nhận gradient từ segmentation loss**, không có nhãn Weed phụ; `lam` khởi tạo dương như L3 (nếu `lam = 0` thì head không học được) | "Weed-aware" khác với bất kỳ spatial attention map nào |
-| K4 | L3 + LLR | Bổ trợ hay thay thế; **không bắt buộc** để chấp nhận mô hình |
+| K4 | L3 + LLR | Bổ trợ hay thay thế; không bắt buộc trong pilot |
+| **K5** | **Cùng prior head, aux loss, lambda và training budget với L3; gate trực tiếp trước SR nhưng KHÔNG chuẩn hóa trong cửa sổ** | Kiểm tra giá trị tăng thêm của window normalization so với spatial gating thông thường |
+| **K6** | **Cùng prior head và aux loss; gate trên feature sau SR, trước LayerNorm/K/V projection; chuẩn hóa theo lưới K/V nếu phù hợp** | Kiểm tra lợi ích do vị trí can thiệp bên trong cửa sổ SR so với gating sau giảm độ phân giải |
+| **C3-K5 / C3-K6** | **GT-Weed oracle qua gate trước/sau SR**, cùng split/seed/budget với C3 | Định lượng phần lợi thế oracle do cơ chế can thiệp, khi leakage GT được giữ chung; không phải chứng cứ deployable |
+| K7 (phụ) | Frozen/random prior, kiểm soát prior head và phân phối trọng số | Kiểm tra cơ chế có thật sự cần prior đã học |
 
 ### 6.5 Ablation (pilot 1 seed trên validation, chạy tuần tự, không full factorial)
 
 | Thứ tự | Nhóm | Các mức |
 |---|---|---|
-| 1 | Nguồn prior stage 1 | 5 băng thô · đầu ra patch embedding |
+| 1 | Nguồn prior stage 1 | **output stage 1 (pilot)** · 5 băng thô (ablation) · đầu ra patch embedding (biến thể stage 1–3) |
 | 2 | Nguồn prior stage 2–3 | Resize prior stage 1 · head riêng trên đầu ra stage trước |
-| 3 | Stage áp dụng | 1 · 1–2 · 1–3 |
+| 3 | Stage áp dụng | **pilot: 2–3**; ablation hợp lệ với prior output stage 1: 2 · 3 · 2–3; **chỉ với prior từ patch embedding:** 1 · 1–2 · 1–3 |
 | 4 | Cơ chế | `lam` ∈ {cố định nhỏ, học được bị chặn trong [0,1] (init 0,05)}; chuẩn hóa cửa sổ có/không; sàn `eps` ∈ {0,05, 0,1, 0,3}. Clip `c` **không** nằm trong pilot; chỉ thử ở cách B (clip rồi chuẩn hóa lại) sau khi cơ chế chính hoạt động |
 | 5 | Nhãn và loss | Mục tiêu: soft occupancy (average pooling mask Weed) · max-pool presence; aux loss: BCE · BCE + Dice; trọng số 0,1/0,3/1,0 |
 
@@ -286,8 +287,8 @@ Mặc định dùng soft occupancy; max-pool presence là đối chứng, không
 |---|---|---|---|---|---|---|---|---|
 | SegFormer-B0 5 băng, không LLR (L0) | | | | | | | | |
 | LiteSent (B0 + LLR) | 85,49 ± 0,30* | 77,78* | 80,06* | | | 3,66 M | 17,09 G | 15,97 ms |
-| WeedAware-SR L3, không LLR | | | | | | | | |
-| WeedAware-SR L3 + LLR (K4) | | | | | | | | |
+| CCMC-SR L3, không LLR | | | | | | | | |
+| CCMC-SR L3 + LLR (K4) | | | | | | | | |
 | ResNet50–DeepLabV3+ | | | | | | | | |
 | SegFormer-B1/B2 (tham chiếu dung lượng) | | | | | | | | |
 
@@ -307,66 +308,124 @@ Mặc định dùng soft occupancy; max-pool presence là đối chứng, không
 
 | Cổng | Câu hỏi | Điều kiện đi tiếp | Nếu không đạt |
 |---|---|---|---|
-| G1 | SR có phải nút thắt cho cỏ nhỏ? | Dựa chủ yếu vào **D0 và D2**: nhóm nhỏ suy giảm rõ ở D0 và khó giải mã hơn sau SR ở D2. D1 chỉ hỗ trợ, không bắt buộc | Không giả định SR là nguyên nhân chính |
-| G2 | GT-Weed có hơn GT-Veg? | Bước 1 (rẻ, chưa cần learned head): C3 vượt C2 và L0 ở Small-Weed Recall (pilot 1 seed, validation). Bước 2: xác nhận bằng ma trận can thiệp 6.3. CI bootstrap ủng hộ, Crop IoU không giảm quá ngưỡng đặt trước | Bỏ giả thuyết Weed-specific |
-| G3 | Prior học được có đủ tốt? | `HR = (M_L3 − M_L0) / (M_O3 − M_L0) ≥ 50 %` (chỉ tính khi mẫu số > 0), `M` là Small-Weed Recall | Cải thiện prior head hoặc dừng |
-| G4 | Lợi ích đến từ việc nối prior vào SR? | L3 vượt K1, K2, K3 ở Small-Weed Recall, không đánh đổi nghiêm trọng mIoU/Crop IoU | Chưa chứng minh được cơ chế |
+| G1 | SR có phải nút thắt cho cỏ nhỏ? | Dựa chủ yếu vào **Diag-D0 và Diag-D2**: nhóm nhỏ suy giảm rõ ở D0 và khó giải mã hơn sau SR ở D2. Diag-D1 chỉ hỗ trợ, không bắt buộc | Không giả định SR là nguyên nhân chính |
+| G2 | Oracle có bác bỏ động lực Weed-specific? | **Gate loại bỏ một chiều:** nếu C3 không vượt C2 trên validation (paired seed, metric/CI), ghi NO-GO/INCONCLUSIVE cho giả thuyết oracle. Nếu C3 > C2 chỉ ghi SCREEN-PASS, **không phải H2 PASS**; yêu cầu L3 vs L2 và K5/K6 mới có GO khoa học | Không dùng C3>C2 để khẳng định H2 |
+| G3 | Learned Weed prior có hơn learned Vegetation prior? | **H2 chính:** `Δ_H2 = M_L3 − M_L2` (Small-Weed Recall) ≥ 3 điểm phần trăm, paired 95% CI không cắt 0; Crop IoU giảm không quá 1 điểm; báo cáo Weed IoU/mIoU và prior quality. HR oracle chỉ báo cáo exploratory | Không claim Weed-specific superiority |
+| G4 | Lợi ích đến từ việc nối prior vào SR? | L3 vượt K1, K2, K3 **và từng K5, K6** ở Small-Weed Recall, không đánh đổi nghiêm trọng mIoU/Crop IoU | Chưa chứng minh được cơ chế |
 
-Ngưỡng 50 % là tiêu chí của dự án, không phải ngưỡng khoa học đã được công nhận; phải ghi cố định trước khi xem kết quả validation. mIoU không tăng ở G2 vẫn chấp nhận được nếu Small-Weed Recall tăng rõ mà Crop IoU không hỏng. Ngược lại, mIoU tăng nhẹ mà Small-Weed Recall không tăng thì **chưa** chứng minh giả thuyết trung tâm.
+**Không dùng HR = (M_L3−M_L0)/(M_C3−M_L0) làm gate**: mẫu số có thể bị phóng đại do oracle leakage hoặc không dương. Nếu báo cáo HR, ghi rõ *oracle-relative descriptive ratio*, kèm mẫu số và CI, không gán ngưỡng 50%. Có thể báo cáo thêm tỉ lệ theo C3-K5 nhưng phép trừ leakage **không nhận dạng được** một upper bound sạch; không thay bằng mẫu số điều chỉnh tự chế. mIoU không tăng ở G3 vẫn có thể chấp nhận nếu Small-Weed Recall tăng rõ mà Crop IoU không hỏng. Ngược lại, mIoU tăng nhẹ mà Small-Weed Recall không tăng thì **chưa** chứng minh giả thuyết trung tâm.
 
 **Bảng quyết định theo kết quả:**
 
 | Kết quả | Quyết định |
 |---|---|
-| D0/D2 không ủng hộ H1 | Không tiếp tục claim SR là bottleneck |
-| C3 không hơn C2 (GT-Weed không hơn GT-Veg) | Dừng hướng Weed-specific |
-| Ceiling tốt nhưng prior học được kém (HR thấp) | Nghiên cứu lại prior head |
+| Diag-D0/Diag-D2 không ủng hộ H1 | Không tiếp tục claim SR là bottleneck |
+| C3 không hơn C2 | Không có bằng chứng oracle ủng hộ; xem lại thiết kế hoặc dừng; không dùng để chứng minh H2 |
+| C3 hơn C2 nhưng L3 không hơn L2 | **Không** xác nhận H2: chênh lệch oracle có thể là label leakage |
+| C3(SR) không hơn C3-K5 | Không có bằng chứng SR tốt hơn gate ngay cả khi cùng GT leakage |
+| Oracle tốt nhưng L3 kém | Kiểm tra prior head, calibration và GT leakage; không dùng HR làm lý do duy nhất |
 | L3 không hơn K1 | Chưa chứng minh tác dụng của việc nối prior vào SR |
 | L3 hơn K1 nhưng không hơn K2 | Chưa chứng minh cần đúng vị trí Weed |
 | L3 hơn K1, K2 nhưng không hơn K3 | Chưa chứng minh "Weed-aware" khác content-adaptive |
-| L3 hơn K1, K2, K3 | Đủ cơ sở chuyển sang ablation và 5 seeds |
+| L3 hơn K1, K2, K3 nhưng không hơn K5 hoặc K6 | Chưa chứng minh đóng góp riêng của toán tử SR; không claim SR-specific novelty |
+| L3 hơn K1, K2, K3, K5, K6 với CI paired đủ rõ | Có cơ sở tiếp tục ablation và 5 seeds |
 
 ## 8. Lộ trình
 
-**Deadline cứng: 7 ngày lịch** để có gói kết quả validation và quyết định go/no-go. GPU-hours thực tế phụ thuộc quota còn lại, GPU được cấp và thời gian mỗi run; không giả định có sẵn 30 giờ hay 10× quota. Làm P0–P3 trước, chỉ đầu tư K1–K4 và 5 seeds khi các cổng đạt. Xem lịch chi tiết tại mục 8.1.
+**Deadline cứng: 7 ngày lịch** để có gói kết quả validation và quyết định go/no-go. GPU-hours thực tế phụ thuộc quota còn lại, GPU được cấp và thời gian mỗi run; không giả định có sẵn 30 giờ hay 10× quota. Làm P0–P3 trước, chỉ đầu tư K1–K7 và 5 seeds khi các cổng đạt. Xem lịch chi tiết tại mục 8.1.
 
 | Giai đoạn | Công việc | Kết quả cần có |
 |---|---|---|
-| [ ] P0 | Chẩn đoán checkpoint hiện có (D0); xác nhận hai baseline không-LLR | Recall theo bin, lỗi theo ngày, ma trận nhầm lẫn, baseline L0 chốt |
-| [ ] P1 | D1 và D2 (quét `R` có chuyển trọng số, probe) | Bằng chứng hoặc bác bỏ H1, cổng G1 |
+| [ ] P0 | Chẩn đoán checkpoint hiện có (Diag-D0); xác nhận hai baseline không-LLR | Recall theo bin, lỗi theo ngày, ma trận nhầm lẫn, baseline L0 chốt |
+| [ ] P1 | Diag-D1 và Diag-D2 (quét `R` có chuyển trọng số, probe) | Bằng chứng hoặc bác bỏ H1, cổng G1 |
 | [ ] P2 | Cài `WeightedSR` (có thể viết song song với P1); unit test mục 3.1 | Shape đúng ở các kích thước ảnh; `lam = 0` và prior đồng đều trùng baseline; backward không NaN; FLOPs đúng quy ước |
-| [ ] P3a | L0 và mô hình ceiling C2, C3 (GT prior, 1 seed, validation) | Cổng G2 bước 1, chưa cần learned head |
-| [ ] P3b | L1–L3 và can thiệp oracle 6.3 | Cổng G2 bước 2, G3 |
-| [ ] P4 | K1–K4 và ablation 6.5 | Cổng G4 |
+| [ ] P3a | L0 và mô hình ceiling C2, C3 (GT prior, 1 seed, validation) | G2 chỉ sàng lọc một chiều, chưa kiểm chứng H2 |
+| [ ] P3b | L1–L3 và can thiệp oracle 6.3 | G3/H2 qua L3 vs L2; kiểm tra leakage C3-K5 và G4 |
+| [ ] P4 | K1–K7 (ưu tiên K5/K6) và ablation 6.5 | Cổng G4 |
 | [ ] P5 | Khóa cấu hình, 5 seeds, bootstrap, bảng 6.6 | Kết quả chính, CI, hiệu quả tính toán |
 | [ ] P6 | Phân tích ngày bay (6.7) và tập dữ liệu thứ hai | Bằng chứng bổ trợ về độ bền |
 | [ ] P7 | Đọc full paper các mục "cần đọc"; viết bài | Related work, đóng góp, giới hạn |
 
-**Thứ tự code:** bắt đầu bằng 4 notebook độc lập (P0, P1, P2, P3) rồi mới tách thành repo. Không huấn luyện L3 (P3b) trước khi có kết quả P0–P1 và P3a. Mức sẵn sàng hiện tại: P0–P2 có thể bắt đầu; chưa chạy toàn bộ thí nghiệm trước khi qua G1 và G2.
+**Thứ tự code:** bắt đầu bằng 4 notebook độc lập (P0, P1, P2, P3) rồi mới tách thành repo. **Không tích hợp/train L3 (P3b) trước khi có kết quả P0–P1, P2 và P3a (C2/C3), trừ khi ghi rõ pilot kỹ thuật không dùng để quyết định khoa học.** Mức sẵn sàng hiện tại: P0–P2 có thể bắt đầu; chưa chạy toàn bộ thí nghiệm trước khi qua G1 và G2.
 
 ### 8.1. Sprint Kaggle bắt buộc 7 ngày (D1–D7)
 
-**Mục tiêu bắt buộc đến cuối D7:** (i) baseline có thể tái hiện; (ii) CCMC-SR stage 2–3 chạy đúng và có checkpoint; (iii) ít nhất một so sánh **paired** với same-prior gate trên validation; (iv) bảng Weed IoU, Crop IoU, mIoU, Small-Weed Recall, thời gian suy luận; (v) quyết định **go/no-go** kèm hạn chế. **Không hứa hoàn thành 5 seeds cho mọi mô hình, external validation hay bài Q1 trong 7 ngày.** Nếu gate không đạt, kết quả âm tính + báo cáo cơ chế là đầu ra hợp lệ.
+**Mục tiêu bắt buộc đến cuối D7 (G2 chỉ sàng lọc, không thay L3–L2):** (i) baseline 2 seeds có thể tái hiện; (ii) C2/C3 và kết quả G2-screen có artifact hoặc ghi NOT RUN với lý do; (iii) nếu G1 đạt và G2 không bác bỏ, CCMC-SR stage 2–3 có checkpoint và ít nhất một so sánh **paired** với K5/K6 trên validation; (iv) bảng Weed IoU, Crop IoU, mIoU, Small-Weed Recall, thời gian suy luận; (v) quyết định **go/no-go** kèm hạn chế. **Không hứa hoàn thành 5 seeds cho mọi mô hình, external validation hay bài Q1 trong 7 ngày.** Nếu gate không đạt, kết quả âm tính + báo cáo cơ chế là đầu ra hợp lệ.
 
 **Quy tắc Kaggle và 10 tài khoản:** 10 tài khoản **không đồng nghĩa** 10 GPU song song hoặc được phép cộng dồn quota. Chỉ dùng tài khoản do từng người sở hữu, có quyền sử dụng, tuân thủ điều khoản Kaggle; **không luân phiên tài khoản để né hạn mức/biện pháp kiểm soát**, không chia sẻ mật khẩu, không dùng tài khoản phụ nhằm vượt quota. Có thể chia nhóm theo **người phụ trách độc lập** (code, phân tích, kiểm thử, huấn luyện khi được cấp tài nguyên hợp lệ). Nếu tài nguyên không đủ, giảm phạm vi theo thứ tự ưu tiên bên dưới, hoặc dùng GPU được cấp hợp lệ từ nguồn khác. Quota/loại GPU/thời lượng phiên thay đổi theo tài khoản và thời điểm, phải kiểm tra trong Kaggle trước khi lên lịch.
 
 | Ngày | Việc bắt buộc và thứ tự ưu tiên | GPU / công việc song song | Deliverable cuối ngày; cổng dừng |
 |---|---|---|---|
-| **D1** | Chốt official split, preprocessing 5 bands, metric instance/bin, seed; chạy baseline L0 1 seed hoặc xác minh checkpoint cùng protocol; kiểm toán sai lệch 82,16 vs 83,53 | 1 phiên GPU nếu cần; song song CPU: đọc full paper gần nhất, kiểm tra leakage, viết test metric | `configs/baseline.yaml`, `splits_hash.json`, `results/d1_baseline.json`, log môi trường; **không sang D3 nếu metric sai** |
-| **D2** | D0 Small-Weed Recall, Crop/Weed IoU, theo ngày; D2 probe tối giản nếu đủ thời gian; cài `WeightedSR` và unit tests | GPU cho inference/probe; CPU viết operator + synthetic tests song song | `results/d2_diagnostics.csv`, unit tests shape/gradient/identity/window mean; nếu D0 không ủng hộ, ghi **G1 fail**, chỉ chạy pilot phản chứng |
-| **D3** | Tích hợp CCMC-SR stage 2–3; chạy smoke test 1 batch → 1 epoch → pilot L3 1 seed; cùng lúc chạy K1 aux-only nếu GPU cho phép | GPU ưu tiên L3; CPU review code, loss, profiler | `checkpoints/l3_seed0.pt`, learning curves, no-NaN, equivalence test; **fail correctness → dừng train** |
-| **D4** | Chạy **same-prior spatial gate** với cùng prior head/aux loss/seed/split/epoch; chạy oracle C2/C3 pilot chỉ nếu còn ngân sách | GPU ưu tiên đối chứng gate; CPU viết bootstrap, phân tích prior | `results/d4_l3_vs_gate.csv`, checkpoint gate, báo cáo G2 sơ bộ; nếu gate ngang/vượt L3, **không claim SR-specific novelty** |
-| **D5** | Chạy K2 within-window shuffle, K3 no-aux hoặc prior random (chọn tối thiểu 1 placebo); corruption thử nghiệm trên validation; profile latency batch 1 | GPU 1–2 pilot ngắn tùy quota; CPU dựng bảng paired delta | `results/d5_mechanism.csv`, `profile_t4.json`, bảng lỗi; **G3/G4 không đạt → không mở ablation rộng** |
-| **D6** | Nếu G1–G4 có tín hiệu: lặp **L0/L3/gate với seed thứ 2**, ưu tiên cùng seed giữa các model; nếu quota thiếu: chỉ chạy L3 vs gate seed 2; đóng băng config | GPU ưu tiên xác nhận paired; CPU bootstrap theo image/cluster và audit | `results/d6_paired.csv`, config frozen, bảng mean/delta sơ bộ; không lấy test để chọn mô hình |
+| **D1** | Chốt official split, preprocessing 5 bands, metric instance/bin, seed; chạy baseline L0 **seed 1/2** hoặc xác minh checkpoint cùng protocol; kiểm toán sai lệch 82,16 vs 83,53 | 1 phiên GPU nếu cần; song song CPU: đọc full paper gần nhất, kiểm tra leakage, viết test metric | `configs/baseline.yaml`, `splits_hash.json`, `results/d1_baseline.json`, log môi trường; **không sang D3 nếu metric sai** |
+| **D2** | Diag-D0 Small-Weed Recall, Crop/Weed IoU, theo ngày; **L0 seed 2**, Diag-D2 probe stage 1–3; unit test WeightedSR **trên tensor tổng hợp, chưa tích hợp HF** | GPU cho inference/probe; CPU viết operator + synthetic tests song song | `results/d2_diagnostics.csv`, unit tests shape/gradient/identity/window mean; nếu D0 không ủng hộ, ghi **G1 fail**, chỉ chạy pilot phản chứng |
+| **D3** | **P3a: tích hợp tối thiểu đường truyền GT prior để chạy C2 và C3 (ceiling), cùng seed/protocol; chưa train L3**. Nếu chưa xong, tiếp tục P0/P1 và tests | GPU ưu tiên C2/C3; CPU review tính hợp lệ oracle, profiler | `results/d3_c2_c3.csv`, checkpoint C2/C3, G2 sơ bộ; **nếu chưa có C2/C3 thì L3 = NOT RUN** |
+| **D4** | Hoàn tất C2/C3 nếu chưa đủ; kiểm tra G1/G2-screen; **chỉ khi đạt và đã chốt 6 điểm thiết kế**, tích hợp HF CCMC-SR stage 2–3, smoke test và **L2/L3 paired pilot** | GPU ưu tiên C2/C3 còn thiếu → L2/L3 paired pilot nếu G1 và G2-screen cho phép; CPU viết bootstrap, phân tích prior | `results/d4_gates.csv`, `checkpoints/l2_seed0.pt`, `checkpoints/l3_seed0.pt` nếu đủ điều kiện; nếu G2 loại bỏ, **không chạy L3 như thí nghiệm khẳng định** |
+| **D5** | Chạy **K5 same-prior gate trước SR và K6 gate sau SR** với paired seed; nếu thiếu thời gian ưu tiên K5, đánh dấu K6 NOT RUN và **không claim SR-specific novelty**; profile latency | GPU 1–2 pilot ngắn tùy quota; CPU dựng bảng paired delta | `results/d5_k5_k6.csv`, `profile_t4.json`, bảng lỗi; **G3/G4 không đạt → không mở ablation rộng** |
+| **D6** | Nếu G1–G4 có tín hiệu, đặc biệt L3>L2: lặp **L2/L3/K5/K6 cùng seed thứ 2**; thêm K1/K2/K3 và corruption khi đủ thời gian; đóng băng config | GPU ưu tiên xác nhận paired; CPU bootstrap theo image/cluster và audit | `results/d6_paired.csv`, config frozen, bảng mean/delta sơ bộ; không lấy test để chọn mô hình |
 | **D7** | Đánh giá validation thống nhất, kiểm tra crop/weed trade-off, tổng hợp biểu đồ, chạy test chính thức **một lần duy nhất nếu đã khóa mô hình**; viết báo cáo quyết định | GPU inference/test + profiling khi hợp lệ; CPU viết report và đóng gói notebook | `results/summary_7days.md`, `results/metrics.csv`, `results/decision.json`, `README` cập nhật, notebook reproducible; danh sách việc còn thiếu cho paper |
 
-**Ước lượng công suất (phải benchmark D1, không phải cam kết):** ký hiệu `t` = thời gian train **một** model/seed đến budget epoch đã khóa, `q` = tổng GPU-giờ **thực sự được cấp hợp lệ** trong 7 ngày. Kịch bản tối thiểu gồm L0, L3, same-prior gate và 1 placebo: khoảng `4t + t_diagnostics + t_profile` GPU-giờ. Kịch bản xác nhận 2 seeds cho L0/L3/gate: thêm khoảng `3t`. Năm seeds của 3 model cần xấp xỉ `15t` (chưa tính ablation), **chỉ thực hiện nếu** `q` đủ. D1 chạy benchmark 5–10 epoch, đo thời gian/epoch và ghi `ETA = epochs_remaining × median_epoch_time`; thêm biên dự phòng 20–30% cho startup, checkpoint, lỗi phiên. Không tự suy ra GPU-hours từ số tài khoản.
+**Ước lượng công suất (phải benchmark D1, không phải cam kết):** ký hiệu `t` = thời gian train **một** model/seed đến budget epoch đã khóa, `q` = tổng GPU-giờ **thực sự được cấp hợp lệ** trong 7 ngày. Kịch bản tối thiểu sau khi qua G1/G2 gồm L0 (2 seeds), C2, C3, L3, K5, K6: khoảng `7t + t_diagnostics + t_profile` GPU-giờ. Kịch bản xác nhận 2 seeds cho L0/L3/gate: thêm khoảng `3t`. Năm seeds của 3 model cần xấp xỉ `15t` (chưa tính ablation), **chỉ thực hiện nếu** `q` đủ. D1 chạy benchmark 5–10 epoch, đo thời gian/epoch và ghi `ETA = epochs_remaining × median_epoch_time`; thêm biên dự phòng 20–30% cho startup, checkpoint, lỗi phiên. Không tự suy ra GPU-hours từ số tài khoản.
 
 **Điều phối phiên và checkpoint:** mỗi job có `run_id = model__seed__split_hash__git_commit`; đặt seed Python/NumPy/PyTorch và log versions; lưu checkpoint **theo epoch** hoặc mỗi 10–15 phút, gồm model/optimizer/scheduler/scaler/RNG/epoch/config, và xuất ra Kaggle Dataset/Artifact hoặc kho được phép truy cập để có thể resume giữa các phiên hợp lệ. Không phụ thuộc vào filesystem tạm của notebook; kiểm tra checkpoint đọc lại được ngay D1. Một job chỉ có một người/phiên ghi vào output để tránh overwrite. Ghi `manifest.csv`: run_id, chủ sở hữu, notebook version, GPU, start/end, wall time, GPU time, seed, trạng thái, đường dẫn artifact, hash. Không trộn checkpoints của các split/config khác nhau.
 
-**Chia việc cho nhóm có tối đa 10 người/tài khoản hợp lệ (không yêu cầu 10 GPU):** nhóm A (2 người) data/metrics + split audit; B (2) WeightedSR + tests; C (2) training/baseline + logging; D (2) gate/oracle + controls; E (2) profiling, thống kê, related work và tổng hợp. Một người có thể kiêm nhiều vai nếu nhóm nhỏ hơn. Khi chỉ có **1 GPU khả dụng**, hàng đợi ưu tiên: **L0 → L3 → same-prior gate → K1/K2 → seed 2 → oracle → ablation → seed 3–5 → external**. Các job CPU triển khai song song, còn GPU chỉ chạy những job không xung đột tài nguyên.
+**Chia việc cho nhóm có tối đa 10 người/tài khoản hợp lệ (không yêu cầu 10 GPU):** nhóm A (2 người) data/metrics + split audit; B (2) WeightedSR + tests; C (2) training/baseline + logging; D (2) gate/oracle + controls; E (2) profiling, thống kê, related work và tổng hợp. Một người có thể kiêm nhiều vai nếu nhóm nhỏ hơn. Khi chỉ có **1 GPU khả dụng**, hàng đợi ưu tiên: **L0 (2 seeds) → C2/C3 → L2/L3 → K5/K6 → K1/K2/K3 → seed 2 → ablation → seed 3–5 → external**. Các job CPU triển khai song song, còn GPU chỉ chạy những job không xung đột tài nguyên.
 
 **Định nghĩa hoàn thành 7 ngày:** phân biệt `DONE` (đã chạy và có artifact), `PARTIAL` (chưa đủ seed/CI) và `NOT RUN` (thiếu quota/thời gian). Không đưa số liệu từ pilot 1 seed thành bằng chứng kết luận Q1; không báo cáo test lặp lại để chọn hyperparameter. Sau D7, nếu kết quả tốt, tiếp tục 5 seeds, external dataset, robust checks và hoàn thiện related work trong giai đoạn tiếp theo.
+
+### 8.2. Điều kiện khóa thiết kế và quy tắc thống kê (bắt buộc)
+
+- **Chưa sửa code huấn luyện L3:** ưu tiên P0 (metric instance/bin, baseline L0 2 seeds, kiểm toán 82,16 vs 83,53) và P2 (unit test toán tử tensor tổng hợp). C2/C3 cần đường truyền GT prior nhưng không cần learned prior head; chỉ triển khai khi test toán tử đạt.
+- **Metric instance/bin:** dùng instance labels gốc nếu có; nếu suy ra connected components từ semantic mask thì ghi rõ không tương đương instance GT. Định nghĩa kích thước trên **diện tích pixel ảnh gốc**, bins và matching rule cố định trước khi nhìn validation. Báo cáo số instance `n` mỗi bin trên train/val/test, recall `TP_instance/n_GT_instance`, và CI cluster-bootstrap theo ảnh (không bootstrap pixel như độc lập). Bin có `n < 20` trên validation/test chỉ **exploratory**, không dùng một mình cho gate.
+- **Baseline audit:** kiểm tra split hash, decoder/fusion, weights, epoch selection, augmentation, cách tính mIoU và số seeds; không gộp 82,16 với 83,53 khi chưa xác nhận cùng protocol. L0 2 seeds để đo phương sai pilot, nhưng không thay thế 5 seeds xác nhận.
+- **Ngưỡng đặt trước:** `L3−L0 ≥ +3 điểm phần trăm` Small-Weed Recall (hiệu quả tuyệt đối); `L3−L2 ≥ +3 điểm phần trăm` cho H2/G3; và `L3−Kj > 0` với **từng** đối chứng chính `j∈{1,5,6}` (paired CI 95% không cắt 0) cho G4. Không yêu cầu +3 điểm với từng đối chứng nếu không đủ power; phân biệt hiệu ứng tối thiểu thực tiễn và ý nghĩa thống kê. Các ngưỡng này phải khóa trước khi xem kết quả validation; oracle G2 không dùng ngưỡng +3 làm bằng chứng H2. Đồng thời không giảm Crop IoU quá **1 điểm phần trăm** trên validation, kèm paired bootstrap 95% CI cho delta; **đây là ngưỡng quản trị pilot đề xuất, phải khóa trước khi xem kết quả, không phải ngưỡng phổ quát**. Nếu CI cắt 0 thì ghi INCONCLUSIVE dù delta điểm đạt. Với mIoU, không kết luận từ một run có chênh lệch dưới 0,30 điểm (độ lệch chuẩn LiteSent đã báo); so sánh paired theo seed và ảnh. HR chỉ là mô tả exploratory, không phải điều kiện G3.
+- **D7:** chỉ đánh giá test sau khi chốt model/config từ validation; nếu chưa đạt các gate, test để nguyên chưa mở. Ghi DONE/PARTIAL/NOT RUN từng thí nghiệm; deadline 7 ngày không cho phép bỏ gate mà vẫn claim novelty.
+
+### 8.3. Ánh xạ ID để tránh hai hệ thí nghiệm song song
+
+| Sprint ID | Protocol nghiên cứu | Ý nghĩa |
+|---|---|---|
+| N0 / D1 | P0, L0, Diag-D0 | Baseline, metric, audit |
+| N1 / D2 | P1, Diag-D1–Diag-D2 | Diagnostic/probe, cả stage 1–3 |
+| N2 / D3 | P2, P3a, C2/C3 | Unit tests, oracle ceiling |
+| N3 / D4 | P3b, L3 | Learned Weed prior, chỉ sau G1/G2 |
+| N4 / D5 | P4, K5/K6 | Same-prior gating controls |
+| N5 / D6 | P4, K1/K2/K3 | Mechanism/placebo nếu đủ GPU |
+| N6 / D6 | P5, paired seeds | Xác nhận và bootstrap |
+| N7 / D7 | G1–G4, P5 | Tổng hợp, quyết định và test một lần nếu khóa cấu hình |
+
+**Ưu tiên tên chuẩn:** D1–D7 = ngày sprint; `Diag-D0/1/2` = diagnostic ID trong mục 6.1. N0–N7 là tên nhóm bằng chứng lịch sử, **không phải thí nghiệm độc lập mới**.
+
+### 8.4. Đặc tả triển khai HuggingFace (khóa API trước khi tích hợp)
+
+**Chưa xác minh bằng `inspect.getsource` trên môi trường Kaggle đã pin:** môi trường soạn README hiện không cài `transformers`; các đường dẫn module sau là **giả thuyết API cần kiểm chứng**, không được xem là cam kết tương thích mọi version. D1 ghi `transformers.__version__`, `torch.__version__`, commit và xuất source của `SegformerEncoder.forward`, `SegformerEfficientSelfAttention.forward`, `SegformerOverlapPatchEmbeddings.forward`, đồng thời in `model.named_modules()` để xác nhận tên/shape.
+
+1. **Prior capture (pilot):** dự kiến `forward_pre_hook` ở `model.segformer.encoder.patch_embeddings[1]` nhận input `F1` dạng `(B,C,H,W)` ngay trước patch embedding stage 2. Hook này **chỉ đúng nếu source đã pin** cho thấy encoder chuyển output stage 1 (sau layer norm và reshape) sang patch embedding stage 2. Assert `F1.ndim == 4`, stride 4, và hook gọi trước mọi SR stage 2. Tạo prior head từ **F1**, không dùng GT lúc inference. Không lấy output patch embedding stage 2 làm nhầm F1.
+2. **SR interception:** dự kiến `forward_pre_hook` ở `.encoder.block[stage_idx][block_idx].attention.self.sr` (hoặc đường dẫn tương đương xác nhận bằng `named_modules`) cho **mọi block stage 2 và 3**; input SR phải là `(B,C,H_i,W_i)`. Hook trả tuple `(X_mod,)`, chỉ thay input của SRConv dùng cho **K/V**; Q và residual đi từ tensor gốc. Kiểm tra module có `sr` hay `sequence_reduction` theo version, không hard-code đường dẫn chưa xác minh. **Lưu ý:** hook trên `sr` là trước SR convolution, không phải trước toàn bộ attention; kiểm tra gradient/identity bằng code thật.
+3. **Resize và chuẩn hóa:** `adaptive_avg_pool2d(p, (H_i,W_i))` cho prior 150→75/38; dùng `AvgPool2d(kernel_size=R,stride=R,ceil_mode=False)` cho mean **trong cửa sổ SR**, không dùng adaptive pool để thay window mean. Đối chiếu alignment 150→38 với thực tế patch embedding và đo sensitivity với lệch 1 pixel. Bỏ vùng rìa ngoài SR window; tại đó hệ số 1.
+4. **Head/loss:** prior head xuất logits tại `F1` (150×150 cho input 600×600); `sigmoid` ra p. Target soft occupancy = `adaptive_avg_pool2d(mask_weed.float(), (150,150))`; `BCEWithLogitsLoss` ở độ phân giải đó, pilot `L_seg + 0.3 L_aux`. **Không detach F1** ở pilot; detach là ablation riêng. L2 dùng target Crop ∪ Weed cùng pipeline. Với C2/C3 dùng GT prior cùng phép downsample, không có aux head; chỉ là diagnostic GT-leaking.
+5. **An toàn hook:** xóa cache theo forward, không global mutable state giữa concurrent forwards; hook closure per-model và thử gradient checkpointing, DDP, torch.compile riêng trước khi dùng. Hook có thể được gọi lại khi checkpoint recompute; ưu tiên wrapper/subclass tường minh nếu lifecycle không chắc. Test zero prior/dense prior, lambda=0, mean weight, forward/backward, batch>1, input 512/600, train/eval và autocast. Test thay đổi **chỉ** SR input của stage 2–3; Q và stage 1/4 phải bất biến khi cùng weights.
+6. **Oracle leakage:** C3 sử dụng GT Weed của chính ảnh validation/test, tức là đưa nhãn đích vào mô hình qua K/V, không thể gọi kết quả là năng lực phân đoạn deployable hay upper bound sạch. K2 window shuffle giữ tín hiệu hiện diện cỏ theo cửa sổ; C3-K5/C3-K6 dùng cùng GT để định lượng đối chứng có leakage. **Không hiệu chỉnh HR bằng phép trừ C3-K5 một cách tùy tiện**; cần learned-prior L3 vs L2 và L3 vs K5/K6 để kết luận.
+
+**Lệnh xác minh trên notebook Kaggle (chạy trước khi đăng ký hook):**
+
+```python
+import inspect, transformers
+from transformers.models.segformer.modeling_segformer import (
+    SegformerEncoder, SegformerEfficientSelfAttention, SegformerOverlapPatchEmbeddings
+)
+print(transformers.__version__)
+for cls in (SegformerEncoder, SegformerEfficientSelfAttention, SegformerOverlapPatchEmbeddings):
+    print(cls.__name__, inspect.getsource(cls.forward))
+for name, module in model.named_modules():
+    if 'patch_embeddings.1' in name or name.endswith('.sr'):
+        print(name, type(module).__name__)
+```
+
+### 8.5. Tuyên bố novelty có thể kiểm chứng (không cam kết chưa từng công bố)
+
+**Đóng góp ứng viên:** một phép **class-conditioned, per-SR-window normalized reweighting** của đầu vào SRConv trong K/V projection, bảo toàn mean trọng số trong cửa sổ và giữ số token K/V, dùng prior Weed **dự đoán từ cùng encoder**. Không gọi đây là token pruning, không khẳng định bảo toàn feature/information, không gọi việc thêm attention/gating là mới. Điểm khác biệt phải được chứng minh bằng đối chứng *same-prior same-budget* K5/K6, L3 vs L2, test lệch prior và chẩn đoán SR; nếu không thắng gate thông thường, novelty SR-specific không đứng vững.
+
+**Khoảng trống chỉ là giả thuyết sau rà soát tài liệu:** phải đọc full text và công thức/implementation của các paper liên quan (đặc biệt adaptive patch weighting, SR attention, class-conditioned token selection) trước khi viết claim “first”. Mục tiêu Q1 không được bảo đảm bằng tên phương pháp; cần hiệu quả, kiểm chứng cơ chế, robustness, paired multi-seed và generalization.
 
 ## 9. Cấu trúc repo (dự kiến)
 
@@ -417,18 +476,21 @@ Giai đoạn đầu làm bằng notebook; chỉ tách thành repo sau khi P2 ho�
 - Ngày cuối ít ảnh và có thể bị nhiễu bởi herbicide.
 - Con số FLOPs 3,49 G và 17,09 G có thể phụ thuộc cách đếm (THOP bỏ sót matmul của attention); phải đo lại cùng điều kiện trước khi dùng làm bằng chứng hiệu quả.
 - SR không padding bỏ hàng/cột cuối ở stage 1 và 2, nên vùng sát biên không đóng góp vào K/V ở cả baseline lẫn mô hình đề xuất; ghi nhận khi phân tích lỗi gần biên ảnh.
-- Tính mới chưa được xác nhận: cần đọc full paper Dynamic Spatial Sparsification, ALGM, VLTP.
+- Tính mới chưa được xác nhận: đã xác minh metadata/abstract Dynamic Spatial Sparsification (TPAMI 2023), ALGM (CVPR 2024), MLSRS-SegFormer (MethodsX 2025); vẫn cần đối chiếu full method/code và tìm thêm prior art. Không xem việc chưa thấy toán tử trùng là bằng chứng tuyệt đối.
 
 ## 12. Tài liệu tham khảo
 
-**Đã xác minh hoặc biết chắc:**
+**Đã xác minh metadata/abstract trên nguồn xuất bản (không đồng nghĩa đã kiểm toán toàn bộ code):**
 
 1. Celikkan et al., *WeedsGalore: A Multispectral and Multitemporal UAV-based Dataset for Crop and Weed Segmentation in Agricultural Maize Fields*, WACV 2025 (arXiv:2502.13103).
 2. Xie et al., *SegFormer: Simple and Efficient Design for Semantic Segmentation with Transformers*, NeurIPS 2021.
 3. Chen et al., *Encoder-Decoder with Atrous Separable Convolution for Semantic Image Segmentation*, ECCV 2018.
 4. Rao et al., *DynamicViT: Efficient Vision Transformers with Dynamic Token Sparsification*, NeurIPS 2021.
+5. Rao et al., *Dynamic Spatial Sparsification for Efficient Vision Transformers and Convolutional Neural Networks*, IEEE TPAMI 45(9), 2023, DOI: 10.1109/TPAMI.2023.3263826; https://pubmed.ncbi.nlm.nih.gov/37030709/ .
+6. Norouzi et al., *ALGM: Adaptive Local-then-Global Token Merging for Efficient Semantic Segmentation with Plain Vision Transformers*, CVPR 2024; https://openaccess.thecvf.com/content/CVPR2024/html/Norouzi_ALGM_Adaptive_Local-then-Global_Token_Merging_for_Efficient_Semantic_Segmentation_with_CVPR_2024_paper .
+7. *Multi-level spatio-relational SegFormer (MLSRS-SegFormer)*, MethodsX 15 (2025), 103693, DOI: 10.1016/j.mex.2025.103693; https://pmc.ncbi.nlm.nih.gov/articles/PMC12637274/ . APW nằm tại PatchEmbedding, Hausdorff bias thêm vào attention logits; không thấy mô tả CCMC-SR trong phần phương pháp đã kiểm tra, nhưng không khẳng định paper không có phép tương tự ở nơi khác.
 
-**Theo rà soát của nhóm, cần xác minh tên tác giả, venue và nội dung trước khi trích dẫn:** Dynamic Spatial Sparsification (2022); ALGM (CVPR 2024); VLTP (WACV 2025); PDAViT (Neurocomputing 2026); ASVLB-Net (Pest Management Science 2026); VISA / BAWSeg (Remote Sensing 2026); FG-UNet (Pest Management Science 2024); Multispectral Feature Decomposition via Dual-Branch CNN–Transformer U-Net (2026).
+**Chưa xác minh đầy đủ trong lượt rà soát này; không dùng làm chứng cứ chắc chắn về novelty:** Dynamic Spatial Sparsification (**TPAMI 2023, đã xác minh DOI**); ALGM (**CVPR 2024, đã xác minh**); VLTP (WACV 2025); PDAViT (Neurocomputing 2026); ASVLB-Net (Pest Management Science 2026); VISA / BAWSeg (Remote Sensing 2026); FG-UNet (Pest Management Science 2024); Multispectral Feature Decomposition via Dual-Branch CNN–Transformer U-Net (2026).
 
 ## 13. Nhóm thực hiện
 
