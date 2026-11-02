@@ -9,9 +9,14 @@ from datasets import WeedsGaloreDataset
 from torch.utils.data import DataLoader
 from nets import (deeplabv3plus_resnet50, deeplabv3plus_resnet50_do,
                   deeplabv3plus_resnet50_attn, deeplabv3plus_resnet34_spectral,
-                  SegFormer5Band, UNet)
+                  SegFormer5Band, UNet, CCMCSegFormer)
+from nets.ccmc_sr import GT_MODES, aux_target
 from pathlib import Path
+import hashlib
+import json
+import platform
 import random
+import numpy as np
 from torchmetrics.classification import MulticlassJaccardIndex
 from torch.utils.tensorboard import SummaryWriter
 import os
@@ -106,6 +111,54 @@ flags.DEFINE_integer('epochs', 10, 'number of epochs for training')
 flags.DEFINE_string('out_dir', 'out_dir', 'directory to save logs and ckpts')
 flags.DEFINE_integer('log_interval', 25, 'number of iterations to log scalars')
 flags.DEFINE_integer('ckpt_interval', 500, 'number of iterations to save ckpts')
+# --- CCMC-SR (paper/README_CCMC_SR_v2_3_oracle_leakage_reviewed.md) ---
+flags.DEFINE_boolean('ccmc', False, 'use CCMCSegFormer (MiT-B0 5-band, prior-modulated K/V SR). '
+                     'prior_mode=none gives L0 through the same code path.')
+flags.DEFINE_enum('prior_mode', 'none', ['none', 'ndvi', 'learned_veg', 'learned_weed', 'learned_free',
+                                         'gt_veg', 'gt_weed'],
+                  'L0=none, L1=ndvi, L2=learned_veg, L3=learned_weed, K3=learned_free, '
+                  'C2=gt_veg, C3=gt_weed (GT oracle: diagnostic only)')
+flags.DEFINE_enum('injection', 'ccmc_sr', ['ccmc_sr', 'none', 'pre_sr_gate', 'post_sr_gate'],
+                  'ccmc_sr=proposed, none=K1, pre_sr_gate=K5, post_sr_gate=K6')
+flags.DEFINE_enum('prior_perturb', 'none', ['none', 'window_shuffle', 'global_shuffle'],
+                  'window_shuffle=K2, global_shuffle=K2b placebo')
+flags.DEFINE_list('ccmc_stages', ['2', '3'], 'MiT stages whose K/V SR is modulated (1-based)')
+flags.DEFINE_float('ccmc_eps', 0.1, 'floor eps of w = eps + (1-eps) * p')
+flags.DEFINE_float('lam_init', 0.05, 'initial lambda = sigmoid(a)')
+flags.DEFINE_boolean('learn_lambda', True, 'learn lambda (bounded in (0,1)) or keep it fixed')
+flags.DEFINE_float('aux_weight', 0.3, 'weight of the prior aux BCE loss (learned_veg/learned_weed)')
+flags.DEFINE_string('run_name', '', 'run id written to run_config.json (e.g. L3__seed0)')
+flags.DEFINE_boolean('resume', False, 'resume from <out_dir>/last.pth if it exists')
+flags.DEFINE_boolean('detect_anomaly', False, 'torch.autograd anomaly detection (very slow, debug only)')
+flags.DEFINE_boolean('measure_stats', True, 'print params/THOP FLOPs/latency before training')
+
+
+def split_hash():
+    split_dir = Path(__file__).resolve().parent / 'datasets' / 'weedsgalore' / 'splits'
+    digest = hashlib.sha256()
+    for name in ('train.txt', 'val.txt', 'test.txt'):
+        digest.update((split_dir / name).read_bytes())
+    return digest.hexdigest()[:16]
+
+
+def environment_info():
+    info = {'python': platform.python_version(), 'torch': torch.__version__,
+            'cuda': torch.version.cuda, 'numpy': np.__version__}
+    try:
+        import transformers
+        info['transformers'] = transformers.__version__
+    except ImportError:
+        pass
+    if torch.cuda.is_available():
+        info['gpu'] = torch.cuda.get_device_name(0)
+    try:
+        import subprocess
+        info['git_commit'] = subprocess.check_output(
+            ['git', 'rev-parse', '--short', 'HEAD'], cwd=Path(__file__).resolve().parent,
+            stderr=subprocess.DEVNULL).decode().strip()
+    except Exception:
+        info['git_commit'] = 'unknown'
+    return info
 
 def count_parameters(model):
     """Count total trainable and non-trainable parameters"""
@@ -164,9 +217,14 @@ def measure_model_stats(model, device, in_channels, input_size=(512, 512)):
 
 def main(_):
     random.seed(FLAGS.seed)
+    np.random.seed(FLAGS.seed)
     torch.manual_seed(FLAGS.seed)
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(FLAGS.seed)
+    # Separate generator for data order/augmentation, so models with extra parameters
+    # (prior head) see the SAME batches as L0 for the same seed (paired comparison).
+    data_generator = torch.Generator()
+    data_generator.manual_seed(FLAGS.seed)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Using {device}")
@@ -183,12 +241,21 @@ def main(_):
 
     # Dataloader
     train_dataloader = DataLoader(dataset=train_dataset, batch_size=FLAGS.batch_size, shuffle=True,
-                                  num_workers=FLAGS.num_workers, collate_fn=None, drop_last=True)
+                                  num_workers=FLAGS.num_workers, collate_fn=None, drop_last=True,
+                                  generator=data_generator)
     val_dataloader = DataLoader(dataset=val_dataset, batch_size=FLAGS.batch_size, shuffle=False,
                                 num_workers=FLAGS.num_workers, collate_fn=None, drop_last=False)
 
     # Network
-    if FLAGS.unet:
+    if FLAGS.ccmc:
+        net = CCMCSegFormer(num_classes=FLAGS.num_classes, in_channels=FLAGS.in_channels,
+                            use_low_level_refine=FLAGS.use_low_level_refine,
+                            use_multiscale_fusion=FLAGS.use_multiscale_fusion,
+                            prior_mode=FLAGS.prior_mode, injection=FLAGS.injection,
+                            prior_perturb=FLAGS.prior_perturb,
+                            stages=[int(s) for s in FLAGS.ccmc_stages], eps=FLAGS.ccmc_eps,
+                            lam_init=FLAGS.lam_init, learn_lambda=FLAGS.learn_lambda)
+    elif FLAGS.unet:
         net = UNet(in_channels=FLAGS.in_channels, num_classes=FLAGS.num_classes)
     elif FLAGS.segformer:
         net = SegFormer5Band(num_classes=FLAGS.num_classes,
@@ -207,14 +274,16 @@ def main(_):
         net = deeplabv3plus_resnet50(num_classes=FLAGS.num_classes, pretrained_backbone=FLAGS.pretrained_backbone)  # (determinsitic) DeepLabv3+
 
     # Modify first layer
-    if FLAGS.in_channels == 5 and not FLAGS.spectral_guided and not FLAGS.segformer:
+    if FLAGS.in_channels == 5 and not FLAGS.spectral_guided and not FLAGS.segformer and not FLAGS.ccmc:
         net.backbone.conv1 = torch.nn.Conv2d(FLAGS.in_channels, net.backbone.conv1.out_channels, kernel_size=7, stride=2, padding=3, bias=False, device=device)
 
     # Model to device
     net.to(device=device)
 
-    # Measure model statistics
-    measure_model_stats(net, device, in_channels=FLAGS.in_channels)
+    # Measure model statistics (GT-oracle models need labels in forward -> skip)
+    is_oracle = FLAGS.ccmc and FLAGS.prior_mode in GT_MODES
+    if FLAGS.measure_stats and not is_oracle:
+        measure_model_stats(net, device, in_channels=FLAGS.in_channels)
 
     # Loss criterion
     class_weights = None
@@ -240,12 +309,47 @@ def main(_):
     print(f'Logging to: {FLAGS.out_dir}')
     Path(FLAGS.out_dir).mkdir(parents=True, exist_ok=True)
 
-    torch.autograd.set_detect_anomaly(True)
+    use_aux = FLAGS.ccmc and FLAGS.prior_mode in ('learned_veg', 'learned_weed') and FLAGS.aux_weight > 0
+    bce = torch.nn.BCEWithLogitsLoss()
+    run_config = {'run_name': FLAGS.run_name, 'split_hash': split_hash(), 'env': environment_info(),
+                  'flags': FLAGS.flag_values_dict(),
+                  'num_params': sum(p.numel() for p in net.parameters()),
+                  'uses_gt_prior': is_oracle, 'aux_loss': use_aux}
+    with open(f'{FLAGS.out_dir}/run_config.json', 'w') as f:
+        json.dump(run_config, f, indent=2, default=str)
+    history_path = f'{FLAGS.out_dir}/history.jsonl'
+
+    if FLAGS.detect_anomaly:
+        torch.autograd.set_detect_anomaly(True)
+
+    start_epoch, best_epoch = 0, -1
+    last_path = f'{FLAGS.out_dir}/last.pth'
+    if FLAGS.resume and os.path.exists(last_path):
+        state = torch.load(last_path, map_location=device, weights_only=False)
+        net.load_state_dict(state['model'])
+        optimizer.load_state_dict(state['optimizer'])
+        data_generator.set_state(state['data_generator'])
+        torch.set_rng_state(state['torch_rng'])
+        if torch.cuda.is_available() and state.get('cuda_rng') is not None:
+            torch.cuda.set_rng_state_all(state['cuda_rng'])
+        np.random.set_state(state['numpy_rng'])
+        random.setstate(state['python_rng'])
+        start_epoch, tot_iter = state['epoch'] + 1, state['tot_iter']
+        best_val_miou, best_epoch = state['best_val_miou'], state['best_epoch']
+        print(f'Resumed from {last_path} at epoch {start_epoch} (best {best_val_miou:.2f}% @ {best_epoch})')
+
+    def forward_train(features, labels, binary_labels):
+        if not FLAGS.ccmc:
+            return net(features), None
+        prior_mask = binary_labels if is_oracle else None
+        return net(features, prior_mask=prior_mask, return_aux=True)
 
     # Train
-    for epoch in range(FLAGS.epochs):
+    for epoch in range(start_epoch, FLAGS.epochs):
+        epoch_start = time.time()
         net.train()
         train_iter = iter(train_dataloader)
+        epoch_aux, epoch_seg, epoch_steps = 0.0, 0.0, 0
         for i, data in enumerate(train_iter):
             features, unique_labels, binary_labels = data
             if FLAGS.num_classes == 3:
@@ -253,9 +357,10 @@ def main(_):
             else:
                 labels = unique_labels
             features, labels = features.to(device), labels.to(device)  # NCHW
+            binary_labels = binary_labels.to(device)
 
             optimizer.zero_grad()
-            out = net(features)
+            out, extras = forward_train(features, labels, binary_labels)
             ce_loss = criterion(out, labels.long())
             if FLAGS.use_dice_loss:
                 dice_loss = soft_dice_loss(out, labels, num_classes=FLAGS.num_classes,
@@ -263,6 +368,14 @@ def main(_):
                 loss = (1 - FLAGS.dice_weight) * ce_loss + FLAGS.dice_weight * dice_loss
             else:
                 loss = ce_loss
+            epoch_seg += loss.item()
+            if use_aux:
+                prior_logits = extras['prior_logits']
+                target = aux_target(binary_labels, FLAGS.prior_mode, prior_logits.shape[-2:])
+                aux_loss = bce(prior_logits.float(), target)
+                loss = loss + FLAGS.aux_weight * aux_loss
+                epoch_aux += aux_loss.item()
+            epoch_steps += 1
             loss.backward()
             optimizer.step()
 
@@ -301,12 +414,18 @@ def main(_):
             for features, unique_labels, binary_labels in val_dataloader:
                 labels = binary_labels if FLAGS.num_classes == 3 else unique_labels
                 features, labels = features.to(device), labels.to(device)
-                predictions = net(features).argmax(dim=1)
+                if FLAGS.ccmc:
+                    # Oracle (C2/C3) models read GT of the val image: label leakage, diagnostic only.
+                    prior_mask = binary_labels.to(device) if is_oracle else None
+                    predictions = net(features, prior_mask=prior_mask).argmax(dim=1)
+                else:
+                    predictions = net(features).argmax(dim=1)
                 val_evaluator.update(predictions, labels)
 
         val_scores = val_evaluator.compute() * 100
         val_miou = val_scores.mean().item()
-        print(f'Epoch: {epoch}, Val mIoU: {val_miou:.2f}%')
+        print(f'Epoch: {epoch}, Val mIoU: {val_miou:.2f}% | ' +
+              ' '.join(f'c{c}={s:.2f}' for c, s in enumerate(val_scores.tolist())))
         writer.add_scalar('val_miou (%)', val_miou, epoch + 1)
         writer.add_scalar('val_iou_bg (%)', val_scores[0], epoch + 1)
         writer.add_scalar('val_iou_crop (%)', val_scores[1], epoch + 1)
@@ -315,8 +434,33 @@ def main(_):
 
         if val_miou > best_val_miou:
             best_val_miou = val_miou
+            best_epoch = epoch
             torch.save(net.state_dict(), f'{FLAGS.out_dir}/best_val.pth')
             print(f'Saved best_val.pth ({best_val_miou:.2f}%)')
+
+        lambdas = net.encoder.lambdas() if FLAGS.ccmc else []
+        record = {'epoch': epoch, 'val_miou': val_miou, 'val_iou': val_scores.tolist(),
+                  'train_seg_loss': epoch_seg / max(epoch_steps, 1),
+                  'train_aux_loss': epoch_aux / max(epoch_steps, 1) if use_aux else None,
+                  'lambdas': lambdas, 'best_val_miou': best_val_miou, 'best_epoch': best_epoch,
+                  'epoch_time_s': time.time() - epoch_start}
+        with open(history_path, 'a') as f:
+            f.write(json.dumps(record) + '\n')
+        if lambdas:
+            print(f'lambdas (stages {FLAGS.ccmc_stages}): ' + ', '.join(f'{v:.4f}' for v in lambdas))
+
+        torch.save({'model': net.state_dict(), 'optimizer': optimizer.state_dict(), 'epoch': epoch,
+                    'tot_iter': tot_iter, 'best_val_miou': best_val_miou, 'best_epoch': best_epoch,
+                    'data_generator': data_generator.get_state(), 'torch_rng': torch.get_rng_state(),
+                    'cuda_rng': torch.cuda.get_rng_state_all() if torch.cuda.is_available() else None,
+                    'numpy_rng': np.random.get_state(), 'python_rng': random.getstate()}, last_path)
+
+    summary = {'run_name': FLAGS.run_name, 'best_val_miou': best_val_miou, 'best_epoch': best_epoch,
+               'final_lambdas': net.encoder.lambdas() if FLAGS.ccmc else [],
+               'split_hash': run_config['split_hash']}
+    with open(f'{FLAGS.out_dir}/run_summary.json', 'w') as f:
+        json.dump(summary, f, indent=2)
+    print(json.dumps(summary))
 
 if __name__ == '__main__':
     app.run(main)

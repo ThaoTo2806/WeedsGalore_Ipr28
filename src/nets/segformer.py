@@ -191,10 +191,13 @@ class LowLevelRefine(nn.Module):
 class SegFormer5Band(nn.Module):
   def __init__(self, num_classes=3, decoder_dim=128, pretrained_backbone=False,
                low_level_channels=48, in_channels=5, use_low_level_refine=True,
-               use_multiscale_fusion=True):
+               use_multiscale_fusion=True, encoder=None):
     super(SegFormer5Band, self).__init__()
-    self.encoder = (PretrainedMiTEncoder(in_channels=in_channels)
-                    if pretrained_backbone else MiTEncoder(in_channels=in_channels))
+    if encoder is not None:
+      self.encoder = encoder
+    else:
+      self.encoder = (PretrainedMiTEncoder(in_channels=in_channels)
+                      if pretrained_backbone else MiTEncoder(in_channels=in_channels))
     self.linear1 = nn.Conv2d(32, decoder_dim, 1, bias=False)
     self.use_multiscale_fusion = use_multiscale_fusion
     if use_multiscale_fusion:
@@ -223,8 +226,11 @@ class SegFormer5Band(nn.Module):
     self.classifier = nn.Conv2d(decoder_dim, num_classes, 1)
 
   def forward(self, x):
+    return self.decode(x, self.encoder(x))
+
+  def decode(self, x, encoder_features):
     input_size = x.shape[-2:]
-    feature1, feature2, feature3, feature4 = self.encoder(x)
+    feature1, feature2, feature3, feature4 = encoder_features
     target_size = feature1.shape[-2:]  # 1/4 resolution
     if self.use_multiscale_fusion:
       features = [self.linear1(feature1), self.linear2(feature2),
