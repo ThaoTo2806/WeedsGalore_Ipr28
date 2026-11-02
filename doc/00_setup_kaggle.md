@@ -61,7 +61,9 @@ Kết quả cần thấy: mỗi ngày có `images`, `semantics` và (nếu có) 
 ### Cell S5 — Kiểm tra API HuggingFace (kế hoạch mục 8.4)
 
 ```python
-import inspect, os
+import inspect, os, sys
+REPO = '/kaggle/working/WeedsGalore_Ipr28'
+os.chdir(REPO)
 from transformers.models.segformer.modeling_segformer import (
     SegformerEncoder, SegformerEfficientSelfAttention, SegformerOverlapPatchEmbeddings)
 src_attn = inspect.getsource(SegformerEfficientSelfAttention.forward)
@@ -78,7 +80,10 @@ os.makedirs('results/env', exist_ok=True)
 with open('results/env/hf_source_check.txt', 'w') as f:
     f.write(src_attn + '\n\n' + src_enc)
 
-import sys; sys.path.insert(0, 'src')
+import sys
+if f'{REPO}/src' not in sys.path:
+    sys.path.insert(0, f'{REPO}/src')
+assert os.path.exists(f'{REPO}/src/nets/ccmc_sr.py'), 'Repo chưa có code mới: commit + push rồi chạy lại S2'
 from nets.ccmc_sr import CCMCSegFormer
 m = CCMCSegFormer(prior_mode='learned_weed')
 for name, mod in m.named_modules():
@@ -90,6 +95,8 @@ assert all(checks.values()), 'API HF khác giả định -> dừng lại, gửi 
 ### Cell S6 — Unit test (bắt buộc pass trước mọi thí nghiệm)
 
 ```python
+%cd /kaggle/working/WeedsGalore_Ipr28
+!mkdir -p results/env
 !python -m pytest -q tests/test_ccmc_sr.py 2>&1 | tee results/env/unit_tests.log | tail -n 15
 ```
 

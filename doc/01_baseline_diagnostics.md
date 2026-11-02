@@ -25,6 +25,7 @@ Unit test phải pass trước khi chạy tiếp.
 
 ```python
 import os
+os.chdir('/kaggle/working/WeedsGalore_Ipr28')
 EXP = 'exp01'
 OUT = f'results/{EXP}'
 BINS = 'results/instance_bins.json'   # bin cố định cho MỌI thí nghiệm sau này

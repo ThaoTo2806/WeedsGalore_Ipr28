@@ -49,7 +49,7 @@ def test_window_mean_is_one_and_edges_are_one(size, ratio, eps):
 def test_identity_uniform_prior_and_zero_lambda():
     prior_uniform = torch.full((2, 1, 75, 75), 0.5)
     f = window_normalized_factor(prior_uniform, 4, torch.tensor(0.9), 0.1)
-    assert torch.equal(f, torch.ones_like(f))
+    assert torch.allclose(f, torch.ones_like(f), atol=1e-6)  # equal up to float rounding
     prior = torch.rand(2, 1, 75, 75)
     f0 = window_normalized_factor(prior, 4, torch.tensor(0.0), 0.1)
     assert torch.equal(f0, torch.ones_like(f0))
