@@ -139,14 +139,17 @@ def boundary_dilation(shape, ratio=0.02):
 # Per-image statistics
 # ----------------------------------------------------------------------------------------
 
-def image_stats(pred, label, inst, edges, boundary_ratio=0.02):
-    """All additive statistics of one image as a flat dict (numbers only)."""
+def image_stats(pred, label, inst, edges, boundary_ratio=0.02, boundary_px=0):
+    """All additive statistics of one image as a flat dict (numbers only).
+
+    boundary_px > 0 sets a fixed boundary width (pixels); otherwise ratio * diagonal.
+    """
     row = {}
     for c in range(NUM_CLASSES):
         p, g = pred == c, label == c
         row[f'inter_{c}'] = int((p & g).sum())
         row[f'union_{c}'] = int((p | g).sum())
-    d = boundary_dilation(label.shape, boundary_ratio)
+    d = boundary_px if boundary_px > 0 else boundary_dilation(label.shape, boundary_ratio)
     for c in (1, 2):
         pb, gb = mask_boundary(pred == c, d), mask_boundary(label == c, d)
         row[f'binter_{c}'] = int((pb & gb).sum())

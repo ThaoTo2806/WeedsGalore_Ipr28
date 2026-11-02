@@ -1,0 +1,69 @@
+I1102 08:01:29.432199 131936305926464 utils.py:164] NumExpr defaulting to 4 threads.
+stage 1 small_vs_none  pre_avg  pos   555 AUROC 0.605 AP 0.120
+stage 1 small_vs_none  post_sr  pos   555 AUROC 0.566 AP 0.104
+stage 1 small_vs_none  pre_max  pos   555 AUROC 0.694 AP 0.196
+stage 1 medium_vs_none pre_avg  pos   599 AUROC 0.774 AP 0.194
+stage 1 medium_vs_none post_sr  pos   599 AUROC 0.738 AP 0.168
+stage 1 medium_vs_none pre_max  pos   599 AUROC 0.868 AP 0.404
+stage 1 large_vs_none  pre_avg  pos  1320 AUROC 0.937 AP 0.778
+stage 1 large_vs_none  post_sr  pos  1320 AUROC 0.879 AP 0.652
+stage 1 large_vs_none  pre_max  pos  1320 AUROC 0.949 AP 0.737
+stage 1 small_vs_rest  pre_avg  pos   555 AUROC 0.647 AP 0.103
+stage 1 small_vs_rest  post_sr  pos   555 AUROC 0.619 AP 0.091
+stage 1 small_vs_rest  pre_max  pos   555 AUROC 0.680 AP 0.134
+stage 2 small_vs_none  pre_avg  pos   555 AUROC 0.845 AP 0.379
+stage 2 small_vs_none  post_sr  pos   555 AUROC 0.816 AP 0.317
+stage 2 small_vs_none  pre_max  pos   555 AUROC 0.904 AP 0.591
+stage 2 medium_vs_none pre_avg  pos   599 AUROC 0.926 AP 0.614
+stage 2 medium_vs_none post_sr  pos   599 AUROC 0.911 AP 0.510
+stage 2 medium_vs_none pre_max  pos   599 AUROC 0.956 AP 0.768
+stage 2 large_vs_none  pre_avg  pos  1320 AUROC 0.984 AP 0.942
+stage 2 large_vs_none  post_sr  pos  1320 AUROC 0.983 AP 0.935
+stage 2 large_vs_none  pre_max  pos  1320 AUROC 0.987 AP 0.952
+stage 2 small_vs_rest  pre_avg  pos   555 AUROC 0.811 AP 0.254
+stage 2 small_vs_rest  post_sr  pos   555 AUROC 0.782 AP 0.226
+stage 2 small_vs_rest  pre_max  pos   555 AUROC 0.864 AP 0.356
+stage 3 small_vs_none  pre_avg  pos   623 AUROC 0.941 AP 0.666
+stage 3 small_vs_none  post_sr  pos   623 AUROC 0.944 AP 0.678
+stage 3 small_vs_none  pre_max  pos   623 AUROC 0.945 AP 0.678
+stage 3 medium_vs_none pre_avg  pos   703 AUROC 0.974 AP 0.855
+stage 3 medium_vs_none post_sr  pos   703 AUROC 0.975 AP 0.857
+stage 3 medium_vs_none pre_max  pos   703 AUROC 0.979 AP 0.877
+stage 3 large_vs_none  pre_avg  pos  1487 AUROC 0.993 AP 0.976
+stage 3 large_vs_none  post_sr  pos  1487 AUROC 0.994 AP 0.978
+stage 3 large_vs_none  pre_max  pos  1487 AUROC 0.994 AP 0.977
+stage 3 small_vs_rest  pre_avg  pos   623 AUROC 0.925 AP 0.500
+stage 3 small_vs_rest  post_sr  pos   623 AUROC 0.920 AP 0.497
+stage 3 small_vs_rest  pre_max  pos   623 AUROC 0.929 AP 0.519
+{
+  "1": {
+    "drop_small": 0.03892618669089243,
+    "drop_large": 0.057933155080214016,
+    "contrast_small_minus_large": -0.019006968389321588,
+    "ci95": [
+      -0.04903557358279183,
+      0.007875587910530639
+    ],
+    "n_boot_valid": 1000
+  },
+  "2": {
+    "drop_small": 0.028425770308123433,
+    "drop_large": 0.0008590527119939351,
+    "contrast_small_minus_large": 0.027566717596129497,
+    "ci95": [
+      0.013762425072486253,
+      0.04188697773125049
+    ],
+    "n_boot_valid": 1000
+  },
+  "3": {
+    "drop_small": -0.00259171048252016,
+    "drop_large": -0.0011662513322265866,
+    "contrast_small_minus_large": -0.0014254591502935732,
+    "ci95": [
+      -0.005640094607183099,
+      0.003185002692905483
+    ],
+    "n_boot_valid": 1000
+  }
+}

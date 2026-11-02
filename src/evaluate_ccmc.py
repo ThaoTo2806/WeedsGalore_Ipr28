@@ -41,7 +41,10 @@ flags.DEFINE_enum('prior_override', 'none', ['none', 'uniform', 'gt_veg', 'gt_we
 flags.DEFINE_string('prior_noise', 'none', "corruption of the GT-Weed prior: 'dilate:5', "
                     "'erode:3', 'shift:8', 'drop:0.3' (only with prior_override=gt_weed or "
                     "prior_mode=gt_weed)")
-flags.DEFINE_float('boundary_ratio', 0.02, 'Boundary IoU dilation ratio of image diagonal')
+flags.DEFINE_float('boundary_ratio', 0.02, 'Boundary IoU dilation ratio of image diagonal '
+                   '(only used if boundary_px <= 0)')
+flags.DEFINE_integer('boundary_px', 3, 'fixed Boundary IoU width in pixels. Ratio 0.02 gives '
+                     '~17 px on 600x600, wider than most weeds (BIoU == IoU), so 3 px is used')
 flags.DEFINE_integer('min_bin_n', 20, 'bins with fewer instances are flagged exploratory')
 define_model_flags()
 
@@ -88,7 +91,7 @@ def main(_):
             sources[src] = sources.get(src, 0) + 1
             row = {'name': name}
             row['date'], row['tile'] = name_parts(name)
-            row.update(image_stats(pred, label, inst, edges, FLAGS.boundary_ratio))
+            row.update(image_stats(pred, label, inst, edges, FLAGS.boundary_ratio, FLAGS.boundary_px))
             # Prior quality (head prediction if a head exists, otherwise the used prior)
             prior = None
             if 'prior_logits' in extras:
@@ -120,6 +123,7 @@ def main(_):
                'prior_override': FLAGS.prior_override, 'prior_noise': FLAGS.prior_noise,
                'GT_LEAKAGE': bool(uses_gt), 'instance_source': sources,
                'bin_edges_px': edges.tolist(), 'bins_source': bins_meta.get('source'),
+               'boundary_px': FLAGS.boundary_px,
                'lambdas': net.encoder.lambdas() if FLAGS.ccmc else [],
                'metrics': metrics_from_sums(sums)}
     cm = np.array([[sums[f'cm_{g}{p}'] for p in range(3)] for g in range(3)], dtype=float)

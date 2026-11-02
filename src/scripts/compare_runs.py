@@ -38,6 +38,8 @@ flags.DEFINE_enum('gate', 'none', ['none', 'h2', 'g3', 'g4', 'abs', 'screen'], '
 flags.DEFINE_float('min_delta', None, 'override primary-metric threshold (pp)')
 flags.DEFINE_float('max_crop_drop', 1.0, 'max allowed Crop IoU drop (pp)')
 flags.DEFINE_string('primary', 'SmallWeedRecall', 'primary metric of the gate')
+flags.DEFINE_string('co_primary', 'cov_small', 'PASS also requires this metric delta > 0 '
+                    '(added after Exp01 review; empty string disables)')
 flags.DEFINE_string('out', None, 'output json')
 
 
@@ -137,7 +139,8 @@ def main(_):
     result = {'A': FLAGS.name_a, 'B': FLAGS.name_b, 'files_A': FLAGS.a, 'files_B': FLAGS.b,
               'n_seeds': len(FLAGS.a), 'cluster': FLAGS.cluster, 'n_clusters': n_clusters,
               'n_images': len(names), 'n_boot': FLAGS.n_boot, 'metrics': {}}
-    metrics = list(dict.fromkeys(FLAGS.metrics + [FLAGS.primary, 'IoU_crop']))
+    metrics = list(dict.fromkeys(FLAGS.metrics + [FLAGS.primary, 'IoU_crop'] +
+                                 ([FLAGS.co_primary] if FLAGS.co_primary else [])))
     for metric in metrics:
         point_a = [float(metric_values(s.sum(0), col, metric)) for s in sums_a]
         point_b = [float(metric_values(s.sum(0), col, metric)) for s in sums_b]
@@ -168,6 +171,13 @@ def main(_):
                           'decision': decide(FLAGS.gate, p['delta'], p['ci95'][0], crop['delta'],
                                              min_delta, FLAGS.max_crop_drop),
                           'crop_ci95': crop['ci95']}
+        if FLAGS.co_primary and FLAGS.gate != 'screen':
+            co = result['metrics'][FLAGS.co_primary]
+            result['gate']['co_primary'] = {'metric': FLAGS.co_primary, 'delta': co['delta'],
+                                            'ci95': co['ci95']}
+            if result['gate']['decision'] == 'PASS' and not co['delta'] > 0:
+                result['gate']['decision'] = (f'INCONCLUSIVE ({FLAGS.co_primary} delta '
+                                              f"{co['delta']:+.2f} disagrees in sign)")
         if FLAGS.gate == 'screen':
             result['gate']['note'] = ('Oracle priors use GT of the evaluated image (label '
                                       'leakage). One-way screen only; NOT evidence for H2.')

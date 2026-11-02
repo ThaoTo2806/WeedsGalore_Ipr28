@@ -1,0 +1,25 @@
+{
+  "label": "K6",
+  "input": [
+    1,
+    5,
+    600,
+    600
+  ],
+  "device": "Tesla T4",
+  "torch": "2.11.0+cu128",
+  "precision": "fp32",
+  "batch": 1,
+  "params_M": 3.464934,
+  "prior_head_params": 9313,
+  "GFLOPs_flopcounter": 13.684162048,
+  "GMACs": 6.842081024,
+  "modulation_elementwise_Mops": 1.18208,
+  "latency_ms_median": 15.52668809890747,
+  "latency_ms_p10": 15.360691452026368,
+  "latency_ms_p90": 15.712646198272704,
+  "latency_ms_mean": 15.552655461629232,
+  "runs": 300,
+  "warmup": 50,
+  "peak_mem_MB": 150.78173828125
+}

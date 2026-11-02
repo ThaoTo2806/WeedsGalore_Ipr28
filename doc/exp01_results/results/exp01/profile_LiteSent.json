@@ -1,0 +1,25 @@
+{
+  "label": "LiteSent",
+  "input": [
+    1,
+    5,
+    600,
+    600
+  ],
+  "device": "Tesla T4",
+  "torch": "2.11.0+cu128",
+  "precision": "fp32",
+  "batch": 1,
+  "params_M": 3.662291,
+  "prior_head_params": 0,
+  "GFLOPs_flopcounter": 50.411362048,
+  "GMACs": 25.205681024,
+  "modulation_elementwise_Mops": 0.0,
+  "latency_ms_median": 24.684672355651855,
+  "latency_ms_p10": 24.17856922149658,
+  "latency_ms_p90": 25.208149909973145,
+  "latency_ms_mean": 24.703029708862303,
+  "runs": 300,
+  "warmup": 50,
+  "peak_mem_MB": 299.18896484375
+}

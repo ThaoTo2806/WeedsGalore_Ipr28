@@ -1,0 +1,36 @@
+{
+  "ckpt": "runs/L0_s0/best_val.pth",
+  "contrasts": {
+    "1": {
+      "drop_small": 0.03892618669089243,
+      "drop_large": 0.057933155080214016,
+      "contrast_small_minus_large": -0.019006968389321588,
+      "ci95": [
+        -0.04903557358279183,
+        0.007875587910530639
+      ],
+      "n_boot_valid": 1000
+    },
+    "2": {
+      "drop_small": 0.028425770308123433,
+      "drop_large": 0.0008590527119939351,
+      "contrast_small_minus_large": 0.027566717596129497,
+      "ci95": [
+        0.013762425072486253,
+        0.04188697773125049
+      ],
+      "n_boot_valid": 1000
+    },
+    "3": {
+      "drop_small": -0.00259171048252016,
+      "drop_large": -0.0011662513322265866,
+      "contrast_small_minus_large": -0.0014254591502935732,
+      "ci95": [
+        -0.005640094607183099,
+        0.003185002692905483
+      ],
+      "n_boot_valid": 1000
+    }
+  },
+  "note": "positive contrast with CI > 0 = small Weed loses more linear decodability through SR than large Weed (supports H1)"
+}

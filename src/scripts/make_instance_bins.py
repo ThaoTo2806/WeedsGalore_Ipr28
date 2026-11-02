@@ -46,9 +46,9 @@ def main(_):
     if fmt['exists']:
         im = Image.open(inst_path)
         arr = np.array(im)
+        flat = arr.reshape(-1, arr.shape[-1]) if arr.ndim == 3 else arr.reshape(-1)
         fmt.update({'mode': im.mode, 'dtype': str(arr.dtype), 'shape': list(arr.shape),
-                    'n_unique': int(len(np.unique(arr.reshape(-1, arr.shape[-1]) if arr.ndim == 3
-                                                  else arr, axis=0)))})
+                    'n_unique': int(len(np.unique(flat, axis=0)))})
     print('instance format:', json.dumps(fmt))
 
     areas, sources, counts_per_image = {}, {}, {}
