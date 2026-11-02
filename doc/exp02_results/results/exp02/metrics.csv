@@ -1,0 +1,16 @@
+file,run_name,split,prior_mode,injection,prior_perturb,override,noise,GT_LEAKAGE,lambdas,mIoU,IoU_bg,IoU_crop,IoU_weed,BIoU_crop,BIoU_weed,SmallWeedRecall,recall30_small,cov_small,recall50_medium,recall50_large,recall50_all,n_small,n_medium,n_large,prior_soft_iou_weed
+C2_s0_val_summary.json,C2_s0,val,gt_veg,ccmc_sr,none,none,none,True,0.0500;0.0505,82.718,98.139,74.728,75.288,62.119,51.816,49.032,67.419,63.71,69.489,48.47,55.254,620,567,621,0.6228
+C2_s1_val_summary.json,C2_s1,val,gt_veg,ccmc_sr,none,none,none,True,0.0501;0.0516,82.942,98.182,74.943,75.702,62.51,53.139,50.645,69.516,65.645,72.31,48.631,56.748,620,567,621,0.6228
+C3K5_s0_val_summary.json,C3K5_s0,val,gt_weed,pre_sr_gate,none,none,none,True,0.0520;0.0534,82.644,98.136,74.554,75.242,61.667,51.865,46.774,65.645,61.129,70.018,47.665,54.369,620,567,621,1.0
+C3K5_s1_val_summary.json,C3K5_s1,val,gt_weed,pre_sr_gate,none,none,none,True,0.0513;0.0536,82.672,98.152,74.474,75.392,61.304,51.869,42.581,61.129,52.903,72.31,48.47,53.927,620,567,621,1.0
+C3K6_s0_val_summary.json,C3K6_s0,val,gt_weed,post_sr_gate,none,none,none,True,0.0516;0.0536,82.33,98.123,74.133,74.734,61.478,51.295,45.161,62.903,59.839,68.254,47.987,53.374,620,567,621,1.0
+C3K6_s1_val_summary.json,C3K6_s1,val,gt_weed,post_sr_gate,none,none,none,True,0.0518;0.0535,82.785,98.183,74.745,75.427,62.113,53.208,50.323,68.065,64.677,73.016,48.631,56.858,620,567,621,1.0
+C3_s0_noise-dilate3_val_summary.json,C3_s0_noise-dilate3,val,gt_weed,ccmc_sr,none,none,dilate:3,True,0.0512;0.0526,82.795,98.152,74.859,75.374,62.158,52.215,47.742,66.452,62.097,70.194,48.148,54.923,620,567,621,0.5122
+C3_s0_noise-drop0.3_val_summary.json,C3_s0_noise-drop0.3,val,gt_weed,ccmc_sr,none,none,drop:0.3,True,0.0512;0.0526,82.791,98.152,74.85,75.369,62.16,52.199,47.742,66.452,62.097,70.018,48.148,54.867,620,567,621,0.6272
+C3_s0_noise-erode1_val_summary.json,C3_s0_noise-erode1,val,gt_weed,ccmc_sr,none,none,erode:1,True,0.0512;0.0526,82.794,98.153,74.856,75.373,62.162,52.211,47.742,66.452,62.097,70.018,48.148,54.867,620,567,621,0.6916
+C3_s0_noise-shift4_val_summary.json,C3_s0_noise-shift4,val,gt_weed,ccmc_sr,none,none,shift:4,True,0.0512;0.0526,82.795,98.153,74.858,75.373,62.162,52.207,47.742,66.452,61.935,70.018,48.148,54.867,620,567,621,0.5112
+C3_s0_val_summary.json,C3_s0,val,gt_weed,ccmc_sr,none,none,none,True,0.0512;0.0526,82.794,98.153,74.856,75.374,62.161,52.212,47.742,66.452,62.097,70.018,48.148,54.867,620,567,621,1.0
+C3_s1_val_summary.json,C3_s1,val,gt_weed,ccmc_sr,none,none,none,True,0.0500;0.0522,82.845,98.158,74.865,75.511,62.274,52.787,48.548,67.258,63.226,71.605,48.631,55.808,620,567,621,1.0
+L0_s0_val_summary.json,L0_s0,val,none,ccmc_sr,none,none,none,False,,82.94,98.166,75.109,75.545,62.425,52.402,49.677,66.935,63.548,69.841,47.826,55.365,620,567,621,
+L0_s1_val_summary.json,L0_s1,val,none,ccmc_sr,none,none,none,False,,82.79,98.167,74.744,75.458,62.798,52.483,46.774,63.871,58.226,71.429,49.114,55.31,620,567,621,
+LiteSent_s0_val_summary.json,LiteSent_s0,val,n/a,n/a,n/a,none,none,False,,84.558,98.416,77.442,77.815,66.091,57.793,64.194,74.677,71.935,75.309,49.919,62.777,620,567,621,

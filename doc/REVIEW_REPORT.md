@@ -8,7 +8,7 @@
 | Gate | Câu hỏi | Bằng chứng cần có | Trạng thái | Cập nhật |
 |---|---|---|---|---|
 | G1 | SR có phải nút thắt của cỏ nhỏ? | Diag-D0 + Diag-D2 (Exp01) | **PASS có điều kiện** (stage 2; hiệu ứng nhỏ, tương quan, không phải nhân quả) | 02/11/2026, Exp01 |
-| G2 | Oracle có bác bỏ động lực Weed-specific? (sàng lọc một chiều) | C3 so với C2, C3 so với C3-K5 (Exp02) | PENDING | — |
+| G2 | Oracle có bác bỏ động lực Weed-specific? (sàng lọc một chiều) | C3 so với C2, C3 so với C3-K5 | **INCONCLUSIVE — Exp02 vô hiệu** (λ kẹt ở 0,05, cơ chế chưa hoạt động); chạy lại ở Exp03 | 02/11/2026, Exp02 |
 | G3 | H2: learned Weed prior hơn learned Veg prior? | L3 − L2 ≥ +3 pp Small-Weed Recall, CI > 0, Crop không giảm quá 1 pp (Exp03) | PENDING | — |
 | G4 | Lợi ích có đến từ việc nối prior vào SR? | L3 > K1, K2, K3, K5, K6 (Exp04–05) | PENDING | — |
 
@@ -16,7 +16,8 @@
 |---|---|---|
 | 00 Code + setup | DONE | 44/44 unit test pass trên Kaggle (`transformers 4.45.2`, torch 2.11, T4, commit `ea354cd`) |
 | 01 Baseline + chẩn đoán | DONE | L0 s0/s1, LiteSent s0, D0, D2 (2 seed), profile. Diag-D1 NOT RUN (đúng kế hoạch). Xem mục 3 |
-| 02 Oracle C2/C3 | Sẵn sàng chạy | [02_oracle_c2_c3.md](02_oracle_c2_c3.md) |
+| 02 Oracle C2/C3 | DONE nhưng **vô hiệu về khoa học** | λ không học được; xem mục 4 |
+| 03 Oracle với λ hoạt động, 3 seed | Sẵn sàng chạy | [03_oracle_active_lambda.md](03_oracle_active_lambda.md) |
 
 ---
 
@@ -177,3 +178,72 @@ Việc bạn cần làm trước Exp02:
 1. Commit + push code đã sửa.
 2. Upload `exp01_ckpts.zip` thành Kaggle Dataset.
 3. Commit `results/instance_bins.json` (bin đã khóa: [45, 147]).
+
+---
+
+## 4. Exp02 — Oracle C2/C3, C3-K5, C3-K6 (review 02/11/2026)
+
+Artifact: [doc/exp02_results/results/exp02](exp02_results/results/exp02).
+
+### 4.1 Trạng thái
+
+| Mục | Trạng thái |
+|---|---|
+| 8 run train (C2, C3, C3K5, C3K6 × seed 0, 1) | DONE |
+| Đánh giá lại L0 s0/s1, LiteSent (BIoU 3 px) | DONE |
+| E2.4 nhiễu prior trên C3 s0 | DONE |
+| C3 so với C2, C3K5, C3K6 | DONE |
+| C3 so với L0 và C2 so với L0 | **Lỗi** `Missing columns pq_*` (L0 không có cột chất lượng prior), đã sửa trong `compare_runs.py` |
+
+### 4.2 Kết quả (val, trung bình 2 seed)
+
+| Mô hình | SmallWeedRecall | cov_small | mIoU | Weed IoU | λ cuối (stage 2; 3) |
+|---|---|---|---|---|---|
+| L0 | 48,23 (49,68 / 46,77) | 60,89 | 82,87 | 75,50 | — |
+| C3 (GT-Weed) | 48,15 | 62,66 | 82,82 | 75,44 | 0,051; 0,053 |
+| C2 (GT-Veg) | 49,84 | 64,68 | 82,83 | 75,49 | 0,050; 0,052 |
+| C3-K5 | 44,68 | 57,02 | 82,66 | 75,32 | 0,052; 0,054 |
+| C3-K6 | 47,74 | 62,26 | 82,56 | 75,08 | 0,052; 0,054 |
+| LiteSent (tham chiếu, 1 seed) | 64,19 | 71,94 | 84,56 | 77,81 | — |
+
+### 4.3 Chẩn đoán: **cơ chế chưa từng hoạt động**, Exp02 không kiểm định được giả thuyết
+
+1. **λ bị kẹt về mặt toán học.** Adam dịch mỗi tham số khoảng ≤ lr mỗi bước. Với lr 3e-4 và 100 epoch × 13 iter = 1 300 bước, logit `a` đổi được nhiều nhất khoảng 0,39, nên λ ≤ sigmoid(−2,94 + 0,39) ≈ 0,07. Quỹ đạo thực tế là 0,050 → 0,054. Khởi tạo λ = 0,05 trong kế hoạch là để đảm bảo trùng baseline, nhưng phần đó đã được prior head đồng đều đảm bảo, nên λ nhỏ là không cần thiết và làm tắt cơ chế. *Đây là lỗi thiết kế tối ưu hóa, không phải bằng chứng về giả thuyết.*
+2. **Bằng chứng trực tiếp:** C3 s0 với prior GT bị dilate, erode, drop 30 % hay shift 4 px cho kết quả **trùng** prior sạch (mIoU 82,791–82,795; Small-Weed Recall 47,742 ở cả 5 trường hợp). Mô hình không nhạy với prior, kể cả prior là nhãn thật.
+3. Vì vậy mọi khác biệt giữa C2, C3, C3-K5, C3-K6 và L0 là **nhiễu huấn luyện**. Prior ở mức λ ≈ 0,05 chỉ làm quỹ đạo huấn luyện lệch đi như một seed khác.
+
+### 4.4 Bài học thống kê quan trọng (đưa vào phần phương pháp của paper)
+
+- Cùng mô hình L0, hai seed chênh **2,9 pp** Small-Weed Recall (49,68 so với 46,77) và 5,3 pp cov_small. Mức này ngang ngưỡng +3 pp của H2.
+- Bootstrap chỉ theo ảnh (2 seed, cố định) cho CI **quá hẹp**. C3 − C2 = −1,69 [−2,79; −0,36] trông "có ý nghĩa". C3 − C3-K5 = +3,47 [+1,90; +5,30] được gate ghi "PASS", nhưng phần lớn do một seed lệch (C3K5_s1 = 42,58). Trong khi đó các mô hình này về thực chất là cùng một mô hình.
+- **Đã sửa trong `compare_runs.py`:**
+  - **(a)** Bootstrap phân tầng: resample seed paired, rồi resample ảnh (`--seed_bootstrap`, mặc định bật).
+  - **(b)** PASS/SCREEN-PASS cần ít nhất 3 seed paired (`--min_seeds_pass=3`).
+  - **(c)** Chỉ dùng các cột chung giữa hai mô hình.
+- Exp03 có **A/A test** (L0_s0 so với L0_s1, chỉ bootstrap theo ảnh) để định lượng việc bootstrap theo ảnh đánh giá thấp phương sai. Kết quả này đưa vào phụ lục thống kê.
+
+### 4.5 Quyết định
+
+- **G2 = INCONCLUSIVE (cơ chế chưa kích hoạt).** Không ghi NO-GO, và không dùng bất kỳ so sánh nào của Exp02 làm bằng chứng về loại prior hay vị trí can thiệp.
+- Kết quả "PASS" của C3 so với C3-K5 bị **hủy**, vì sinh ra từ nhiễu seed với cơ chế không hoạt động.
+- Chưa sang L2/L3 cho tới khi Exp03 trả lời được câu hỏi: *khi λ thực sự học được, prior GT có tác động lên đầu ra không?*
+
+### 4.6 Code đã sửa sau Exp02
+
+- `train.py`: thêm `--lam_lr` (param group riêng cho logit λ). Exp03 dùng `--lam_init=0.5 --lam_lr=0.01`; khởi tạo vẫn trùng baseline với L2/L3 vì prior head đồng đều. Cấu hình λ cố định dùng `--learn_lambda=False --lam_init=0.999`.
+- `compare_runs.py`: bootstrap phân tầng theo seed, yêu cầu ≥ 3 seed, chỉ dùng cột chung.
+
+### 4.7 Quy tắc dừng đăng ký trước cho Exp03 (chống "đào dữ liệu")
+
+| Kết quả Exp03 | Quyết định |
+|---|---|
+| Activity: \|C3a(GT) − C3a(uniform)\| < 1 pp Small-Weed Recall ở cả 3 seed | Toán tử **không có đòn bẩy**, kể cả với nhãn thật. Dừng CCMC-SR dạng hiện tại |
+| Activity rõ, nhưng C3a **và** C3f đều không vượt L0 (CI chứa 0 hoặc âm) | Toán tử thay đổi đầu ra nhưng không có lợi. Dừng CCMC-SR; không chuyển sang L3 |
+| C3a hoặc C3f > L0, nhưng C3a ≤ C2a | G2 NO-GO cho tính *Weed-specific*. Có thể chuyển hướng sang prior thực vật (L2 làm phương pháp chính) và phải ghi rõ trong bài |
+| C3a > L0 và C3a > C2a (SCREEN-PASS, 3 seed) | Sang Exp04: L2, L3 với cùng cấu hình λ (init 0,5, lam_lr 0,01) |
+
+### 4.8 Về yêu cầu "cải tiến thật, chưa có paper công bố"
+
+- **CCMC-SR không bỏ bớt gì của mô hình pretrained.** Toàn bộ trọng số MiT-B0 được giữ nguyên; chỉ **đầu vào của phép giảm K/V** được tái trọng số theo prior lớp. Đây là sửa đổi toán tử bên trong backbone, không phải cắt bớt hay ghép mô hình.
+- **Không thể bảo đảm tuyệt đối "chưa có paper nào công bố".** Điều làm được là rà soát có hệ thống: tìm kiếm có ghi lại từ khóa, cơ sở dữ liệu, ngày, và đối chiếu công thức với các công trình gần nhất ở mục 4 của kế hoạch (MLSRS-SegFormer APW, Dynamic Spatial Sparsification, ALGM, VLTP, SegMAN). Việc này nằm ở P7, nhưng **chỉ có ý nghĩa nếu Exp03 cho thấy toán tử có tác dụng**. Một phương pháp mới mà không có hiệu quả thì cũng không đăng Q1 được.
+- Nếu Exp03 rơi vào hai dòng đầu của bảng 4.7, phương án dự phòng **vẫn nằm trong kế hoạch** (mục 4.3): "dual-statistic SR". Phương án này dùng một nhánh gộp có trọng số theo prior và một nhánh SR chuẩn, chung conv và pha trộn bằng hệ số học được. Lý do được dẫn từ Diag-D2: `pre_max` giữ tín hiệu cỏ nhỏ tốt hơn hẳn `post_sr`. Phương án này chỉ được mở khi có lý do ghi rõ trong báo cáo, không mở tự động.

@@ -1,0 +1,7 @@
+{"run_name": "C3_s0_noise-erode1", "split": "val", "prior_override": "none", "prior_noise": "erode:1", "GT_LEAKAGE": true, "instance_source": {"official": 26}, "lambdas": [0.05115634575486183, 0.05259859934449196]}
+mIoU 82.79 | bg 98.15 crop 74.86 weed 75.37 | BIoU crop 62.16 weed 52.21
+  small  n= 620 recall@0.5=47.74 recall@0.3=66.45 cov>=0.5=62.10
+  medium n= 567 recall@0.5=70.02 recall@0.3=78.31 cov>=0.5=91.71
+  large  n= 621 recall@0.5=48.15 recall@0.3=57.81 cov>=0.5=98.07
+  all    n=1808 recall@0.5=54.87 recall@0.3=67.20 cov>=0.5=83.74
+  NOTE: GT prior used -> label leakage; diagnostic only, not a deployable result.

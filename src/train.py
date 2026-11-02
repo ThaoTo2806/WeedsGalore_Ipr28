@@ -126,6 +126,7 @@ flags.DEFINE_list('ccmc_stages', ['2', '3'], 'MiT stages whose K/V SR is modulat
 flags.DEFINE_float('ccmc_eps', 0.1, 'floor eps of w = eps + (1-eps) * p')
 flags.DEFINE_float('lam_init', 0.05, 'initial lambda = sigmoid(a)')
 flags.DEFINE_boolean('learn_lambda', True, 'learn lambda (bounded in (0,1)) or keep it fixed')
+flags.DEFINE_float('lam_lr', 0.0, 'separate Adam lr for the lambda logits (0 = same as --lr)')
 flags.DEFINE_float('aux_weight', 0.3, 'weight of the prior aux BCE loss (learned_veg/learned_weed)')
 flags.DEFINE_string('run_name', '', 'run id written to run_config.json (e.g. L3__seed0)')
 flags.DEFINE_boolean('resume', False, 'resume from <out_dir>/last.pth if it exists')
@@ -293,8 +294,17 @@ def main(_):
     criterion = torch.nn.CrossEntropyLoss(
         weight=class_weights, ignore_index=FLAGS.ignore_index).to(device)
 
-    # Optimizer
-    optimizer = torch.optim.Adam(net.parameters(), lr=FLAGS.lr)
+    # Optimizer. Adam moves a parameter by at most ~lr per step: with lr=3e-4 and ~1300 steps the
+    # lambda logit can change by <= ~0.4 (lambda stuck near its init, observed in Exp02), so lambda
+    # gets its own learning rate when --lam_lr > 0.
+    lam_params = [p for n, p in net.named_parameters() if n.endswith('lam_logit') and p.requires_grad]
+    if FLAGS.ccmc and FLAGS.lam_lr > 0 and lam_params:
+        lam_ids = {id(p) for p in lam_params}
+        other = [p for p in net.parameters() if id(p) not in lam_ids]
+        optimizer = torch.optim.Adam([{'params': other},
+                                      {'params': lam_params, 'lr': FLAGS.lam_lr}], lr=FLAGS.lr)
+    else:
+        optimizer = torch.optim.Adam(net.parameters(), lr=FLAGS.lr)
 
     # Metric
     evaluator = MulticlassJaccardIndex(num_classes=FLAGS.num_classes, average=None, ignore_index=FLAGS.ignore_index).to(device)

@@ -25,11 +25,11 @@ flowchart LR
 |---|---|---|---|---|---|
 | 00 | [00_setup_kaggle.md](00_setup_kaggle.md) | — | Clone, cài đặt, kiểm tra API HF, unit test | Test phải pass | Sẵn sàng |
 | 01 | [01_baseline_diagnostics.md](01_baseline_diagnostics.md) | D1–D2 / P0–P1, N0–N1 | Bìn kích thước, L0 2 seeds, LiteSent seed 0, Diag-D0, Diag-D2 probe, profile | G1 | DONE — G1 PASS có điều kiện |
-| 02 | [02_oracle_c2_c3.md](02_oracle_c2_c3.md) | D3 / P3a | C2, C3, C3-K5, C3-K6 × 2 seed (oracle, GT leakage) + L0 đánh giá lại | G2-screen | Sẵn sàng chạy |
-| 03 | (tạo sau review Exp02) | D4 / P3b | L2, L3 + oracle intervention 2×2 | G3 (H2: L3 − L2) | Chưa tạo |
-| 04 | (tạo sau review Exp03) | D5 / P4 | K5, K6 cùng prior/budget | G4 | Chưa tạo |
-| 05 | (tạo sau review Exp04) | D6 / P4–P5 | K1, K2, K3 + seed 2 | G4 | Chưa tạo |
-| 06 | (tạo sau review Exp05) | D7 / P5 | Khóa cấu hình, test **một lần** | — | Chưa tạo |
+| 02 | [02_oracle_c2_c3.md](02_oracle_c2_c3.md) | D3 / P3a | C2, C3, C3-K5, C3-K6 × 2 seed (oracle, GT leakage) + L0 đánh giá lại | G2-screen | DONE — vô hiệu (λ kẹt 0,05) |
+| 03 | [03_oracle_active_lambda.md](03_oracle_active_lambda.md) | D3 làm lại / P3a | C3a, C2a, C3f, C3K5a × 3 seed + L0 s2, kiểm tra cơ chế hoạt động, A/A test | G2-screen | Sẵn sàng chạy |
+| 04 | (tạo sau review Exp03) | D4 / P3b | L2, L3 (3 seed) + oracle intervention 2×2 | G3 (H2: L3 − L2) | Chưa tạo |
+| 05 | (tạo sau review Exp04) | D5 / P4 | K5, K6, K1, K2, K3 | G4 | Chưa tạo |
+| 06 | (tạo sau review Exp05) | D6–D7 / P5 | Khóa cấu hình, 5 seed, test **một lần** | — | Chưa tạo |
 
 ## Ánh xạ cấu hình → cờ dòng lệnh (`src/train.py --ccmc=True`)
 

@@ -41,6 +41,10 @@ flags.DEFINE_string('primary', 'SmallWeedRecall', 'primary metric of the gate')
 flags.DEFINE_string('co_primary', 'cov_small', 'PASS also requires this metric delta > 0 '
                     '(added after Exp01 review; empty string disables)')
 flags.DEFINE_string('out', None, 'output json')
+flags.DEFINE_boolean('seed_bootstrap', True, 'hierarchical bootstrap: also resample paired seeds '
+                     '(needed because image-only bootstrap ignores training-seed variance; '
+                     'see the L0_s0 vs L0_s1 A/A test in Exp03)')
+flags.DEFINE_integer('min_seeds_pass', 3, 'a PASS/SCREEN-PASS needs at least this many paired seeds')
 
 
 def load_csv(path):
@@ -114,13 +118,11 @@ def main(_):
     runs_a = [load_csv(p) for p in FLAGS.a]
     runs_b = [load_csv(p) for p in FLAGS.b]
     names = runs_a[0][0]
-    cols = runs_a[0][1]
+    # common stat columns (e.g. prior-quality columns only exist for models with a prior)
+    cols = [k for k in runs_a[0][1] if all(k in c for _, c, _ in runs_a + runs_b)]
     for n, c, _ in runs_a + runs_b:
         if sorted(n) != sorted(names):
             raise SystemExit('Runs are not evaluated on the same images/split')
-        missing = [k for k in cols if k not in c]
-        if missing:
-            raise SystemExit(f'Missing columns {missing[:5]}')
     col = {k: i for i, k in enumerate(cols)}
 
     def aligned(run):
@@ -138,15 +140,20 @@ def main(_):
 
     result = {'A': FLAGS.name_a, 'B': FLAGS.name_b, 'files_A': FLAGS.a, 'files_B': FLAGS.b,
               'n_seeds': len(FLAGS.a), 'cluster': FLAGS.cluster, 'n_clusters': n_clusters,
-              'n_images': len(names), 'n_boot': FLAGS.n_boot, 'metrics': {}}
+              'n_images': len(names), 'n_boot': FLAGS.n_boot,
+              'seed_bootstrap': bool(FLAGS.seed_bootstrap and len(FLAGS.a) > 1), 'metrics': {}}
+    n_seeds = len(FLAGS.a)
+    seed_idx = (rng.integers(0, n_seeds, size=(FLAGS.n_boot, n_seeds))
+                if result['seed_bootstrap'] else np.tile(np.arange(n_seeds), (FLAGS.n_boot, 1)))
     metrics = list(dict.fromkeys(FLAGS.metrics + [FLAGS.primary, 'IoU_crop'] +
                                  ([FLAGS.co_primary] if FLAGS.co_primary else [])))
     for metric in metrics:
         point_a = [float(metric_values(s.sum(0), col, metric)) for s in sums_a]
         point_b = [float(metric_values(s.sum(0), col, metric)) for s in sums_b]
-        boot_a = np.mean([metric_values(weights @ s, col, metric) for s in sums_a], axis=0)
-        boot_b = np.mean([metric_values(weights @ s, col, metric) for s in sums_b], axis=0)
-        boot_delta = boot_a - boot_b
+        per_seed_a = np.stack([metric_values(weights @ s, col, metric) for s in sums_a])  # (S, B)
+        per_seed_b = np.stack([metric_values(weights @ s, col, metric) for s in sums_b])
+        per_seed_delta = per_seed_a - per_seed_b  # paired by seed
+        boot_delta = np.take_along_axis(per_seed_delta, seed_idx.T, axis=0).mean(axis=0)
         boot_delta = boot_delta[~np.isnan(boot_delta)]
         delta = float(np.mean(point_a) - np.mean(point_b))
         lo, hi = (np.percentile(boot_delta, [2.5, 97.5]).tolist() if len(boot_delta)
@@ -178,12 +185,16 @@ def main(_):
             if result['gate']['decision'] == 'PASS' and not co['delta'] > 0:
                 result['gate']['decision'] = (f'INCONCLUSIVE ({FLAGS.co_primary} delta '
                                               f"{co['delta']:+.2f} disagrees in sign)")
+        if result['gate']['decision'].startswith(('PASS', 'SCREEN-PASS')) and \
+                n_seeds < FLAGS.min_seeds_pass:
+            result['gate']['decision'] = (f"INCONCLUSIVE (only {n_seeds} paired seed(s); "
+                                          f"PASS needs >= {FLAGS.min_seeds_pass})")
         if FLAGS.gate == 'screen':
             result['gate']['note'] = ('Oracle priors use GT of the evaluated image (label '
                                       'leakage). One-way screen only; NOT evidence for H2.')
 
     print(f"{FLAGS.name_a} vs {FLAGS.name_b} | seeds={len(FLAGS.a)} | cluster={FLAGS.cluster} "
-          f"(n={n_clusters})")
+          f"(n={n_clusters}) | seed_bootstrap={result['seed_bootstrap']}")
     print(f"{'metric':18s} {'A':>8s} {'B':>8s} {'delta':>8s}   95% CI           P(d<=0)")
     for metric, r in result['metrics'].items():
         print(f"{metric:18s} {r['A_mean']:8.2f} {r['B_mean']:8.2f} {r['delta']:+8.2f}   "
