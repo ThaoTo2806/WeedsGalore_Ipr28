@@ -132,9 +132,9 @@ flags.DEFINE_boolean('learn_lambda', True, 'learn lambda (bounded in (0,1)) or k
 flags.DEFINE_float('lam_lr', 0.0, 'separate Adam lr for the lambda logits (0 = same as --lr)')
 flags.DEFINE_float('aux_weight', 0.3, 'weight of the prior aux BCE loss (learned_veg/learned_weed)')
 # --- MCSD: mass-conserving sub-cell decoding (src/nets/mcsd.py) ---
-flags.DEFINE_enum('head', 'bilinear', ['bilinear', 'mcsd', 'pixelshuffle'],
+flags.DEFINE_enum('head', 'bilinear', ['bilinear', 'mcsd', 'pixelshuffle', 'occ_conditioned'],
                   'prediction head of SegFormer5Band without LLR: bilinear (L0), mcsd (proposed), '
-                  'pixelshuffle (control: same heads, no mass conservation)')
+                  'pixelshuffle (unconditioned control), occ_conditioned (no Sinkhorn)')
 flags.DEFINE_integer('sinkhorn_iters', 5, 'Sinkhorn iterations per cell (mcsd)')
 flags.DEFINE_float('mcsd_tau', 1.0, 'temperature of the placement scores (mcsd)')
 flags.DEFINE_boolean('spectral_guide', False, 'add a full-resolution placement prior from the raw bands')

@@ -1,0 +1,7 @@
+{
+  "run_name": "LiteSent__s4",
+  "best_val_miou": 84.45447540283203,
+  "best_epoch": 95,
+  "final_lambdas": [],
+  "split_hash": "675667edf3f35f16"
+}

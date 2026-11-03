@@ -1,0 +1,6 @@
+{"run_name": "LiteSent_s4", "split": "val", "prior_override": "none", "prior_noise": "none", "GT_LEAKAGE": false, "instance_source": {"official": 26}, "lambdas": []}
+mIoU 84.45 | bg 98.38 crop 76.85 weed 78.13 | BIoU crop 65.20 weed 58.26
+  small  n= 620 recall@0.5=63.71 recall@0.3=73.55 cov>=0.5=70.81
+  medium n= 567 recall@0.5=73.90 recall@0.3=79.01 cov>=0.5=93.30
+  large  n= 621 recall@0.5=51.21 recall@0.3=60.06 cov>=0.5=98.23
+  all    n=1808 recall@0.5=62.61 recall@0.3=70.63 cov>=0.5=87.28

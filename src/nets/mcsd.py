@@ -22,6 +22,8 @@ to Weed, placed where s_weed is highest, instead of losing them to argmax smooth
 Controls (same heads and losses, only the coupling differs):
   head='pixelshuffle' : softmax over classes of pixel-shuffled placement scores (no mass
                         conservation; occupancy head trained with the same aux loss).
+    head='occ_conditioned': per-sub-pixel softmax of occupancy log-prior plus placement scores;
+                                                    uses occupancy but does not enforce its output marginals.
 """
 
 import torch
@@ -30,7 +32,7 @@ from torch.nn import functional as F
 
 from .segformer import SegFormer5Band
 
-HEADS = ('bilinear', 'mcsd', 'pixelshuffle')
+HEADS = ('bilinear', 'mcsd', 'pixelshuffle', 'occ_conditioned')
 
 
 def sinkhorn_subcell(log_q, scores, iters=5, tau=1.0):
@@ -51,12 +53,17 @@ def sinkhorn_subcell(log_q, scores, iters=5, tau=1.0):
     return log_k + log_u + log_v
 
 
+def occupancy_conditioned_subcell(log_q, scores, tau=1.0):
+    """Normalize occupancy-conditioned placement scores independently per sub-pixel."""
+    logits = log_q.float().unsqueeze(2) + scores.float() / tau
+    return F.log_softmax(logits, dim=1)
+
+
 class MCSDSegFormer(SegFormer5Band):
     """SegFormer-B0 5-band (L0 encoder + multi-scale decoder) with a sub-cell prediction head.
 
-    forward(x)                  -> per-pixel log-probabilities (B, C, H, W) for 'mcsd' and
-                                   'pixelshuffle' (usable as logits by CE/Dice), logits for
-                                   'bilinear'.
+    forward(x)                  -> per-pixel log-probabilities (B, C, H, W) for sub-cell heads,
+                                   usable as logits by CE/Dice; logits for 'bilinear'.
     forward(x, return_aux=True) -> (output, {'occ_logits': (B, C, h, w)})
     """
 
@@ -111,7 +118,10 @@ class MCSDSegFormer(SegFormer5Band):
         if self.head == 'mcsd':
             log_p = sinkhorn_subcell(F.log_softmax(occ_logits.float(), dim=1), scores,
                                      self.sinkhorn_iters, self.tau)
-        else:  # pixelshuffle control: per-pixel softmax, no mass conservation
+        elif self.head == 'occ_conditioned':
+            log_q = F.log_softmax(occ_logits.float(), dim=1)
+            log_p = occupancy_conditioned_subcell(log_q, scores, self.tau)
+        else:  # pixelshuffle control: per-pixel softmax, no occupancy conditioning
             log_p = F.log_softmax(scores.float(), dim=1)
         out = F.pixel_shuffle(log_p.reshape(b, c * r * r, h, w), r)
         return (out, {'occ_logits': occ_logits}) if return_aux else out

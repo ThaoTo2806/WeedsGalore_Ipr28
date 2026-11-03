@@ -21,35 +21,36 @@ flowchart LR
 
 ## Danh sách thí nghiệm
 
-| Exp | File | Sprint / Plan ID | Nội dung | Gate | Trạng thái |
-|---|---|---|---|---|---|
-| 00 | [00_setup_kaggle.md](00_setup_kaggle.md) | — | Clone, cài đặt, kiểm tra API HF, unit test | Test phải pass | Sẵn sàng |
-| 01 | [01_baseline_diagnostics.md](01_baseline_diagnostics.md) | D1–D2 / P0–P1, N0–N1 | Bìn kích thước, L0 2 seeds, LiteSent seed 0, Diag-D0, Diag-D2 probe, profile | G1 | DONE — G1 PASS có điều kiện |
-| 02 | [02_oracle_c2_c3.md](02_oracle_c2_c3.md) | D3 / P3a | C2, C3, C3-K5, C3-K6 × 2 seed (oracle, GT leakage) + L0 đánh giá lại | G2-screen | DONE — vô hiệu (λ kẹt 0,05) |
-| 03 | [03_oracle_active_lambda.md](03_oracle_active_lambda.md) | D3 làm lại / P3a | C3a, C2a, C3f, C3K5a × 3 seed + L0 s2, kiểm tra cơ chế hoạt động, A/A test | G2-screen | DONE — CCMC-SR dừng theo quy tắc |
-| 04 | [04_bottleneck_localization.md](04_bottleneck_localization.md) | Định vị nút thắt | LiteSent s1–s2, decoder 1/2 không chi tiết, decoder 1/2 với F1 (3 seed) | Chọn hướng phương pháp mới | DONE — nút thắt là độ phân giải dự đoán |
-| 05 | [05_mcsd.md](05_mcsd.md) | Phương pháp mới | MCSD, PS (đối chứng), MCSD-g × 3 seed | H-MCSD, H-mech, H-eff | DONE — MCSD-g PASS (val, 3 seed) |
-| 06 | [06_confirm_5seeds.md](06_confirm_5seeds.md) | Xác nhận | Seed 3–4 cho L0, MCSD-g, MCSD, PS, D½-none, LiteSent + ablation vòng Sinkhorn | Xác nhận độc lập | Sẵn sàng chạy |
-| 07+ | (tạo sau review Exp06) | — | Test một lần, ablation, dataset thứ hai (WeedMap), rà soát novelty | — | Chưa tạo |
+| Exp | File                                                           | Sprint / Plan ID            | Nội dung                                                                                        | Gate                                           | Trạng thái                                                            |
+| --- | -------------------------------------------------------------- | --------------------------- | ----------------------------------------------------------------------------------------------- | ---------------------------------------------- | --------------------------------------------------------------------- |
+| 00  | [00_setup_kaggle.md](00_setup_kaggle.md)                       | —                           | Clone, cài đặt, kiểm tra API HF, unit test                                                      | Test phải pass                                 | Sẵn sàng                                                              |
+| 01  | [01_baseline_diagnostics.md](01_baseline_diagnostics.md)       | D1–D2 / P0–P1, N0–N1        | Bìn kích thước, L0 2 seeds, LiteSent seed 0, Diag-D0, Diag-D2 probe, profile                    | G1                                             | DONE — G1 PASS có điều kiện                                           |
+| 02  | [02_oracle_c2_c3.md](02_oracle_c2_c3.md)                       | D3 / P3a                    | C2, C3, C3-K5, C3-K6 × 2 seed (oracle, GT leakage) + L0 đánh giá lại                            | G2-screen                                      | DONE — vô hiệu (λ kẹt 0,05)                                           |
+| 03  | [03_oracle_active_lambda.md](03_oracle_active_lambda.md)       | D3 làm lại / P3a            | C3a, C2a, C3f, C3K5a × 3 seed + L0 s2, kiểm tra cơ chế hoạt động, A/A test                      | G2-screen                                      | DONE — CCMC-SR dừng theo quy tắc                                      |
+| 04  | [04_bottleneck_localization.md](04_bottleneck_localization.md) | Định vị nút thắt            | LiteSent s1–s2, decoder 1/2 không chi tiết, decoder 1/2 với F1 (3 seed)                         | Chọn hướng phương pháp mới                     | DONE — nút thắt là độ phân giải dự đoán                               |
+| 05  | [05_mcsd.md](05_mcsd.md)                                       | Phương pháp mới             | MCSD, PS (đối chứng), MCSD-g × 3 seed                                                           | H-MCSD, H-mech, H-eff                          | DONE — MCSD-g PASS (val, 3 seed)                                      |
+| 06  | [06_confirm_5seeds.md](06_confirm_5seeds.md)                   | Xác nhận                    | Seed 3–4, bảng 5 seed, ablation inference Sinkhorn                                              | MCSD-g confirmation                            | DONE — PASS seed 3–4; 5-seed Small-Weed Recall +7,84 pp [4,46; 11,66] |
+| 07  | [07_mechanism_audit.md](07_mechanism_audit.md)                 | Kiểm toán cơ chế            | Occupancy-conditioned no-Sinkhorn, marginal error theo lớp/occupancy, điều tra trade-off 1 vòng | Validation-only; không chọn cấu hình bằng test | Kế hoạch trước khi chạy                                               |
+| 08  | [07_mechanism_audit.md](07_mechanism_audit.md)                 | Dataset thứ hai + khóa test | WeedMap hoặc dataset đa phổ phù hợp; rà soát novelty; khóa protocol rồi test một lần            | Giao thức đăng ký trước                        | Chưa chạy                                                             |
 
 ## Ánh xạ cấu hình → cờ dòng lệnh (`src/train.py --ccmc=True`)
 
-| ID | `--prior_mode` | `--injection` | `--prior_perturb` | Ghi chú |
-|---|---|---|---|---|
-| L0 | `none` | — | — | Baseline MiT-B0 5 băng + fusion, **không LLR** |
-| L1 | `ndvi` | `ccmc_sr` | `none` | Prior NDVI cố định |
-| L2 | `learned_veg` | `ccmc_sr` | `none` | Aux loss Crop ∪ Weed |
-| **L3** | `learned_weed` | `ccmc_sr` | `none` | **Phương pháp đề xuất** |
-| K1 | `learned_weed` | `none` | `none` | Head + aux, không nối vào SR |
-| K2 | `learned_weed` | `ccmc_sr` | `window_shuffle` | Hoán vị prior trong cửa sổ SR |
-| K2b | `learned_weed` | `ccmc_sr` | `global_shuffle` | Placebo hoán vị toàn ảnh |
-| K3 | `learned_free` | `ccmc_sr` | `none` | Head không aux loss |
-| K5 | `learned_weed` | `pre_sr_gate` | `none` | Gate trước SR, chuẩn hóa toàn ảnh, **không** chuẩn hóa cửa sổ |
-| K6 | `learned_weed` | `post_sr_gate` | `none` | Gate trên token K/V **sau** LayerNorm của SR, trước phép chiếu key/value |
-| C2 | `gt_veg` | `ccmc_sr` | `none` | Oracle GT (rò rỉ nhãn), chỉ sàng lọc |
-| C3 | `gt_weed` | `ccmc_sr` | `none` | Oracle GT (rò rỉ nhãn), chỉ sàng lọc |
-| C3-K5 / C3-K6 | `gt_weed` | `pre_sr_gate` / `post_sr_gate` | `none` | Đối chứng leakage |
-| LiteSent | (`--ccmc=False --segformer=True --use_low_level_refine=True`) | | | Tham chiếu cũ, chạy lại trong cùng pipeline |
+| ID            | `--prior_mode`                                                | `--injection`                  | `--prior_perturb` | Ghi chú                                                                  |
+| ------------- | ------------------------------------------------------------- | ------------------------------ | ----------------- | ------------------------------------------------------------------------ |
+| L0            | `none`                                                        | —                              | —                 | Baseline MiT-B0 5 băng + fusion, **không LLR**                           |
+| L1            | `ndvi`                                                        | `ccmc_sr`                      | `none`            | Prior NDVI cố định                                                       |
+| L2            | `learned_veg`                                                 | `ccmc_sr`                      | `none`            | Aux loss Crop ∪ Weed                                                     |
+| **L3**        | `learned_weed`                                                | `ccmc_sr`                      | `none`            | **Phương pháp đề xuất**                                                  |
+| K1            | `learned_weed`                                                | `none`                         | `none`            | Head + aux, không nối vào SR                                             |
+| K2            | `learned_weed`                                                | `ccmc_sr`                      | `window_shuffle`  | Hoán vị prior trong cửa sổ SR                                            |
+| K2b           | `learned_weed`                                                | `ccmc_sr`                      | `global_shuffle`  | Placebo hoán vị toàn ảnh                                                 |
+| K3            | `learned_free`                                                | `ccmc_sr`                      | `none`            | Head không aux loss                                                      |
+| K5            | `learned_weed`                                                | `pre_sr_gate`                  | `none`            | Gate trước SR, chuẩn hóa toàn ảnh, **không** chuẩn hóa cửa sổ            |
+| K6            | `learned_weed`                                                | `post_sr_gate`                 | `none`            | Gate trên token K/V **sau** LayerNorm của SR, trước phép chiếu key/value |
+| C2            | `gt_veg`                                                      | `ccmc_sr`                      | `none`            | Oracle GT (rò rỉ nhãn), chỉ sàng lọc                                     |
+| C3            | `gt_weed`                                                     | `ccmc_sr`                      | `none`            | Oracle GT (rò rỉ nhãn), chỉ sàng lọc                                     |
+| C3-K5 / C3-K6 | `gt_weed`                                                     | `pre_sr_gate` / `post_sr_gate` | `none`            | Đối chứng leakage                                                        |
+| LiteSent      | (`--ccmc=False --segformer=True --use_low_level_refine=True`) |                                |                   | Tham chiếu cũ, chạy lại trong cùng pipeline                              |
 
 Siêu tham số chung (giữ nguyên cho mọi mô hình): Adam lr 3e-4, batch 8, 100 epoch, CE (0.9/1.0/1.3) × 0.7 + SoftDice × 0.3, augmentation xoay/lật/nhiễu, chọn checkpoint theo val mIoU. CCMC: `eps=0.1`, `lam_init=0.05`, stage 2–3, aux BCE × 0.3 (soft occupancy tại 150×150).
 

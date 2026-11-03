@@ -1,0 +1,53 @@
+40 eval summaries -> results/exp06/metrics.csv
+Dnone_s0                     val   ovr=none     mIoU=83.47 crop=75.70 weed=76.41 SWR=59.52 lam=
+Dnone_s1                     val   ovr=none     mIoU=83.79 crop=76.48 weed=76.60 SWR=60.97 lam=
+Dnone_s2                     val   ovr=none     mIoU=83.62 crop=76.41 weed=76.17 SWR=62.74 lam=
+Dnone_s3                     val   ovr=none     mIoU=83.39 crop=75.58 weed=76.26 SWR=55.81 lam=
+Dnone_s4                     val   ovr=none     mIoU=84.09 crop=76.98 weed=77.01 SWR=59.84 lam=
+L0_s0                        val   ovr=none     mIoU=82.94 crop=75.11 weed=75.55 SWR=49.68 lam=
+L0_s1                        val   ovr=none     mIoU=82.79 crop=74.74 weed=75.46 SWR=46.77 lam=
+L0_s2                        val   ovr=none     mIoU=82.59 crop=74.89 weed=74.75 SWR=52.90 lam=
+L0_s3                        val   ovr=none     mIoU=82.57 crop=74.49 weed=75.09 SWR=45.00 lam=
+L0_s4                        val   ovr=none     mIoU=82.57 crop=74.78 weed=74.81 SWR=48.06 lam=
+LiteSent_s0                  val   ovr=none     mIoU=84.56 crop=77.44 weed=77.81 SWR=64.19 lam=
+LiteSent_s1                  val   ovr=none     mIoU=84.47 crop=77.46 weed=77.58 SWR=58.06 lam=
+LiteSent_s2                  val   ovr=none     mIoU=84.48 crop=77.11 weed=77.92 SWR=68.39 lam=
+LiteSent_s3                  val   ovr=none     mIoU=84.35 crop=76.97 weed=77.69 SWR=61.45 lam=
+LiteSent_s4                  val   ovr=none     mIoU=84.45 crop=76.85 weed=78.13 SWR=63.71 lam=
+MCSD_s0                      val   ovr=none     mIoU=82.88 crop=74.65 weed=75.74 SWR=53.23 lam=
+MCSD_s1                      val   ovr=none     mIoU=83.52 crop=76.03 weed=76.29 SWR=56.77 lam=
+MCSD_s2                      val   ovr=none     mIoU=83.48 crop=75.73 weed=76.40 SWR=52.26 lam=
+MCSD_s3                      val   ovr=none     mIoU=83.35 crop=75.77 weed=76.06 SWR=58.23 lam=
+MCSD_s4                      val   ovr=none     mIoU=82.96 crop=74.98 weed=75.66 SWR=45.97 lam=
+MCSDgIt1_s0                  val   ovr=none     mIoU=82.72 crop=74.31 weed=75.58 SWR=65.00 lam=
+MCSDgIt1_s1                  val   ovr=none     mIoU=83.46 crop=75.71 weed=76.40 SWR=65.48 lam=
+MCSDgIt1_s2                  val   ovr=none     mIoU=83.26 crop=75.35 weed=76.15 SWR=68.39 lam=
+MCSDgIt1_s3                  val   ovr=none     mIoU=83.04 crop=74.99 weed=75.90 SWR=65.48 lam=
+MCSDgIt1_s4                  val   ovr=none     mIoU=82.73 crop=74.33 weed=75.64 SWR=66.13 lam=
+MCSDgIt20_s0                 val   ovr=none     mIoU=83.24 crop=75.13 weed=76.26 SWR=55.65 lam=
+MCSDgIt20_s1                 val   ovr=none     mIoU=83.63 crop=76.11 weed=76.52 SWR=51.13 lam=
+MCSDgIt20_s2                 val   ovr=none     mIoU=83.85 crop=76.23 weed=76.96 SWR=58.39 lam=
+MCSDgIt20_s3                 val   ovr=none     mIoU=83.64 crop=76.03 weed=76.61 SWR=57.90 lam=
+MCSDgIt20_s4                 val   ovr=none     mIoU=83.17 crop=75.11 weed=76.16 SWR=55.48 lam=
+MCSDg_s0                     val   ovr=none     mIoU=83.36 crop=75.39 weed=76.35 SWR=55.65 lam=
+MCSDg_s1                     val   ovr=none     mIoU=83.76 crop=76.38 weed=76.61 SWR=52.10 lam=
+MCSDg_s2                     val   ovr=none     mIoU=83.94 crop=76.42 weed=77.02 SWR=59.03 lam=
+MCSDg_s3                     val   ovr=none     mIoU=83.75 crop=76.23 weed=76.71 SWR=58.39 lam=
+MCSDg_s4                     val   ovr=none     mIoU=83.32 crop=75.43 weed=76.25 SWR=56.45 lam=
+PS_s0                        val   ovr=none     mIoU=82.03 crop=73.40 weed=74.60 SWR=54.35 lam=
+PS_s1                        val   ovr=none     mIoU=81.46 crop=72.60 weed=73.74 SWR=52.42 lam=
+PS_s2                        val   ovr=none     mIoU=79.30 crop=67.69 weed=72.34 SWR=55.32 lam=
+PS_s3                        val   ovr=none     mIoU=82.59 crop=74.45 weed=75.20 SWR=55.81 lam=
+PS_s4                        val   ovr=none     mIoU=81.68 crop=73.34 weed=73.70 SWR=54.84 lam=
+train: {"run_name": "Dnone__s3", "best_val_miou": 83.39207458496094, "best_epoch": 95, "final_lambdas": [], "split_hash": "675667edf3f35f16"}
+train: {"run_name": "Dnone__s4", "best_val_miou": 84.09503173828125, "best_epoch": 98, "final_lambdas": [], "split_hash": "675667edf3f35f16"}
+train: {"run_name": "L0__s3", "best_val_miou": 82.57235717773438, "best_epoch": 95, "final_lambdas": [], "split_hash": "675667edf3f35f16"}
+train: {"run_name": "L0__s4", "best_val_miou": 82.5665512084961, "best_epoch": 95, "final_lambdas": [], "split_hash": "675667edf3f35f16"}
+train: {"run_name": "LiteSent__s3", "best_val_miou": 84.35228729248047, "best_epoch": 92, "final_lambdas": [], "split_hash": "675667edf3f35f16"}
+train: {"run_name": "LiteSent__s4", "best_val_miou": 84.45447540283203, "best_epoch": 95, "final_lambdas": [], "split_hash": "675667edf3f35f16"}
+train: {"run_name": "MCSD__s3", "best_val_miou": 83.3480224609375, "best_epoch": 96, "final_lambdas": [], "split_hash": "675667edf3f35f16"}
+train: {"run_name": "MCSD__s4", "best_val_miou": 82.95936584472656, "best_epoch": 78, "final_lambdas": [], "split_hash": "675667edf3f35f16"}
+train: {"run_name": "MCSDg__s3", "best_val_miou": 83.75152587890625, "best_epoch": 81, "final_lambdas": [], "split_hash": "675667edf3f35f16"}
+train: {"run_name": "MCSDg__s4", "best_val_miou": 83.3228530883789, "best_epoch": 98, "final_lambdas": [], "split_hash": "675667edf3f35f16"}
+train: {"run_name": "PS__s3", "best_val_miou": 82.5934829711914, "best_epoch": 95, "final_lambdas": [], "split_hash": "675667edf3f35f16"}
+train: {"run_name": "PS__s4", "best_val_miou": 81.67577362060547, "best_epoch": 99, "final_lambdas": [], "split_hash": "675667edf3f35f16"}

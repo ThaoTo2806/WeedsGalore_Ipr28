@@ -1,0 +1,7 @@
+{
+  "ckpt": "runs/MCSDg_s0/best_val.pth",
+  "sinkhorn_iters": 5,
+  "max_abs_fraction_error": 0.10772636532783508,
+  "mean_abs_fraction_error": 0.00043232961308184225,
+  "pred_weed_mass_over_gt": 1.0921431339612706
+}

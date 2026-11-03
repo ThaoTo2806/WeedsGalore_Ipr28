@@ -156,6 +156,26 @@ def test_sinkhorn_marginals_and_placement():
     assert p1[0, :, 5, 0, 0].argmax() == 2 and p1[0, 2].sum() > 0.95
 
 
+def test_occupancy_conditioned_subcell():
+    from nets.mcsd import occupancy_conditioned_subcell
+    log_q = torch.log(torch.tensor([0.7, 0.2, 0.1])).view(1, 3, 1, 1)
+    scores = torch.zeros(1, 3, 16, 1, 1, requires_grad=True)
+    log_p = occupancy_conditioned_subcell(log_q, scores)
+    p = log_p.exp()
+    expected = log_q.exp().unsqueeze(2).expand_as(p)
+    assert torch.allclose(p, expected, atol=1e-6)
+    assert torch.allclose(p.sum(1), torch.ones(1, 16, 1, 1), atol=1e-6)
+
+    placed_scores = scores.detach().clone()
+    placed_scores[0, 2, 0] = 4.0
+    placed_scores.requires_grad_()
+    changed = occupancy_conditioned_subcell(log_q, placed_scores).exp()
+    assert changed[0, 2, 0, 0, 0] > p[0, 2, 0, 0, 0]
+    assert not torch.allclose(changed.mean(2), log_q.exp(), atol=1e-4)
+    changed[0, 2].sum().backward()
+    assert torch.isfinite(placed_scores.grad).all()
+
+
 def test_pixel_shuffle_layout_and_gradient():
     from nets.mcsd import sinkhorn_subcell
     import torch.nn.functional as F

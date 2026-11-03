@@ -1,0 +1,6 @@
+{"run_name": "MCSDgIt1_s2", "split": "val", "prior_override": "none", "prior_noise": "none", "GT_LEAKAGE": false, "instance_source": {"official": 26}, "lambdas": []}
+mIoU 83.26 | bg 98.28 crop 75.35 weed 76.15 | BIoU crop 64.32 weed 57.10
+  small  n= 620 recall@0.5=68.39 recall@0.3=78.71 cov>=0.5=76.29
+  medium n= 567 recall@0.5=75.13 recall@0.3=79.89 cov>=0.5=93.65
+  large  n= 621 recall@0.5=51.53 recall@0.3=59.74 cov>=0.5=98.71
+  all    n=1808 recall@0.5=64.71 recall@0.3=72.57 cov>=0.5=89.44

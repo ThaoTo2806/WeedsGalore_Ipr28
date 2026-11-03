@@ -23,7 +23,8 @@ def define_model_flags():
                       'prior perturbation used at train time')
     flags.DEFINE_list('ccmc_stages', ['2', '3'], 'modulated stages (1-based)')
     flags.DEFINE_float('ccmc_eps', 0.1, 'eps floor')
-    flags.DEFINE_enum('head', 'bilinear', ['bilinear', 'mcsd', 'pixelshuffle'], 'prediction head')
+    flags.DEFINE_enum('head', 'bilinear', ['bilinear', 'mcsd', 'pixelshuffle', 'occ_conditioned'],
+                      'prediction head')
     flags.DEFINE_integer('sinkhorn_iters', 5, 'Sinkhorn iterations (mcsd)')
     flags.DEFINE_float('mcsd_tau', 1.0, 'placement temperature (mcsd)')
     flags.DEFINE_boolean('spectral_guide', False, 'raw-band placement prior (mcsd)')

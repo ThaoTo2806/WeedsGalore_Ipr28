@@ -1,0 +1,6 @@
+{"run_name": "PS_s0", "split": "val", "prior_override": "none", "prior_noise": "none", "GT_LEAKAGE": false, "instance_source": {"official": 26}, "lambdas": []}
+mIoU 82.03 | bg 98.10 crop 73.40 weed 74.60 | BIoU crop 60.14 weed 50.72
+  small  n= 620 recall@0.5=54.35 recall@0.3=69.35 cov>=0.5=66.45
+  medium n= 567 recall@0.5=72.13 recall@0.3=77.07 cov>=0.5=91.89
+  large  n= 621 recall@0.5=47.18 recall@0.3=56.68 cov>=0.5=97.75
+  all    n=1808 recall@0.5=57.47 recall@0.3=67.42 cov>=0.5=85.18

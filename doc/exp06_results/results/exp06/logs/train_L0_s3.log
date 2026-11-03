@@ -1,0 +1,202 @@
+Using cuda
+Cuda current device: 0
+Cuda device name: Tesla T4
+
+============================================================
+MODEL STATISTICS
+============================================================
+Total Parameters: 3,455,619
+Trainable Parameters: 3,455,619
+Non-trainable Parameters: 0
+FLOPs (forward pass): 3,485,466,624 (~3.49G)
+FLOPs per pixel: 13,296
+Inference time (avg 100 runs): 10.08 ms
+Throughput: 99.25 img/s
+============================================================
+
+Logging to: runs/L0_s3
+Epoch: 0 iter: 1, Loss: 0.99
+mIoU: 16.80%
+Epoch: 0, Val mIoU: 44.26% | c0=92.35 c1=10.61 c2=29.81
+Saved best_val.pth (44.26%)
+Epoch: 1, Val mIoU: 50.31% | c0=92.46 c1=21.48 c2=37.00
+Saved best_val.pth (50.31%)
+Epoch: 2, Val mIoU: 60.58% | c0=94.63 c1=37.82 c2=49.29
+Saved best_val.pth (60.58%)
+Epoch: 3 iter: 50, Loss: 0.61
+mIoU: 42.60%
+Epoch: 3, Val mIoU: 64.12% | c0=95.92 c1=43.86 c2=52.58
+Saved best_val.pth (64.12%)
+Epoch: 4, Val mIoU: 64.67% | c0=95.50 c1=45.51 c2=53.00
+Saved best_val.pth (64.67%)
+Epoch: 5, Val mIoU: 69.47% | c0=96.42 c1=52.28 c2=59.71
+Saved best_val.pth (69.47%)
+Epoch: 6, Val mIoU: 69.99% | c0=95.98 c1=55.59 c2=58.41
+Saved best_val.pth (69.99%)
+Epoch: 7 iter: 100, Loss: 0.32
+mIoU: 67.43%
+Epoch: 7, Val mIoU: 72.29% | c0=96.65 c1=58.55 c2=61.65
+Saved best_val.pth (72.29%)
+Epoch: 8, Val mIoU: 67.54% | c0=95.23 c1=54.02 c2=53.37
+Epoch: 9, Val mIoU: 74.39% | c0=96.97 c1=60.55 c2=65.65
+Saved best_val.pth (74.39%)
+Epoch: 10, Val mIoU: 74.62% | c0=97.02 c1=62.10 c2=64.74
+Saved best_val.pth (74.62%)
+Epoch: 11 iter: 150, Loss: 0.23
+mIoU: 73.16%
+Epoch: 11, Val mIoU: 75.26% | c0=97.31 c1=62.17 c2=66.29
+Saved best_val.pth (75.26%)
+Epoch: 12, Val mIoU: 75.30% | c0=97.02 c1=63.25 c2=65.64
+Saved best_val.pth (75.30%)
+Epoch: 13, Val mIoU: 75.65% | c0=97.36 c1=62.76 c2=66.84
+Saved best_val.pth (75.65%)
+Epoch: 14, Val mIoU: 77.10% | c0=97.33 c1=65.82 c2=68.14
+Saved best_val.pth (77.10%)
+Epoch: 15 iter: 200, Loss: 0.18
+mIoU: 76.02%
+Epoch: 15, Val mIoU: 76.82% | c0=97.44 c1=65.52 c2=67.50
+Epoch: 16, Val mIoU: 78.29% | c0=97.48 c1=67.51 c2=69.87
+Saved best_val.pth (78.29%)
+Epoch: 17, Val mIoU: 77.17% | c0=97.62 c1=65.09 c2=68.79
+Epoch: 18, Val mIoU: 78.09% | c0=97.52 c1=67.54 c2=69.21
+Epoch: 19 iter: 250, Loss: 0.15
+mIoU: 77.69%
+Epoch: 19, Val mIoU: 78.35% | c0=97.67 c1=67.48 c2=69.90
+Saved best_val.pth (78.35%)
+Epoch: 20, Val mIoU: 79.01% | c0=97.79 c1=68.50 c2=70.74
+Saved best_val.pth (79.01%)
+Epoch: 21, Val mIoU: 78.17% | c0=97.59 c1=67.53 c2=69.40
+Epoch: 22, Val mIoU: 77.88% | c0=97.57 c1=67.20 c2=68.88
+Epoch: 23 iter: 300, Loss: 0.13
+mIoU: 78.85%
+Epoch: 23, Val mIoU: 79.17% | c0=97.80 c1=68.87 c2=70.85
+Saved best_val.pth (79.17%)
+Epoch: 24, Val mIoU: 78.43% | c0=97.62 c1=67.66 c2=70.00
+Epoch: 25, Val mIoU: 79.20% | c0=97.66 c1=69.51 c2=70.45
+Saved best_val.pth (79.20%)
+Epoch: 26 iter: 350, Loss: 0.12
+mIoU: 79.17%
+Epoch: 26, Val mIoU: 78.02% | c0=97.56 c1=67.51 c2=69.00
+Epoch: 27, Val mIoU: 79.19% | c0=97.69 c1=69.47 c2=70.41
+Epoch: 28, Val mIoU: 79.80% | c0=97.78 c1=69.68 c2=71.94
+Saved best_val.pth (79.80%)
+Epoch: 29, Val mIoU: 78.58% | c0=97.47 c1=69.14 c2=69.12
+Epoch: 30 iter: 400, Loss: 0.12
+mIoU: 79.32%
+Epoch: 30, Val mIoU: 79.93% | c0=97.77 c1=70.21 c2=71.82
+Saved best_val.pth (79.93%)
+Epoch: 31, Val mIoU: 79.25% | c0=97.86 c1=68.94 c2=70.95
+Epoch: 32, Val mIoU: 80.23% | c0=97.94 c1=70.11 c2=72.65
+Saved best_val.pth (80.23%)
+Epoch: 33, Val mIoU: 79.66% | c0=97.80 c1=70.11 c2=71.08
+Epoch: 34 iter: 450, Loss: 0.10
+mIoU: 80.83%
+Epoch: 34, Val mIoU: 80.69% | c0=97.95 c1=71.19 c2=72.94
+Saved best_val.pth (80.69%)
+Epoch: 35, Val mIoU: 79.34% | c0=97.86 c1=69.53 c2=70.63
+Epoch: 36, Val mIoU: 79.79% | c0=97.77 c1=70.39 c2=71.22
+Epoch: 37, Val mIoU: 80.69% | c0=97.86 c1=71.87 c2=72.32
+Epoch: 38 iter: 500, Loss: 0.10
+mIoU: 80.88%
+Epoch: 38, Val mIoU: 80.32% | c0=97.79 c1=71.35 c2=71.82
+Epoch: 39, Val mIoU: 81.13% | c0=97.96 c1=72.08 c2=73.35
+Saved best_val.pth (81.13%)
+Epoch: 40, Val mIoU: 80.15% | c0=97.85 c1=70.86 c2=71.73
+Epoch: 41, Val mIoU: 80.28% | c0=97.99 c1=70.48 c2=72.38
+Epoch: 42 iter: 550, Loss: 0.10
+mIoU: 81.11%
+Epoch: 42, Val mIoU: 81.06% | c0=97.93 c1=72.33 c2=72.94
+Epoch: 43, Val mIoU: 80.81% | c0=97.90 c1=72.07 c2=72.46
+Epoch: 44, Val mIoU: 81.56% | c0=98.03 c1=72.71 c2=73.94
+Saved best_val.pth (81.56%)
+Epoch: 45, Val mIoU: 81.46% | c0=98.04 c1=72.63 c2=73.70
+Epoch: 46 iter: 600, Loss: 0.09
+mIoU: 81.94%
+Epoch: 46, Val mIoU: 80.17% | c0=97.73 c1=71.50 c2=71.28
+Epoch: 47, Val mIoU: 79.53% | c0=97.98 c1=68.99 c2=71.62
+Epoch: 48, Val mIoU: 80.85% | c0=98.02 c1=71.72 c2=72.83
+Epoch: 49 iter: 650, Loss: 0.09
+mIoU: 81.82%
+Epoch: 49, Val mIoU: 81.26% | c0=97.97 c1=72.29 c2=73.52
+Epoch: 50, Val mIoU: 81.48% | c0=98.01 c1=72.86 c2=73.58
+Epoch: 51, Val mIoU: 81.01% | c0=97.90 c1=72.23 c2=72.89
+Epoch: 52, Val mIoU: 81.15% | c0=97.95 c1=72.48 c2=73.02
+Epoch: 53 iter: 700, Loss: 0.09
+mIoU: 82.28%
+Epoch: 53, Val mIoU: 81.83% | c0=98.01 c1=73.33 c2=74.15
+Saved best_val.pth (81.83%)
+Epoch: 54, Val mIoU: 81.74% | c0=98.10 c1=72.89 c2=74.23
+Epoch: 55, Val mIoU: 81.45% | c0=97.93 c1=73.19 c2=73.24
+Epoch: 56, Val mIoU: 81.99% | c0=98.02 c1=73.68 c2=74.26
+Saved best_val.pth (81.99%)
+Epoch: 57 iter: 750, Loss: 0.09
+mIoU: 82.56%
+Epoch: 57, Val mIoU: 81.54% | c0=97.97 c1=73.13 c2=73.51
+Epoch: 58, Val mIoU: 81.96% | c0=98.01 c1=73.53 c2=74.36
+Epoch: 59, Val mIoU: 81.75% | c0=97.99 c1=73.36 c2=73.89
+Epoch: 60, Val mIoU: 81.01% | c0=97.85 c1=73.03 c2=72.14
+Epoch: 61 iter: 800, Loss: 0.08
+mIoU: 82.71%
+Epoch: 61, Val mIoU: 81.78% | c0=98.00 c1=73.33 c2=74.00
+Epoch: 62, Val mIoU: 81.85% | c0=98.01 c1=73.44 c2=74.10
+Epoch: 63, Val mIoU: 81.64% | c0=98.01 c1=73.32 c2=73.58
+Epoch: 64, Val mIoU: 81.67% | c0=98.01 c1=73.39 c2=73.63
+Epoch: 65 iter: 850, Loss: 0.08
+mIoU: 82.89%
+Epoch: 65, Val mIoU: 81.37% | c0=97.92 c1=73.17 c2=73.03
+Epoch: 66, Val mIoU: 81.60% | c0=97.98 c1=73.24 c2=73.57
+Epoch: 67, Val mIoU: 81.68% | c0=98.01 c1=73.45 c2=73.57
+Epoch: 68, Val mIoU: 82.33% | c0=98.06 c1=74.14 c2=74.79
+Saved best_val.pth (82.33%)
+Epoch: 69 iter: 900, Loss: 0.08
+mIoU: 82.90%
+Epoch: 69, Val mIoU: 81.23% | c0=98.06 c1=72.52 c2=73.10
+Epoch: 70, Val mIoU: 82.55% | c0=98.08 c1=74.43 c2=75.14
+Saved best_val.pth (82.55%)
+Epoch: 71, Val mIoU: 81.75% | c0=98.10 c1=73.11 c2=74.04
+Epoch: 72, Val mIoU: 81.83% | c0=98.06 c1=73.24 c2=74.18
+Epoch: 73 iter: 950, Loss: 0.08
+mIoU: 83.02%
+Epoch: 73, Val mIoU: 81.14% | c0=97.85 c1=73.36 c2=72.22
+Epoch: 74, Val mIoU: 80.88% | c0=97.72 c1=72.85 c2=72.07
+Epoch: 75, Val mIoU: 81.76% | c0=98.04 c1=72.99 c2=74.24
+Epoch: 76 iter: 1000, Loss: 0.08
+mIoU: 83.18%
+Epoch: 76, Val mIoU: 81.14% | c0=97.93 c1=73.13 c2=72.36
+Epoch: 77, Val mIoU: 82.26% | c0=98.02 c1=74.45 c2=74.30
+Epoch: 78, Val mIoU: 81.96% | c0=98.08 c1=73.55 c2=74.24
+Epoch: 79, Val mIoU: 82.46% | c0=98.12 c1=74.29 c2=74.97
+Epoch: 80 iter: 1050, Loss: 0.08
+mIoU: 83.21%
+Epoch: 80, Val mIoU: 82.16% | c0=98.10 c1=73.99 c2=74.40
+Epoch: 81, Val mIoU: 82.51% | c0=98.11 c1=74.38 c2=75.03
+Epoch: 82, Val mIoU: 82.08% | c0=98.13 c1=73.71 c2=74.41
+Epoch: 83, Val mIoU: 82.35% | c0=98.09 c1=74.31 c2=74.63
+Epoch: 84 iter: 1100, Loss: 0.08
+mIoU: 83.64%
+Epoch: 84, Val mIoU: 81.62% | c0=97.98 c1=73.84 c2=73.04
+Epoch: 85, Val mIoU: 82.16% | c0=98.16 c1=73.62 c2=74.69
+Epoch: 86, Val mIoU: 82.44% | c0=98.16 c1=73.68 c2=75.46
+Epoch: 87, Val mIoU: 80.80% | c0=98.10 c1=71.45 c2=72.83
+Epoch: 88 iter: 1150, Loss: 0.08
+mIoU: 83.25%
+Epoch: 88, Val mIoU: 82.44% | c0=98.11 c1=74.27 c2=74.95
+Epoch: 89, Val mIoU: 82.45% | c0=98.14 c1=74.44 c2=74.77
+Epoch: 90, Val mIoU: 82.38% | c0=98.16 c1=74.12 c2=74.87
+Epoch: 91, Val mIoU: 82.29% | c0=98.15 c1=74.10 c2=74.60
+Epoch: 92 iter: 1200, Loss: 0.08
+mIoU: 83.70%
+Epoch: 92, Val mIoU: 82.04% | c0=98.03 c1=74.19 c2=73.90
+Epoch: 93, Val mIoU: 82.28% | c0=98.08 c1=74.13 c2=74.62
+Epoch: 94, Val mIoU: 82.50% | c0=98.12 c1=74.48 c2=74.88
+Epoch: 95, Val mIoU: 82.57% | c0=98.14 c1=74.49 c2=75.09
+Saved best_val.pth (82.57%)
+Epoch: 96 iter: 1250, Loss: 0.08
+mIoU: 83.96%
+Epoch: 96, Val mIoU: 82.49% | c0=98.14 c1=74.34 c2=74.99
+Epoch: 97, Val mIoU: 82.53% | c0=98.09 c1=74.85 c2=74.65
+Epoch: 98, Val mIoU: 82.13% | c0=98.09 c1=73.81 c2=74.51
+Epoch: 99 iter: 1300, Loss: 0.07
+mIoU: 84.11%
+Epoch: 99, Val mIoU: 82.53% | c0=98.10 c1=74.78 c2=74.71
+{"run_name": "L0__s3", "best_val_miou": 82.57235717773438, "best_epoch": 95, "final_lambdas": [], "split_hash": "675667edf3f35f16"}

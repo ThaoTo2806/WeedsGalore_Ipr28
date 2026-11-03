@@ -1,0 +1,7 @@
+{
+  "run_name": "MCSD__s4",
+  "best_val_miou": 82.95936584472656,
+  "best_epoch": 78,
+  "final_lambdas": [],
+  "split_hash": "675667edf3f35f16"
+}
