@@ -191,7 +191,7 @@ class LowLevelRefine(nn.Module):
 class SegFormer5Band(nn.Module):
   def __init__(self, num_classes=3, decoder_dim=128, pretrained_backbone=False,
                low_level_channels=48, in_channels=5, use_low_level_refine=True,
-               use_multiscale_fusion=True, encoder=None):
+               use_multiscale_fusion=True, encoder=None, llr_source='raw'):
     super(SegFormer5Band, self).__init__()
     if encoder is not None:
       self.encoder = encoder
@@ -213,10 +213,24 @@ class SegFormer5Band(nn.Module):
         nn.ReLU(inplace=True),
       )
     self.use_low_level_refine = use_low_level_refine
+    # llr_source (controls requested in the review): 'raw' = LiteSent (raw 5-band branch);
+    # 'none' = same 1/2-resolution refine decoder WITHOUT any low-level input;
+    # 'f1' = low-level input is the MiT stage-1 feature F1 (upsampled x2) instead of raw bands.
+    if llr_source not in ('raw', 'none', 'f1'):
+      raise ValueError('llr_source must be raw, none or f1')
+    self.llr_source = llr_source
     if use_low_level_refine:
-      self.low_level = LowLevelRefine(in_channels=in_channels, out_channels=low_level_channels)
+      refine_in = decoder_dim + (0 if llr_source == 'none' else low_level_channels)
+      if llr_source == 'raw':
+        self.low_level = LowLevelRefine(in_channels=in_channels, out_channels=low_level_channels)
+      elif llr_source == 'f1':
+        self.low_level = nn.Sequential(
+          nn.Conv2d(32, low_level_channels, kernel_size=1, bias=False),
+          nn.BatchNorm2d(low_level_channels),
+          nn.ReLU(inplace=True),
+        )
       self.refine = nn.Sequential(
-        nn.Conv2d(decoder_dim + low_level_channels, decoder_dim, kernel_size=3, padding=1, bias=False),
+        nn.Conv2d(refine_in, decoder_dim, kernel_size=3, padding=1, bias=False),
         nn.BatchNorm2d(decoder_dim),
         nn.ReLU(inplace=True),
         nn.Conv2d(decoder_dim, decoder_dim, kernel_size=3, padding=1, groups=decoder_dim, bias=False),
@@ -242,9 +256,16 @@ class SegFormer5Band(nn.Module):
       coarse = self.linear1(feature1)
 
     if self.use_low_level_refine:
-      low_level_feat = self.low_level(x)
-      coarse_up = F.interpolate(coarse, size=low_level_feat.shape[-2:], mode='bilinear', align_corners=False)
-      coarse = self.refine(torch.cat([coarse_up, low_level_feat], dim=1))
+      half_size = ((input_size[0] + 1) // 2, (input_size[1] + 1) // 2)  # = stride-2 conv output
+      coarse_up = F.interpolate(coarse, size=half_size, mode='bilinear', align_corners=False)
+      if self.llr_source == 'raw':
+        parts = [coarse_up, self.low_level(x)]
+      elif self.llr_source == 'f1':
+        f1_up = F.interpolate(feature1, size=half_size, mode='bilinear', align_corners=False)
+        parts = [coarse_up, self.low_level(f1_up)]
+      else:
+        parts = [coarse_up]
+      coarse = self.refine(torch.cat(parts, dim=1))
 
     output = self.classifier(coarse)
     return F.interpolate(output, size=input_size, mode='bilinear', align_corners=False)

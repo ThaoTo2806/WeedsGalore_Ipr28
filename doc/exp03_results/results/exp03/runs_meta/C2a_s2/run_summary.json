@@ -1,0 +1,10 @@
+{
+  "run_name": "C2a__s2",
+  "best_val_miou": 82.31840515136719,
+  "best_epoch": 90,
+  "final_lambdas": [
+    0.6275938749313354,
+    0.5577118992805481
+  ],
+  "split_hash": "675667edf3f35f16"
+}

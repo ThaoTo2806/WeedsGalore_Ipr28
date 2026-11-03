@@ -1,0 +1,38 @@
+24 eval summaries -> results/exp03/metrics.csv
+C2a_s0                       val   ovr=none     mIoU=82.24 crop=73.91 weed=74.69 SWR=46.61 lam=0.5047;0.6245
+C2a_s1                       val   ovr=none     mIoU=82.78 crop=74.93 weed=75.28 SWR=47.58 lam=0.5214;0.5887
+C2a_s2                       val   ovr=none     mIoU=82.32 crop=74.06 weed=74.75 SWR=42.26 lam=0.6076;0.5449
+C3K5a_s0                     val   ovr=none     mIoU=82.79 crop=74.94 weed=75.30 SWR=49.52 lam=0.8300;0.8887
+C3K5a_s1                     val   ovr=none     mIoU=83.08 crop=75.04 weed=76.00 SWR=40.97 lam=0.7819;0.9319
+C3K5a_s2                     val   ovr=none     mIoU=82.81 crop=75.07 weed=75.23 SWR=50.81 lam=0.8624;0.9147
+C3a_s0_noise-dilate3         val   ovr=none     mIoU=82.44 crop=74.45 weed=74.77 SWR=48.71 lam=0.8533;0.8241
+C3a_s0_noise-drop0.3         val   ovr=none     mIoU=82.52 crop=74.48 weed=74.97 SWR=45.16 lam=0.8533;0.8241
+C3a_s0_noise-shift4          val   ovr=none     mIoU=82.50 crop=74.42 weed=74.96 SWR=45.65 lam=0.8533;0.8241
+C3a_s0_ovr-uniform           val   ovr=uniform  mIoU=81.88 crop=73.23 weed=74.29 SWR=43.23 lam=0.8533;0.8241
+C3a_s0                       val   ovr=none     mIoU=82.55 crop=74.53 weed=75.01 SWR=45.97 lam=0.8533;0.8241
+C3a_s1_ovr-uniform           val   ovr=uniform  mIoU=82.41 crop=74.29 weed=74.79 SWR=43.23 lam=0.8047;0.8611
+C3a_s1                       val   ovr=none     mIoU=82.73 crop=75.00 weed=75.07 SWR=48.87 lam=0.8047;0.8611
+C3a_s2_ovr-uniform           val   ovr=uniform  mIoU=81.88 crop=73.07 weed=74.37 SWR=46.45 lam=0.8710;0.8039
+C3a_s2                       val   ovr=none     mIoU=82.51 crop=74.24 weed=75.08 SWR=50.48 lam=0.8710;0.8039
+C3f_s0_ovr-uniform           val   ovr=uniform  mIoU=82.16 crop=73.80 weed=74.50 SWR=39.52 lam=0.9990;0.9990
+C3f_s0                       val   ovr=none     mIoU=82.96 crop=75.02 weed=75.67 SWR=46.94 lam=0.9990;0.9990
+C3f_s1_ovr-uniform           val   ovr=uniform  mIoU=81.91 crop=73.16 weed=74.41 SWR=39.84 lam=0.9990;0.9990
+C3f_s1                       val   ovr=none     mIoU=82.78 crop=74.80 weed=75.38 SWR=46.29 lam=0.9990;0.9990
+C3f_s2_ovr-uniform           val   ovr=uniform  mIoU=81.59 crop=73.02 weed=73.59 SWR=34.03 lam=0.9990;0.9990
+C3f_s2                       val   ovr=none     mIoU=82.70 crop=74.72 weed=75.22 SWR=49.52 lam=0.9990;0.9990
+L0_s0                        val   ovr=none     mIoU=82.94 crop=75.11 weed=75.55 SWR=49.68 lam=
+L0_s1                        val   ovr=none     mIoU=82.79 crop=74.74 weed=75.46 SWR=46.77 lam=
+L0_s2                        val   ovr=none     mIoU=82.59 crop=74.89 weed=74.75 SWR=52.90 lam=
+train: {"run_name": "C2a__s0", "best_val_miou": 82.2401123046875, "best_epoch": 93, "final_lambdas": [0.5060312151908875, 0.632705807685852], "split_hash": "675667edf3f35f16"}
+train: {"run_name": "C2a__s1", "best_val_miou": 82.77532196044922, "best_epoch": 92, "final_lambdas": [0.5220216512680054, 0.5838783383369446], "split_hash": "675667edf3f35f16"}
+train: {"run_name": "C2a__s2", "best_val_miou": 82.31840515136719, "best_epoch": 90, "final_lambdas": [0.6275938749313354, 0.5577118992805481], "split_hash": "675667edf3f35f16"}
+train: {"run_name": "C3K5a__s0", "best_val_miou": 82.7870101928711, "best_epoch": 93, "final_lambdas": [0.8375129103660583, 0.9030517935752869], "split_hash": "675667edf3f35f16"}
+train: {"run_name": "C3K5a__s1", "best_val_miou": 83.08390808105469, "best_epoch": 82, "final_lambdas": [0.8043244481086731, 0.9493364095687866], "split_hash": "675667edf3f35f16"}
+train: {"run_name": "C3K5a__s2", "best_val_miou": 82.81285858154297, "best_epoch": 96, "final_lambdas": [0.8643665313720703, 0.9179112315177917], "split_hash": "675667edf3f35f16"}
+train: {"run_name": "C3a__s0", "best_val_miou": 82.55290222167969, "best_epoch": 93, "final_lambdas": [0.8595221638679504, 0.8377984762191772], "split_hash": "675667edf3f35f16"}
+train: {"run_name": "C3a__s1", "best_val_miou": 82.73053741455078, "best_epoch": 98, "final_lambdas": [0.8067144155502319, 0.8616047501564026], "split_hash": "675667edf3f35f16"}
+train: {"run_name": "C3a__s2", "best_val_miou": 82.50648498535156, "best_epoch": 95, "final_lambdas": [0.8732264637947083, 0.8170357942581177], "split_hash": "675667edf3f35f16"}
+train: {"run_name": "C3f__s0", "best_val_miou": 82.9566650390625, "best_epoch": 93, "final_lambdas": [0.9990000128746033, 0.9990000128746033], "split_hash": "675667edf3f35f16"}
+train: {"run_name": "C3f__s1", "best_val_miou": 82.77906799316406, "best_epoch": 98, "final_lambdas": [0.9990000128746033, 0.9990000128746033], "split_hash": "675667edf3f35f16"}
+train: {"run_name": "C3f__s2", "best_val_miou": 82.7027587890625, "best_epoch": 96, "final_lambdas": [0.9990000128746033, 0.9990000128746033], "split_hash": "675667edf3f35f16"}
+train: {"run_name": "L0__s2", "best_val_miou": 82.58680725097656, "best_epoch": 96, "final_lambdas": [], "split_hash": "675667edf3f35f16"}

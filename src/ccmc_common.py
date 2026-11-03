@@ -12,6 +12,7 @@ def define_model_flags():
     flags.DEFINE_boolean('ccmc', True, 'checkpoint is a CCMCSegFormer (else SegFormer5Band)')
     flags.DEFINE_boolean('use_low_level_refine', False, 'LLR branch (LiteSent=True, L0/L3=False)')
     flags.DEFINE_boolean('use_multiscale_fusion', True, 'multi-scale decoder fusion')
+    flags.DEFINE_enum('llr_source', 'raw', ['raw', 'none', 'f1'], 'refine-decoder input (SegFormer5Band)')
     flags.DEFINE_enum('prior_mode', 'none', ['none', 'ndvi', 'learned_veg', 'learned_weed',
                                              'learned_free', 'gt_veg', 'gt_weed'],
                       'prior mode used at TRAIN time (architecture)')
@@ -34,7 +35,8 @@ def build_model(F):
     return SegFormer5Band(num_classes=F.num_classes, pretrained_backbone=True,
                           in_channels=F.in_channels,
                           use_low_level_refine=F.use_low_level_refine,
-                          use_multiscale_fusion=F.use_multiscale_fusion)
+                          use_multiscale_fusion=F.use_multiscale_fusion,
+                          llr_source=F.llr_source)
 
 
 def load_checkpoint(net, path, device):

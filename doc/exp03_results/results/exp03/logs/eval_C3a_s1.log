@@ -1,0 +1,7 @@
+{"run_name": "C3a_s1", "split": "val", "prior_override": "none", "prior_noise": "none", "GT_LEAKAGE": true, "instance_source": {"official": 26}, "lambdas": [0.8046596050262451, 0.8611152768135071]}
+mIoU 82.73 | bg 98.12 crop 75.00 weed 75.07 | BIoU crop 62.49 weed 50.82
+  small  n= 620 recall@0.5=48.87 recall@0.3=65.65 cov>=0.5=61.77
+  medium n= 567 recall@0.5=72.49 recall@0.3=78.48 cov>=0.5=94.36
+  large  n= 621 recall@0.5=48.31 recall@0.3=56.36 cov>=0.5=98.71
+  all    n=1808 recall@0.5=56.08 recall@0.3=66.48 cov>=0.5=84.68
+  NOTE: GT prior used -> label leakage; diagnostic only, not a deployable result.

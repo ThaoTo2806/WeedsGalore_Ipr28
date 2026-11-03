@@ -1,0 +1,10 @@
+{
+  "run_name": "C3K5a__s1",
+  "best_val_miou": 83.08390808105469,
+  "best_epoch": 82,
+  "final_lambdas": [
+    0.8043244481086731,
+    0.9493364095687866
+  ],
+  "split_hash": "675667edf3f35f16"
+}

@@ -1,0 +1,287 @@
+Using cuda
+Cuda current device: 0
+Cuda device name: Tesla T4
+Logging to: runs/C3K5a_s1
+Epoch: 0 iter: 1, Loss: 0.96
+mIoU: 16.86%
+Epoch: 0, Val mIoU: 38.26% | c0=93.41 c1=20.90 c2=0.47
+Saved best_val.pth (38.26%)
+lambdas (stages ['2', '3']): 0.4885, 0.5195
+Epoch: 1, Val mIoU: 52.41% | c0=94.82 c1=21.58 c2=40.83
+Saved best_val.pth (52.41%)
+lambdas (stages ['2', '3']): 0.4868, 0.5345
+Epoch: 2, Val mIoU: 53.09% | c0=95.38 c1=18.74 c2=45.13
+Saved best_val.pth (53.09%)
+lambdas (stages ['2', '3']): 0.4888, 0.5433
+Epoch: 3 iter: 50, Loss: 0.59
+mIoU: 44.45%
+Epoch: 3, Val mIoU: 60.45% | c0=95.49 c1=35.66 c2=50.18
+Saved best_val.pth (60.45%)
+lambdas (stages ['2', '3']): 0.4906, 0.5507
+Epoch: 4, Val mIoU: 62.03% | c0=96.52 c1=34.59 c2=54.99
+Saved best_val.pth (62.03%)
+lambdas (stages ['2', '3']): 0.4968, 0.5570
+Epoch: 5, Val mIoU: 68.20% | c0=96.63 c1=47.81 c2=60.15
+Saved best_val.pth (68.20%)
+lambdas (stages ['2', '3']): 0.5057, 0.5624
+Epoch: 6, Val mIoU: 71.36% | c0=96.97 c1=54.08 c2=63.04
+Saved best_val.pth (71.36%)
+lambdas (stages ['2', '3']): 0.5134, 0.5680
+Epoch: 7 iter: 100, Loss: 0.30
+mIoU: 68.51%
+Epoch: 7, Val mIoU: 73.41% | c0=97.08 c1=58.38 c2=64.77
+Saved best_val.pth (73.41%)
+lambdas (stages ['2', '3']): 0.5278, 0.5765
+Epoch: 8, Val mIoU: 73.93% | c0=97.15 c1=59.04 c2=65.61
+Saved best_val.pth (73.93%)
+lambdas (stages ['2', '3']): 0.5440, 0.5919
+Epoch: 9, Val mIoU: 75.24% | c0=97.33 c1=60.58 c2=67.82
+Saved best_val.pth (75.24%)
+lambdas (stages ['2', '3']): 0.5519, 0.6025
+Epoch: 10, Val mIoU: 76.03% | c0=97.44 c1=63.33 c2=67.30
+Saved best_val.pth (76.03%)
+lambdas (stages ['2', '3']): 0.5639, 0.6119
+Epoch: 11 iter: 150, Loss: 0.21
+mIoU: 74.12%
+Epoch: 11, Val mIoU: 73.71% | c0=97.42 c1=57.52 c2=66.18
+lambdas (stages ['2', '3']): 0.5747, 0.6251
+Epoch: 12, Val mIoU: 76.68% | c0=97.57 c1=63.68 c2=68.80
+Saved best_val.pth (76.68%)
+lambdas (stages ['2', '3']): 0.5828, 0.6416
+Epoch: 13, Val mIoU: 77.04% | c0=97.59 c1=64.63 c2=68.89
+Saved best_val.pth (77.04%)
+lambdas (stages ['2', '3']): 0.5903, 0.6466
+Epoch: 14, Val mIoU: 75.70% | c0=97.63 c1=61.94 c2=67.53
+lambdas (stages ['2', '3']): 0.5917, 0.6611
+Epoch: 15 iter: 200, Loss: 0.17
+mIoU: 75.99%
+Epoch: 15, Val mIoU: 76.66% | c0=97.57 c1=63.80 c2=68.60
+lambdas (stages ['2', '3']): 0.5934, 0.6715
+Epoch: 16, Val mIoU: 77.03% | c0=97.45 c1=65.00 c2=68.63
+lambdas (stages ['2', '3']): 0.6076, 0.6867
+Epoch: 17, Val mIoU: 76.22% | c0=97.32 c1=64.05 c2=67.28
+lambdas (stages ['2', '3']): 0.6138, 0.6930
+Epoch: 18, Val mIoU: 75.43% | c0=97.42 c1=62.55 c2=66.31
+lambdas (stages ['2', '3']): 0.6176, 0.7027
+Epoch: 19 iter: 250, Loss: 0.14
+mIoU: 77.86%
+Epoch: 19, Val mIoU: 77.50% | c0=97.64 c1=65.74 c2=69.11
+Saved best_val.pth (77.50%)
+lambdas (stages ['2', '3']): 0.6234, 0.7145
+Epoch: 20, Val mIoU: 78.98% | c0=97.69 c1=68.71 c2=70.55
+Saved best_val.pth (78.98%)
+lambdas (stages ['2', '3']): 0.6260, 0.7216
+Epoch: 21, Val mIoU: 78.55% | c0=97.60 c1=68.25 c2=69.79
+lambdas (stages ['2', '3']): 0.6309, 0.7285
+Epoch: 22, Val mIoU: 79.95% | c0=97.90 c1=69.65 c2=72.29
+Saved best_val.pth (79.95%)
+lambdas (stages ['2', '3']): 0.6405, 0.7351
+Epoch: 23 iter: 300, Loss: 0.13
+mIoU: 78.73%
+Epoch: 23, Val mIoU: 77.85% | c0=97.39 c1=66.73 c2=69.42
+lambdas (stages ['2', '3']): 0.6473, 0.7410
+Epoch: 24, Val mIoU: 79.91% | c0=97.84 c1=70.14 c2=71.74
+lambdas (stages ['2', '3']): 0.6523, 0.7468
+Epoch: 25, Val mIoU: 78.29% | c0=97.67 c1=67.55 c2=69.64
+lambdas (stages ['2', '3']): 0.6551, 0.7536
+Epoch: 26 iter: 350, Loss: 0.11
+mIoU: 79.78%
+Epoch: 26, Val mIoU: 79.37% | c0=97.72 c1=69.41 c2=70.97
+lambdas (stages ['2', '3']): 0.6573, 0.7575
+Epoch: 27, Val mIoU: 80.01% | c0=97.89 c1=70.03 c2=72.10
+Saved best_val.pth (80.01%)
+lambdas (stages ['2', '3']): 0.6571, 0.7626
+Epoch: 28, Val mIoU: 79.78% | c0=97.78 c1=70.29 c2=71.27
+lambdas (stages ['2', '3']): 0.6601, 0.7694
+Epoch: 29, Val mIoU: 80.55% | c0=97.90 c1=71.22 c2=72.54
+Saved best_val.pth (80.55%)
+lambdas (stages ['2', '3']): 0.6642, 0.7751
+Epoch: 30 iter: 400, Loss: 0.11
+mIoU: 80.60%
+Epoch: 30, Val mIoU: 79.43% | c0=97.77 c1=69.81 c2=70.72
+lambdas (stages ['2', '3']): 0.6679, 0.7793
+Epoch: 31, Val mIoU: 79.49% | c0=97.74 c1=69.83 c2=70.89
+lambdas (stages ['2', '3']): 0.6757, 0.7835
+Epoch: 32, Val mIoU: 80.29% | c0=97.83 c1=70.37 c2=72.66
+lambdas (stages ['2', '3']): 0.6815, 0.7928
+Epoch: 33, Val mIoU: 81.19% | c0=98.02 c1=71.91 c2=73.65
+Saved best_val.pth (81.19%)
+lambdas (stages ['2', '3']): 0.6837, 0.7984
+Epoch: 34 iter: 450, Loss: 0.10
+mIoU: 80.95%
+Epoch: 34, Val mIoU: 81.07% | c0=98.00 c1=72.17 c2=73.03
+lambdas (stages ['2', '3']): 0.6837, 0.8034
+Epoch: 35, Val mIoU: 80.94% | c0=97.94 c1=71.66 c2=73.22
+lambdas (stages ['2', '3']): 0.6851, 0.8078
+Epoch: 36, Val mIoU: 79.63% | c0=97.62 c1=70.81 c2=70.46
+lambdas (stages ['2', '3']): 0.6864, 0.8111
+Epoch: 37, Val mIoU: 80.87% | c0=97.91 c1=71.58 c2=73.12
+lambdas (stages ['2', '3']): 0.6900, 0.8144
+Epoch: 38 iter: 500, Loss: 0.09
+mIoU: 81.58%
+Epoch: 38, Val mIoU: 80.20% | c0=97.71 c1=71.31 c2=71.57
+lambdas (stages ['2', '3']): 0.6920, 0.8180
+Epoch: 39, Val mIoU: 81.52% | c0=98.05 c1=72.35 c2=74.18
+Saved best_val.pth (81.52%)
+lambdas (stages ['2', '3']): 0.6959, 0.8243
+Epoch: 40, Val mIoU: 80.13% | c0=97.91 c1=70.68 c2=71.81
+lambdas (stages ['2', '3']): 0.6989, 0.8311
+Epoch: 41, Val mIoU: 78.73% | c0=97.67 c1=68.74 c2=69.78
+lambdas (stages ['2', '3']): 0.7001, 0.8350
+Epoch: 42 iter: 550, Loss: 0.10
+mIoU: 81.40%
+Epoch: 42, Val mIoU: 80.34% | c0=97.89 c1=70.98 c2=72.16
+lambdas (stages ['2', '3']): 0.7050, 0.8403
+Epoch: 43, Val mIoU: 81.03% | c0=97.89 c1=72.02 c2=73.20
+lambdas (stages ['2', '3']): 0.7092, 0.8475
+Epoch: 44, Val mIoU: 80.81% | c0=97.82 c1=72.07 c2=72.54
+lambdas (stages ['2', '3']): 0.7129, 0.8511
+Epoch: 45, Val mIoU: 80.83% | c0=97.91 c1=72.05 c2=72.55
+lambdas (stages ['2', '3']): 0.7176, 0.8535
+Epoch: 46 iter: 600, Loss: 0.09
+mIoU: 81.90%
+Epoch: 46, Val mIoU: 81.11% | c0=97.85 c1=72.49 c2=72.99
+lambdas (stages ['2', '3']): 0.7207, 0.8576
+Epoch: 47, Val mIoU: 81.26% | c0=97.98 c1=72.62 c2=73.19
+lambdas (stages ['2', '3']): 0.7230, 0.8607
+Epoch: 48, Val mIoU: 81.50% | c0=98.02 c1=72.82 c2=73.66
+lambdas (stages ['2', '3']): 0.7240, 0.8628
+Epoch: 49 iter: 650, Loss: 0.09
+mIoU: 82.45%
+Epoch: 49, Val mIoU: 80.83% | c0=97.87 c1=71.72 c2=72.90
+lambdas (stages ['2', '3']): 0.7260, 0.8660
+Epoch: 50, Val mIoU: 81.35% | c0=97.99 c1=72.61 c2=73.45
+lambdas (stages ['2', '3']): 0.7333, 0.8709
+Epoch: 51, Val mIoU: 81.92% | c0=98.04 c1=73.44 c2=74.27
+Saved best_val.pth (81.92%)
+lambdas (stages ['2', '3']): 0.7358, 0.8739
+Epoch: 52, Val mIoU: 80.86% | c0=97.92 c1=72.34 c2=72.34
+lambdas (stages ['2', '3']): 0.7375, 0.8757
+Epoch: 53 iter: 700, Loss: 0.09
+mIoU: 82.48%
+Epoch: 53, Val mIoU: 80.55% | c0=97.86 c1=72.03 c2=71.75
+lambdas (stages ['2', '3']): 0.7373, 0.8791
+Epoch: 54, Val mIoU: 82.04% | c0=98.04 c1=73.53 c2=74.55
+Saved best_val.pth (82.04%)
+lambdas (stages ['2', '3']): 0.7414, 0.8823
+Epoch: 55, Val mIoU: 80.73% | c0=97.79 c1=72.55 c2=71.84
+lambdas (stages ['2', '3']): 0.7435, 0.8853
+Epoch: 56, Val mIoU: 81.30% | c0=97.93 c1=72.82 c2=73.14
+lambdas (stages ['2', '3']): 0.7469, 0.8900
+Epoch: 57 iter: 750, Loss: 0.09
+mIoU: 82.47%
+Epoch: 57, Val mIoU: 80.91% | c0=97.87 c1=72.34 c2=72.52
+lambdas (stages ['2', '3']): 0.7496, 0.8930
+Epoch: 58, Val mIoU: 80.16% | c0=97.82 c1=71.10 c2=71.57
+lambdas (stages ['2', '3']): 0.7497, 0.8943
+Epoch: 59, Val mIoU: 81.44% | c0=97.94 c1=73.18 c2=73.19
+lambdas (stages ['2', '3']): 0.7491, 0.8961
+Epoch: 60, Val mIoU: 81.69% | c0=98.00 c1=73.25 c2=73.82
+lambdas (stages ['2', '3']): 0.7508, 0.8972
+Epoch: 61 iter: 800, Loss: 0.08
+mIoU: 82.98%
+Epoch: 61, Val mIoU: 81.08% | c0=97.97 c1=72.41 c2=72.87
+lambdas (stages ['2', '3']): 0.7541, 0.8987
+Epoch: 62, Val mIoU: 82.31% | c0=98.14 c1=73.86 c2=74.94
+Saved best_val.pth (82.31%)
+lambdas (stages ['2', '3']): 0.7539, 0.9015
+Epoch: 63, Val mIoU: 80.97% | c0=98.02 c1=71.87 c2=73.03
+lambdas (stages ['2', '3']): 0.7539, 0.9051
+Epoch: 64, Val mIoU: 82.29% | c0=98.09 c1=74.10 c2=74.68
+lambdas (stages ['2', '3']): 0.7579, 0.9086
+Epoch: 65 iter: 850, Loss: 0.08
+mIoU: 82.99%
+Epoch: 65, Val mIoU: 81.49% | c0=98.03 c1=72.58 c2=73.87
+lambdas (stages ['2', '3']): 0.7578, 0.9096
+Epoch: 66, Val mIoU: 81.40% | c0=98.06 c1=72.59 c2=73.54
+lambdas (stages ['2', '3']): 0.7617, 0.9107
+Epoch: 67, Val mIoU: 81.32% | c0=97.92 c1=73.21 c2=72.83
+lambdas (stages ['2', '3']): 0.7614, 0.9129
+Epoch: 68, Val mIoU: 82.32% | c0=98.07 c1=74.16 c2=74.75
+Saved best_val.pth (82.32%)
+lambdas (stages ['2', '3']): 0.7613, 0.9149
+Epoch: 69 iter: 900, Loss: 0.08
+mIoU: 83.22%
+Epoch: 69, Val mIoU: 81.32% | c0=97.96 c1=72.85 c2=73.14
+lambdas (stages ['2', '3']): 0.7609, 0.9160
+Epoch: 70, Val mIoU: 81.93% | c0=98.06 c1=73.63 c2=74.11
+lambdas (stages ['2', '3']): 0.7632, 0.9185
+Epoch: 71, Val mIoU: 81.92% | c0=98.04 c1=73.67 c2=74.04
+lambdas (stages ['2', '3']): 0.7628, 0.9196
+Epoch: 72, Val mIoU: 82.43% | c0=98.08 c1=74.28 c2=74.92
+Saved best_val.pth (82.43%)
+lambdas (stages ['2', '3']): 0.7651, 0.9197
+Epoch: 73 iter: 950, Loss: 0.08
+mIoU: 83.38%
+Epoch: 73, Val mIoU: 81.41% | c0=97.88 c1=73.56 c2=72.79
+lambdas (stages ['2', '3']): 0.7691, 0.9209
+Epoch: 74, Val mIoU: 80.56% | c0=97.84 c1=72.23 c2=71.61
+lambdas (stages ['2', '3']): 0.7717, 0.9229
+Epoch: 75, Val mIoU: 81.71% | c0=97.96 c1=73.44 c2=73.72
+lambdas (stages ['2', '3']): 0.7709, 0.9248
+Epoch: 76 iter: 1000, Loss: 0.08
+mIoU: 83.30%
+Epoch: 76, Val mIoU: 81.50% | c0=97.92 c1=73.52 c2=73.06
+lambdas (stages ['2', '3']): 0.7712, 0.9266
+Epoch: 77, Val mIoU: 82.52% | c0=98.10 c1=74.55 c2=74.90
+Saved best_val.pth (82.52%)
+lambdas (stages ['2', '3']): 0.7708, 0.9279
+Epoch: 78, Val mIoU: 80.78% | c0=98.04 c1=71.79 c2=72.53
+lambdas (stages ['2', '3']): 0.7695, 0.9282
+Epoch: 79, Val mIoU: 82.37% | c0=98.07 c1=74.33 c2=74.72
+lambdas (stages ['2', '3']): 0.7736, 0.9288
+Epoch: 80 iter: 1050, Loss: 0.08
+mIoU: 83.66%
+Epoch: 80, Val mIoU: 82.77% | c0=98.15 c1=74.79 c2=75.38
+Saved best_val.pth (82.77%)
+lambdas (stages ['2', '3']): 0.7769, 0.9300
+Epoch: 81, Val mIoU: 82.21% | c0=98.09 c1=74.25 c2=74.31
+lambdas (stages ['2', '3']): 0.7797, 0.9314
+Epoch: 82, Val mIoU: 83.08% | c0=98.21 c1=75.04 c2=76.00
+Saved best_val.pth (83.08%)
+lambdas (stages ['2', '3']): 0.7819, 0.9319
+Epoch: 83, Val mIoU: 82.44% | c0=98.07 c1=74.48 c2=74.77
+lambdas (stages ['2', '3']): 0.7825, 0.9327
+Epoch: 84 iter: 1100, Loss: 0.08
+mIoU: 83.79%
+Epoch: 84, Val mIoU: 81.94% | c0=98.10 c1=73.51 c2=74.22
+lambdas (stages ['2', '3']): 0.7823, 0.9340
+Epoch: 85, Val mIoU: 82.26% | c0=98.10 c1=74.20 c2=74.48
+lambdas (stages ['2', '3']): 0.7846, 0.9354
+Epoch: 86, Val mIoU: 82.40% | c0=98.09 c1=74.46 c2=74.65
+lambdas (stages ['2', '3']): 0.7870, 0.9367
+Epoch: 87, Val mIoU: 82.72% | c0=98.16 c1=74.66 c2=75.35
+lambdas (stages ['2', '3']): 0.7880, 0.9380
+Epoch: 88 iter: 1150, Loss: 0.07
+mIoU: 83.97%
+Epoch: 88, Val mIoU: 82.59% | c0=98.10 c1=74.83 c2=74.83
+lambdas (stages ['2', '3']): 0.7872, 0.9386
+Epoch: 89, Val mIoU: 82.26% | c0=98.06 c1=74.48 c2=74.23
+lambdas (stages ['2', '3']): 0.7894, 0.9394
+Epoch: 90, Val mIoU: 82.75% | c0=98.09 c1=74.97 c2=75.19
+lambdas (stages ['2', '3']): 0.7916, 0.9407
+Epoch: 91, Val mIoU: 82.81% | c0=98.18 c1=74.84 c2=75.41
+lambdas (stages ['2', '3']): 0.7942, 0.9404
+Epoch: 92 iter: 1200, Loss: 0.07
+mIoU: 84.26%
+Epoch: 92, Val mIoU: 82.66% | c0=98.14 c1=74.63 c2=75.22
+lambdas (stages ['2', '3']): 0.7966, 0.9410
+Epoch: 93, Val mIoU: 82.54% | c0=98.12 c1=74.33 c2=75.16
+lambdas (stages ['2', '3']): 0.7996, 0.9426
+Epoch: 94, Val mIoU: 83.05% | c0=98.18 c1=75.18 c2=75.78
+lambdas (stages ['2', '3']): 0.8012, 0.9442
+Epoch: 95, Val mIoU: 82.27% | c0=98.04 c1=74.44 c2=74.34
+lambdas (stages ['2', '3']): 0.8007, 0.9452
+Epoch: 96 iter: 1250, Loss: 0.08
+mIoU: 83.89%
+Epoch: 96, Val mIoU: 82.75% | c0=98.18 c1=74.59 c2=75.48
+lambdas (stages ['2', '3']): 0.8003, 0.9461
+Epoch: 97, Val mIoU: 82.49% | c0=98.19 c1=74.16 c2=75.12
+lambdas (stages ['2', '3']): 0.8029, 0.9469
+Epoch: 98, Val mIoU: 83.00% | c0=98.14 c1=75.33 c2=75.55
+lambdas (stages ['2', '3']): 0.8059, 0.9484
+Epoch: 99 iter: 1300, Loss: 0.07
+mIoU: 84.03%
+Epoch: 99, Val mIoU: 82.68% | c0=98.13 c1=74.95 c2=74.97
+lambdas (stages ['2', '3']): 0.8043, 0.9493
+{"run_name": "C3K5a__s1", "best_val_miou": 83.08390808105469, "best_epoch": 82, "final_lambdas": [0.8043244481086731, 0.9493364095687866], "split_hash": "675667edf3f35f16"}

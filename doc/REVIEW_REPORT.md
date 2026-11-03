@@ -8,7 +8,8 @@
 | Gate | Câu hỏi | Bằng chứng cần có | Trạng thái | Cập nhật |
 |---|---|---|---|---|
 | G1 | SR có phải nút thắt của cỏ nhỏ? | Diag-D0 + Diag-D2 (Exp01) | **PASS có điều kiện** (stage 2; hiệu ứng nhỏ, tương quan, không phải nhân quả) | 02/11/2026, Exp01 |
-| G2 | Oracle có bác bỏ động lực Weed-specific? (sàng lọc một chiều) | C3 so với C2, C3 so với C3-K5 | **INCONCLUSIVE — Exp02 vô hiệu** (λ kẹt ở 0,05, cơ chế chưa hoạt động); chạy lại ở Exp03 | 02/11/2026, Exp02 |
+| G2 | Oracle có bác bỏ động lực Weed-specific? (sàng lọc một chiều) | C3 so với C2, C3 so với C3-K5 | **INCONCLUSIVE** (C3a − C2a = +2,96 [−1,26; +8,31]). **Quy tắc dừng CCMC-SR đã kích hoạt:** cơ chế hoạt động nhưng C3a/C3f không vượt L0 dù có rò rỉ nhãn | 03/11/2026, Exp03 |
+| G3, G4 | — | — | **NOT RUN** (CCMC-SR dừng theo quy tắc 4.7) | 03/11/2026 |
 | G3 | H2: learned Weed prior hơn learned Veg prior? | L3 − L2 ≥ +3 pp Small-Weed Recall, CI > 0, Crop không giảm quá 1 pp (Exp03) | PENDING | — |
 | G4 | Lợi ích có đến từ việc nối prior vào SR? | L3 > K1, K2, K3, K5, K6 (Exp04–05) | PENDING | — |
 
@@ -17,7 +18,8 @@
 | 00 Code + setup | DONE | 44/44 unit test pass trên Kaggle (`transformers 4.45.2`, torch 2.11, T4, commit `ea354cd`) |
 | 01 Baseline + chẩn đoán | DONE | L0 s0/s1, LiteSent s0, D0, D2 (2 seed), profile. Diag-D1 NOT RUN (đúng kế hoạch). Xem mục 3 |
 | 02 Oracle C2/C3 | DONE nhưng **vô hiệu về khoa học** | λ không học được; xem mục 4 |
-| 03 Oracle với λ hoạt động, 3 seed | Sẵn sàng chạy | [03_oracle_active_lambda.md](03_oracle_active_lambda.md) |
+| 03 Oracle với λ hoạt động, 3 seed | DONE | 13/13 run; xem mục 5 |
+| 04 Định vị nút thắt (decoder 1/2, nguồn chi tiết) | Sẵn sàng chạy | [04_bottleneck_localization.md](04_bottleneck_localization.md) |
 
 ---
 
@@ -247,3 +249,83 @@ Artifact: [doc/exp02_results/results/exp02](exp02_results/results/exp02).
 - **CCMC-SR không bỏ bớt gì của mô hình pretrained.** Toàn bộ trọng số MiT-B0 được giữ nguyên; chỉ **đầu vào của phép giảm K/V** được tái trọng số theo prior lớp. Đây là sửa đổi toán tử bên trong backbone, không phải cắt bớt hay ghép mô hình.
 - **Không thể bảo đảm tuyệt đối "chưa có paper nào công bố".** Điều làm được là rà soát có hệ thống: tìm kiếm có ghi lại từ khóa, cơ sở dữ liệu, ngày, và đối chiếu công thức với các công trình gần nhất ở mục 4 của kế hoạch (MLSRS-SegFormer APW, Dynamic Spatial Sparsification, ALGM, VLTP, SegMAN). Việc này nằm ở P7, nhưng **chỉ có ý nghĩa nếu Exp03 cho thấy toán tử có tác dụng**. Một phương pháp mới mà không có hiệu quả thì cũng không đăng Q1 được.
 - Nếu Exp03 rơi vào hai dòng đầu của bảng 4.7, phương án dự phòng **vẫn nằm trong kế hoạch** (mục 4.3): "dual-statistic SR". Phương án này dùng một nhánh gộp có trọng số theo prior và một nhánh SR chuẩn, chung conv và pha trộn bằng hệ số học được. Lý do được dẫn từ Diag-D2: `pre_max` giữ tín hiệu cỏ nhỏ tốt hơn hẳn `post_sr`. Phương án này chỉ được mở khi có lý do ghi rõ trong báo cáo, không mở tự động.
+
+---
+
+## 5. Exp03 — Oracle với λ hoạt động, 3 seed (review 03/11/2026)
+
+Artifact: [doc/exp03_results/results/exp03](exp03_results/results/exp03). 13/13 run DONE. So sánh dùng bootstrap phân tầng (seed paired + ảnh).
+
+### 5.1 λ đã học được (sửa lỗi Exp02 thành công)
+
+| Mô hình | λ cuối (stage 2; 3), theo seed |
+|---|---|
+| C3a (GT-Weed, CCMC-SR) | 0,85; 0,82 · 0,80; 0,86 · 0,87; 0,80 |
+| C2a (GT-Veg, CCMC-SR) | 0,50; 0,62 · 0,52; 0,59 · 0,61; 0,54 |
+| C3K5a (GT-Weed, gate trước SR) | 0,83; 0,89 · 0,78; 0,93 · 0,86; 0,91 |
+| C3f | 0,999 (cố định) |
+
+Khi prior là GT-Weed, λ tăng mạnh hơn GT-Veg. Mô hình **muốn** dùng prior Weed nhiều hơn prior thực vật, đây là một quan sát mô tả.
+
+### 5.2 Kết quả chính (Small-Weed Recall, val)
+
+| Mô hình | s0 / s1 / s2 | Trung bình | So với L0 [CI 95 %] |
+|---|---|---|---|
+| **L0** | 49,68 / 46,77 / 52,90 | **49,78** (SD 3,1) | — |
+| C3a | 45,97 / 48,87 / 50,48 | 48,44 | −1,34 [−4,74; +2,30] |
+| C3f (λ = 1) | 46,94 / 46,29 / 49,52 | 47,58 | −2,20 [−5,14; +0,35] |
+| C2a | 46,61 / 47,58 / 42,26 | 45,48 | −4,30 [−10,32; +0,92] |
+| C3K5a | 49,52 / 40,97 / 50,81 | 47,10 | (C3a − C3K5a = +1,34 [−3,78; +7,54]) |
+| LiteSent (1 seed, tham chiếu) | 64,19 | — | +14,5 (Exp01) |
+
+mIoU của mọi mô hình nằm trong khoảng 82,4–82,9, không khác L0.
+
+### 5.3 Cơ chế **có** hoạt động: đổi prior trên cùng checkpoint
+
+| Checkpoint | GT-Weed so với prior đồng đều (Small-Weed Recall) | cov_small |
+|---|---|---|
+| C3a | **+4,14 [+1,84; +6,69]** | +5,48 [+2,92; +8,27] |
+| C3f | **+9,78 [+5,27; +15,67]** | +14,09 [+9,21; +19,53] |
+
+Diễn giải: mô hình **dựa vào** prior. Bỏ prior đi thì tụt, ví dụ C3f với prior đồng đều chỉ còn 37,8 so với L0 49,8. Tuy vậy, dùng prior cũng **không vượt** L0. Toán tử chỉ khiến mạng *chuyển phụ thuộc* sang prior, không bổ sung năng lực. Ngay cả nhãn thật đưa qua K/V SR của stage 2–3 cũng không tăng recall cỏ nhỏ.
+
+### 5.4 A/A test: bằng chứng phương pháp thống kê
+
+L0_s0 so với L0_s1 (cùng mô hình, chỉ khác seed), chỉ bootstrap theo ảnh: Small-Weed Recall **+2,90 [+0,21; +5,41]**, cov_small **+5,32 [+2,98; +7,32]**, đều "có ý nghĩa". Hai mô hình giống hệt nhau nhưng bootstrap theo ảnh vẫn báo khác biệt, tức đây là **dương tính giả**. Kết hợp với độ lệch chuẩn giữa seed của L0 (3,1 pp), kết quả này chứng minh:
+- **(a)** Các so sánh 1 seed trong nhiều bài trên WeedsGalore có thể không đáng tin.
+- **(b)** Bootstrap phân tầng theo seed + ảnh với ≥ 3 seed là bắt buộc.
+
+Đây là đóng góp phương pháp đánh giá **dùng được cho paper**.
+
+### 5.5 Quyết định theo quy tắc đăng ký trước (mục 4.7, dòng 2)
+
+> "Activity rõ, nhưng C3a **và** C3f đều không vượt L0 → toán tử thay đổi đầu ra nhưng không có lợi. **Dừng CCMC-SR; không chuyển sang L3.**"
+
+- **G2:** C3a − C2a = +2,96 [−1,26; +8,31], INCONCLUSIVE. Nhưng câu hỏi này không còn quyết định, vì ngay cả trần oracle cũng không vượt L0.
+- **G3/G4: NOT RUN.** Không chạy L2/L3/K-controls; không claim CCMC-SR.
+- **Giải thích cơ chế (giả thuyết làm việc):** Diag-D2 cho thấy SR ở stage 2 làm mất một phần khả năng giải mã cỏ nhỏ (ΔAUROC ≈ 0,03). Hiệu ứng có thật nhưng **nhỏ và không phải nút thắt chính**. Thông tin dùng để phân đoạn cỏ nhỏ chủ yếu đi qua F1 (stride 4) và decoder, chứ không qua tóm tắt K/V của stage 2–3. LLR giúp +14,5 pp chính vì nó tác động vào độ phân giải đầu ra và chi tiết mức thấp.
+
+### 5.6 Tiến độ: đã được nửa đường chưa?
+
+Trả lời thẳng: **với gói bằng chứng chẩn đoán và đánh giá thì khoảng 40 %; với phương pháp mới cho Q1 thì chưa bắt đầu lại.** Tức là chưa tới nửa đường.
+
+| Phần của paper | Trạng thái | Dùng được không |
+|---|---|---|
+| Baseline tái lập, kiểm toán số liệu cũ, FLOPs/latency đo đúng | DONE | Có |
+| Chẩn đoán cỏ nhỏ (D0: coverage theo bin và theo ngày; lỗi Weed → Background) | DONE | Có |
+| Probe SR (D2): mất thông tin ở stage 2, max-pool giữ tốt hơn | DONE | Có (phân tích) |
+| Oracle CCMC-SR: âm tính có kiểm soát (cơ chế hoạt động nhưng không lợi) | DONE | Có (kết quả âm tính/ablation, **không** phải đóng góp chính) |
+| Phương pháp thống kê: A/A test, bootstrap phân tầng | DONE | Có |
+| **Phương pháp mới vượt baseline có ý nghĩa** | **Chưa có** | Đây là phần quyết định Q1 |
+| Rà soát novelty, 5 seed, test một lần, dataset thứ hai | Chưa | — |
+
+### 5.7 Việc tiếp theo: Exp04, định vị nút thắt trước khi thiết kế phương pháp mới
+
+[04_bottleneck_localization.md](04_bottleneck_localization.md): so LiteSent (decoder 1/2 + băng thô) với **D½-none** (decoder 1/2, không có chi tiết) và **D½-F1** (decoder 1/2, chi tiết lấy từ F1), mỗi cấu hình 3 seed. Thí nghiệm này cũng trả lời trực tiếp hai đối chứng thầy yêu cầu. Bảng diễn giải đã khóa trước trong file Exp04. Phương pháp mới chỉ được thiết kế *sau* khi biết nút thắt nằm ở:
+- (i) độ phân giải decoder,
+- (ii) patch embedding stage 1 của MiT, hay
+- (iii) cách decoder dùng F1.
+
+Nếu là (ii), hướng ưu tiên là **sửa toán tử patch embedding stage 1 bên trong MiT**: giữ trọng số pretrained, không ghép mô hình. Việc này phải rà soát novelty có ghi lại trước khi code.
+
+Code đã thêm: `--llr_source {raw, none, f1}` cho `SegFormer5Band`. Mặc định là `raw` nên checkpoint LiteSent cũ vẫn tải được.
