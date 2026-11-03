@@ -1,0 +1,7 @@
+{
+  "run_name": "PS__s1",
+  "best_val_miou": 81.46006774902344,
+  "best_epoch": 94,
+  "final_lambdas": [],
+  "split_hash": "675667edf3f35f16"
+}

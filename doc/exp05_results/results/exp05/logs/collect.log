@@ -1,0 +1,28 @@
+18 eval summaries -> results/exp05/metrics.csv
+Dnone_s0                     val   ovr=none     mIoU=83.47 crop=75.70 weed=76.41 SWR=59.52 lam=
+Dnone_s1                     val   ovr=none     mIoU=83.79 crop=76.48 weed=76.60 SWR=60.97 lam=
+Dnone_s2                     val   ovr=none     mIoU=83.62 crop=76.41 weed=76.17 SWR=62.74 lam=
+L0_s0                        val   ovr=none     mIoU=82.94 crop=75.11 weed=75.55 SWR=49.68 lam=
+L0_s1                        val   ovr=none     mIoU=82.79 crop=74.74 weed=75.46 SWR=46.77 lam=
+L0_s2                        val   ovr=none     mIoU=82.59 crop=74.89 weed=74.75 SWR=52.90 lam=
+LiteSent_s0                  val   ovr=none     mIoU=84.56 crop=77.44 weed=77.81 SWR=64.19 lam=
+LiteSent_s1                  val   ovr=none     mIoU=84.47 crop=77.46 weed=77.58 SWR=58.06 lam=
+LiteSent_s2                  val   ovr=none     mIoU=84.48 crop=77.11 weed=77.92 SWR=68.39 lam=
+MCSD_s0                      val   ovr=none     mIoU=82.88 crop=74.65 weed=75.74 SWR=53.23 lam=
+MCSD_s1                      val   ovr=none     mIoU=83.52 crop=76.03 weed=76.29 SWR=56.77 lam=
+MCSD_s2                      val   ovr=none     mIoU=83.48 crop=75.73 weed=76.40 SWR=52.26 lam=
+MCSDg_s0                     val   ovr=none     mIoU=83.36 crop=75.39 weed=76.35 SWR=55.65 lam=
+MCSDg_s1                     val   ovr=none     mIoU=83.76 crop=76.38 weed=76.61 SWR=52.10 lam=
+MCSDg_s2                     val   ovr=none     mIoU=83.94 crop=76.42 weed=77.02 SWR=59.03 lam=
+PS_s0                        val   ovr=none     mIoU=82.03 crop=73.40 weed=74.60 SWR=54.35 lam=
+PS_s1                        val   ovr=none     mIoU=81.46 crop=72.60 weed=73.74 SWR=52.42 lam=
+PS_s2                        val   ovr=none     mIoU=79.30 crop=67.69 weed=72.34 SWR=55.32 lam=
+train: {"run_name": "MCSD__s0", "best_val_miou": 82.88243103027344, "best_epoch": 88, "final_lambdas": [], "split_hash": "675667edf3f35f16"}
+train: {"run_name": "MCSD__s1", "best_val_miou": 83.51775360107422, "best_epoch": 92, "final_lambdas": [], "split_hash": "675667edf3f35f16"}
+train: {"run_name": "MCSD__s2", "best_val_miou": 83.47859191894531, "best_epoch": 95, "final_lambdas": [], "split_hash": "675667edf3f35f16"}
+train: {"run_name": "MCSDg__s0", "best_val_miou": 83.35716247558594, "best_epoch": 92, "final_lambdas": [], "split_hash": "675667edf3f35f16"}
+train: {"run_name": "MCSDg__s1", "best_val_miou": 83.7568588256836, "best_epoch": 89, "final_lambdas": [], "split_hash": "675667edf3f35f16"}
+train: {"run_name": "MCSDg__s2", "best_val_miou": 83.93870544433594, "best_epoch": 95, "final_lambdas": [], "split_hash": "675667edf3f35f16"}
+train: {"run_name": "PS__s0", "best_val_miou": 82.03251647949219, "best_epoch": 93, "final_lambdas": [], "split_hash": "675667edf3f35f16"}
+train: {"run_name": "PS__s1", "best_val_miou": 81.46006774902344, "best_epoch": 94, "final_lambdas": [], "split_hash": "675667edf3f35f16"}
+train: {"run_name": "PS__s2", "best_val_miou": 79.3011245727539, "best_epoch": 98, "final_lambdas": [], "split_hash": "675667edf3f35f16"}

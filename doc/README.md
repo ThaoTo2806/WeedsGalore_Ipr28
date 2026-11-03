@@ -28,8 +28,9 @@ flowchart LR
 | 02 | [02_oracle_c2_c3.md](02_oracle_c2_c3.md) | D3 / P3a | C2, C3, C3-K5, C3-K6 × 2 seed (oracle, GT leakage) + L0 đánh giá lại | G2-screen | DONE — vô hiệu (λ kẹt 0,05) |
 | 03 | [03_oracle_active_lambda.md](03_oracle_active_lambda.md) | D3 làm lại / P3a | C3a, C2a, C3f, C3K5a × 3 seed + L0 s2, kiểm tra cơ chế hoạt động, A/A test | G2-screen | DONE — CCMC-SR dừng theo quy tắc |
 | 04 | [04_bottleneck_localization.md](04_bottleneck_localization.md) | Định vị nút thắt | LiteSent s1–s2, decoder 1/2 không chi tiết, decoder 1/2 với F1 (3 seed) | Chọn hướng phương pháp mới | DONE — nút thắt là độ phân giải dự đoán |
-| 05 | [05_mcsd.md](05_mcsd.md) | Phương pháp mới | MCSD, PS (đối chứng), MCSD-g × 3 seed | H-MCSD, H-mech, H-eff | Sẵn sàng chạy |
-| 06+ | (tạo sau review Exp05) | — | Rà soát novelty, 5 seed, test một lần, dataset thứ hai | — | Chưa tạo |
+| 05 | [05_mcsd.md](05_mcsd.md) | Phương pháp mới | MCSD, PS (đối chứng), MCSD-g × 3 seed | H-MCSD, H-mech, H-eff | DONE — MCSD-g PASS (val, 3 seed) |
+| 06 | [06_confirm_5seeds.md](06_confirm_5seeds.md) | Xác nhận | Seed 3–4 cho L0, MCSD-g, MCSD, PS, D½-none, LiteSent + ablation vòng Sinkhorn | Xác nhận độc lập | Sẵn sàng chạy |
+| 07+ | (tạo sau review Exp06) | — | Test một lần, ablation, dataset thứ hai (WeedMap), rà soát novelty | — | Chưa tạo |
 
 ## Ánh xạ cấu hình → cờ dòng lệnh (`src/train.py --ccmc=True`)
 

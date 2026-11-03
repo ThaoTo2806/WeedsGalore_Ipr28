@@ -20,7 +20,8 @@
 | 02 Oracle C2/C3 | DONE nhưng **vô hiệu về khoa học** | λ không học được; xem mục 4 |
 | 03 Oracle với λ hoạt động, 3 seed | DONE | 13/13 run; xem mục 5 |
 | 04 Định vị nút thắt (decoder 1/2, nguồn chi tiết) | DONE | 8/8 run; nút thắt = độ phân giải dự đoán; xem mục 6 |
-| 05 Phương pháp mới MCSD (3 seed) | Sẵn sàng chạy | [05_mcsd.md](05_mcsd.md) |
+| 05 Phương pháp mới MCSD (3 seed) | DONE | 9/9 run; **MCSD-g PASS trên val**; MCSD và H-mech INCONCLUSIVE; xem mục 7 |
+| 06 Xác nhận seed 3–4, bảng 5 seed | Sẵn sàng chạy | [06_confirm_5seeds.md](06_confirm_5seeds.md) |
 
 ---
 
@@ -409,3 +410,60 @@ Xác suất sub-pixel là kế hoạch vận chuyển tối ưu entropic `P = di
 - `train.py`: `--head`, `--sinkhorn_iters`, `--mcsd_tau`, `--spectral_guide`, `--occ_weight`.
 - `ccmc_common.py` / `evaluate_ccmc.py`: hỗ trợ đánh giá và profile MCSD.
 - 6 unit test mới: biên Sinkhorn, xếp sub-pixel, gradient, occupancy loss, forward/backward, decoder khởi tạo trùng L0.
+
+---
+
+## 7. Exp05 — MCSD, PS, MCSD-g, 3 seed (review 03/11/2026)
+
+Artifact: [doc/exp05_results/results/exp05](exp05_results/results/exp05). 9/9 run DONE; mọi so sánh dùng bootstrap phân tầng.
+
+### 7.1 Kết quả (val, trung bình 3 seed)
+
+| Mô hình | Small-Weed Recall | cov_small | mIoU | Crop IoU | Weed IoU | BIoU Weed | GFLOPs | Latency T4 |
+|---|---|---|---|---|---|---|---|---|
+| L0 (1/4 + bilinear) | 49,78 | 62,47 | 82,77 | 74,92 | 75,25 | 52,04 | 13,27 | 14,85 ms |
+| PS (head sub-pixel, không bảo toàn) | 54,03 | 65,75 | **80,93** | **71,23** | 73,56 | 49,39 | 13,54 | 14,52 ms |
+| MCSD | 54,09 | 64,19 | 83,29 | 75,47 | 76,14 | 55,00 | 13,54 | 16,41 ms |
+| **MCSD-g** (MCSD + placement từ 5 băng) | **55,59** | 63,12 | **83,68** | 76,06 | **76,66** | **55,95** | 14,10 | 17,75 ms |
+| D½-none (decoder 1/2 dày) | 61,08 | 70,81 | 83,63 | 76,20 | 76,39 | 55,72 | 40,07 | 21,16 ms |
+| LiteSent (decoder 1/2 + băng thô) | 63,55 | 71,40 | 84,50 | 77,34 | 77,77 | 57,90 | 50,41 | 23,54 ms |
+
+### 7.2 Gate (đã khóa trong 05_mcsd.md)
+
+| Gate | Kết quả | Quyết định |
+|---|---|---|
+| H-MCSD: MCSD − L0 | +4,30 [−0,80; +9,80]; cov_small +1,72 (không ý nghĩa); Weed IoU +0,89, BIoU Weed +2,95 (có ý nghĩa) | **INCONCLUSIVE** |
+| H-mech: MCSD − PS (Small-Weed Recall) | +0,05 [−3,90; +4,23] | **INCONCLUSIVE**. Không claim rằng bảo toàn khối lượng làm tăng recall cỏ nhỏ |
+| Crop guard (đăng ký trước, ≤ 1 pp) | PS − L0: Crop **−3,69 [−6,98; −1,15]**, mIoU −1,84. MCSD − L0: Crop +0,55 | **PS VI PHẠM; MCSD ĐẠT** |
+| (mô tả) MCSD-g − L0 | **+5,81 [+3,25; +8,48]**, cov_small +0,65 (cùng dấu), mIoU +0,91 [+0,12; +1,84], Weed IoU +1,41, BIoU Weed +3,90, Crop +1,15 | **PASS** (3 seed), nhưng là biến thể được chọn sau khi xem val, nên cần xác nhận (Exp06) |
+| H-eff: MCSD-g so với D½-none | Lấy lại **51 %** lợi ích cỏ nhỏ (5,81/11,29) với **3,1 %** FLOPs thêm (+0,83 so với +26,8 G); latency thêm 46 % (+2,9 so với +6,3 ms). mIoU, Weed IoU, BIoU Weed **ngang D½-none** (83,68 / 76,66 / 55,95 so với 83,63 / 76,39 / 55,72) | Đạt mục tiêu Q1 về FLOPs; **không** đạt về latency |
+
+### 7.3 Diễn giải trung thực
+
+1. **Vai trò thật của bảo toàn khối lượng là ổn định hóa, không phải tăng recall.** Head sub-pixel thuần (PS) cũng tăng recall cỏ nhỏ (+4,25 [+1,25; +7,31]) nhưng phá độ chính xác pixel: Crop −3,7, mIoU −1,8, một seed sập (PS s2: Crop 67,7). Ràng buộc Sinkhorn giữ được lợi ích sub-pixel mà **không** làm hỏng Crop/mIoU: MCSD − PS cho mIoU **+2,36 [+1,05; +4,10]**, Crop **+4,24**, BIoU +5,6–5,9. Claim đúng trong paper: *"mass conservation makes sub-cell decoding usable (stable and accuracy-preserving)"*, không phải *"mass conservation increases small-weed recall"*.
+2. **Placement từ 5 băng (NIR/RE) góp phần thêm:** MCSD-g − MCSD cho mIoU +0,39 [+0,12; +0,81] và Crop +0,60, có ý nghĩa; Small-Weed Recall +1,5 không có ý nghĩa. Đây là điểm gắn phương pháp với dữ liệu đa phổ, hữu ích cho câu chuyện ứng dụng.
+3. **Lợi ích của MCSD-g chủ yếu là hình dạng/định vị cỏ nhỏ tốt hơn:** recall@0,5 +5,8, recall@0,3 +3,9, BIoU +3,9, trong khi coverage chỉ +0,65. Nó chưa "tìm thêm" nhiều cỏ bị bỏ sót hoàn toàn. Phần coverage vẫn thua D½-none/LiteSent (−7 pp). Phải ghi đây là giới hạn.
+4. **Bảo toàn khối lượng chỉ gần đúng với 5 vòng:** sai số tỉ lệ lớp lớn nhất trên mỗi ảnh là 0,073 (trung bình 0,059), và khối lượng Weed dự đoán bằng 1,10 lần GT (MCSD s0). Trong paper phải viết "approximately mass-conserving (5 Sinkhorn iterations)". Exp06 đo thêm với 1 và 20 vòng.
+5. **Latency:** FLOPs chỉ +6 % nhưng latency +19,5 % (17,75 so với 14,85 ms). Sinkhorn là các phép elementwise/logsumexp trên tensor 5 chiều, bị giới hạn bởi bộ nhớ chứ không bởi FLOPs. Vẫn nhanh hơn D½-none (21,2 ms) và LiteSent (23,5 ms). Có thể tối ưu sau (ít vòng hơn, kernel gộp).
+6. **Vị trí so với LiteSent:** MCSD-g vẫn thấp hơn LiteSent (Small-Weed Recall −8, mIoU −0,8) nhưng tốn **28 %** FLOPs và **75 %** latency. Hai kịch bản khả thi cho paper: (a) **Pareto hiệu quả**: MCSD-g ngang D½-none về pixel metrics với 35 % FLOPs; (b) **bổ trợ**: gắn MCSD lên decoder 1/2 của LiteSent (ô 2×2), để Exp07 nếu Exp06 xác nhận.
+
+### 7.4 Vấn đề chọn biến thể sau khi xem val
+
+MCSD-g ban đầu đăng ký là "mô tả", và việc chọn nó thay MCSD sau khi xem val là một lựa chọn hậu kiểm (2 biến thể). Để không thiên lệch: (i) **khóa** MCSD-g ngay bây giờ, không tinh chỉnh thêm; (ii) **xác nhận trên seed mới 3–4** (Exp06) bằng quy tắc đã đăng ký trước; (iii) báo cáo cả MCSD và MCSD-g trong paper.
+
+### 7.5 Tiến độ gói bằng chứng Q1 (ước lượng)
+
+| Phần | Trạng thái |
+|---|---|
+| Chẩn đoán, oracle âm tính, định vị nút thắt, phương pháp thống kê | DONE |
+| Phương pháp mới có tín hiệu dương (val, 3 seed) + đối chứng cơ chế + chi phí | DONE |
+| Xác nhận seed mới, bảng 5 seed | Exp06 |
+| Test một lần; ablation (số vòng, τ, occ_weight, ô 2×2 trên LiteSent) | Exp07 |
+| Dataset thứ hai (đề xuất WeedMap, RedEdge 5 băng, cùng bộ băng R,G,B,NIR,RE) | Exp08, cần viết loader |
+| Rà soát novelty đầy đủ (Scopus/IEEE/Scholar), viết bài | Song song |
+
+Ước lượng: khoảng **60 %** gói bằng chứng, nếu Exp06 xác nhận.
+
+### 7.6 Code đã thêm
+
+- [src/scripts/mass_check.py](../src/scripts/mass_check.py): đo sai số bảo toàn khối lượng theo số vòng Sinkhorn (thay script viết tạm bằng `%%writefile`).

@@ -1,0 +1,5 @@
+{
+  "max_row_marginal_error": 0.07338184118270874,
+  "mean_row_marginal_error": 0.05855350024425066,
+  "pred_weed_mass_over_gt": 1.1020134761003675
+}
