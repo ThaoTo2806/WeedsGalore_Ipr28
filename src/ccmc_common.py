@@ -4,6 +4,7 @@ import torch
 from absl import flags
 
 from nets import CCMCSegFormer, SegFormer5Band
+from nets.mcsd import MCSDSegFormer
 
 
 def define_model_flags():
@@ -22,9 +23,18 @@ def define_model_flags():
                       'prior perturbation used at train time')
     flags.DEFINE_list('ccmc_stages', ['2', '3'], 'modulated stages (1-based)')
     flags.DEFINE_float('ccmc_eps', 0.1, 'eps floor')
+    flags.DEFINE_enum('head', 'bilinear', ['bilinear', 'mcsd', 'pixelshuffle'], 'prediction head')
+    flags.DEFINE_integer('sinkhorn_iters', 5, 'Sinkhorn iterations (mcsd)')
+    flags.DEFINE_float('mcsd_tau', 1.0, 'placement temperature (mcsd)')
+    flags.DEFINE_boolean('spectral_guide', False, 'raw-band placement prior (mcsd)')
 
 
 def build_model(F):
+    if F.head != 'bilinear':
+        return MCSDSegFormer(num_classes=F.num_classes, in_channels=F.in_channels,
+                             use_multiscale_fusion=F.use_multiscale_fusion, head=F.head,
+                             sinkhorn_iters=F.sinkhorn_iters, tau=F.mcsd_tau,
+                             spectral_guide=F.spectral_guide)
     if F.ccmc:
         return CCMCSegFormer(num_classes=F.num_classes, in_channels=F.in_channels,
                              use_low_level_refine=F.use_low_level_refine,

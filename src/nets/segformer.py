@@ -243,6 +243,11 @@ class SegFormer5Band(nn.Module):
     return self.decode(x, self.encoder(x))
 
   def decode(self, x, encoder_features):
+    output = self.classifier(self.decode_features(x, encoder_features))
+    return F.interpolate(output, size=x.shape[-2:], mode='bilinear', align_corners=False)
+
+  def decode_features(self, x, encoder_features):
+    """Decoder feature map before the classifier (1/4 res, or 1/2 res with the refine branch)."""
     input_size = x.shape[-2:]
     feature1, feature2, feature3, feature4 = encoder_features
     target_size = feature1.shape[-2:]  # 1/4 resolution
@@ -267,5 +272,4 @@ class SegFormer5Band(nn.Module):
         parts = [coarse_up]
       coarse = self.refine(torch.cat(parts, dim=1))
 
-    output = self.classifier(coarse)
-    return F.interpolate(output, size=input_size, mode='bilinear', align_corners=False)
+    return coarse

@@ -1,0 +1,7 @@
+{
+  "run_name": "DF1__s2",
+  "best_val_miou": 83.77317810058594,
+  "best_epoch": 87,
+  "final_lambdas": [],
+  "split_hash": "675667edf3f35f16"
+}

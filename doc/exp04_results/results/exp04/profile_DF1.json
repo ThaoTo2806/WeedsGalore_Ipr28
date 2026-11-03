@@ -1,0 +1,25 @@
+{
+  "label": "DF1",
+  "input": [
+    1,
+    5,
+    600,
+    600
+  ],
+  "device": "Tesla T4",
+  "torch": "2.11.0+cu128",
+  "precision": "fp32",
+  "batch": 1,
+  "params_M": 3.661667,
+  "prior_head_params": 0,
+  "GFLOPs_flopcounter": 50.299042048,
+  "GMACs": 25.149521024,
+  "modulation_elementwise_Mops": 0.0,
+  "latency_ms_median": 23.418752670288086,
+  "latency_ms_p10": 23.008432579040527,
+  "latency_ms_p90": 24.0215482711792,
+  "latency_ms_mean": 23.450224704742432,
+  "runs": 300,
+  "warmup": 50,
+  "peak_mem_MB": 311.0615234375
+}

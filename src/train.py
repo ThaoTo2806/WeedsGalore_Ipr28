@@ -11,6 +11,7 @@ from nets import (deeplabv3plus_resnet50, deeplabv3plus_resnet50_do,
                   deeplabv3plus_resnet50_attn, deeplabv3plus_resnet34_spectral,
                   SegFormer5Band, UNet, CCMCSegFormer)
 from nets.ccmc_sr import GT_MODES, aux_target
+from nets.mcsd import MCSDSegFormer, occupancy_loss
 from pathlib import Path
 import hashlib
 import json
@@ -130,6 +131,14 @@ flags.DEFINE_float('lam_init', 0.05, 'initial lambda = sigmoid(a)')
 flags.DEFINE_boolean('learn_lambda', True, 'learn lambda (bounded in (0,1)) or keep it fixed')
 flags.DEFINE_float('lam_lr', 0.0, 'separate Adam lr for the lambda logits (0 = same as --lr)')
 flags.DEFINE_float('aux_weight', 0.3, 'weight of the prior aux BCE loss (learned_veg/learned_weed)')
+# --- MCSD: mass-conserving sub-cell decoding (src/nets/mcsd.py) ---
+flags.DEFINE_enum('head', 'bilinear', ['bilinear', 'mcsd', 'pixelshuffle'],
+                  'prediction head of SegFormer5Band without LLR: bilinear (L0), mcsd (proposed), '
+                  'pixelshuffle (control: same heads, no mass conservation)')
+flags.DEFINE_integer('sinkhorn_iters', 5, 'Sinkhorn iterations per cell (mcsd)')
+flags.DEFINE_float('mcsd_tau', 1.0, 'temperature of the placement scores (mcsd)')
+flags.DEFINE_boolean('spectral_guide', False, 'add a full-resolution placement prior from the raw bands')
+flags.DEFINE_float('occ_weight', 0.3, 'weight of the cell-occupancy soft-CE loss (mcsd/pixelshuffle)')
 flags.DEFINE_string('run_name', '', 'run id written to run_config.json (e.g. L3__seed0)')
 flags.DEFINE_boolean('resume', False, 'resume from <out_dir>/last.pth if it exists')
 flags.DEFINE_boolean('detect_anomaly', False, 'torch.autograd anomaly detection (very slow, debug only)')
@@ -250,7 +259,14 @@ def main(_):
                                 num_workers=FLAGS.num_workers, collate_fn=None, drop_last=False)
 
     # Network
-    if FLAGS.ccmc:
+    if FLAGS.head != 'bilinear':
+        if FLAGS.ccmc or FLAGS.use_low_level_refine:
+            raise SystemExit('--head=mcsd/pixelshuffle needs --ccmc=False --use_low_level_refine=False')
+        net = MCSDSegFormer(num_classes=FLAGS.num_classes, in_channels=FLAGS.in_channels,
+                            use_multiscale_fusion=FLAGS.use_multiscale_fusion, head=FLAGS.head,
+                            sinkhorn_iters=FLAGS.sinkhorn_iters, tau=FLAGS.mcsd_tau,
+                            spectral_guide=FLAGS.spectral_guide)
+    elif FLAGS.ccmc:
         net = CCMCSegFormer(num_classes=FLAGS.num_classes, in_channels=FLAGS.in_channels,
                             use_low_level_refine=FLAGS.use_low_level_refine,
                             use_multiscale_fusion=FLAGS.use_multiscale_fusion,
@@ -323,6 +339,7 @@ def main(_):
     Path(FLAGS.out_dir).mkdir(parents=True, exist_ok=True)
 
     use_aux = FLAGS.ccmc and FLAGS.prior_mode in ('learned_veg', 'learned_weed') and FLAGS.aux_weight > 0
+    use_occ = FLAGS.head != 'bilinear' and FLAGS.occ_weight > 0
     bce = torch.nn.BCEWithLogitsLoss()
     run_config = {'run_name': FLAGS.run_name, 'split_hash': split_hash(), 'env': environment_info(),
                   'flags': FLAGS.flag_values_dict(),
@@ -352,6 +369,8 @@ def main(_):
         print(f'Resumed from {last_path} at epoch {start_epoch} (best {best_val_miou:.2f}% @ {best_epoch})')
 
     def forward_train(features, labels, binary_labels):
+        if FLAGS.head != 'bilinear':
+            return net(features, return_aux=True)
         if not FLAGS.ccmc:
             return net(features), None
         prior_mask = binary_labels if is_oracle else None
@@ -388,6 +407,10 @@ def main(_):
                 aux_loss = bce(prior_logits.float(), target)
                 loss = loss + FLAGS.aux_weight * aux_loss
                 epoch_aux += aux_loss.item()
+            if use_occ:
+                occ_loss = occupancy_loss(extras['occ_logits'], labels, FLAGS.num_classes)
+                loss = loss + FLAGS.occ_weight * occ_loss
+                epoch_aux += occ_loss.item()
             epoch_steps += 1
             loss.backward()
             optimizer.step()
@@ -454,7 +477,7 @@ def main(_):
         lambdas = net.encoder.lambdas() if FLAGS.ccmc else []
         record = {'epoch': epoch, 'val_miou': val_miou, 'val_iou': val_scores.tolist(),
                   'train_seg_loss': epoch_seg / max(epoch_steps, 1),
-                  'train_aux_loss': epoch_aux / max(epoch_steps, 1) if use_aux else None,
+                  'train_aux_loss': epoch_aux / max(epoch_steps, 1) if (use_aux or use_occ) else None,
                   'lambdas': lambdas, 'best_val_miou': best_val_miou, 'best_epoch': best_epoch,
                   'epoch_time_s': time.time() - epoch_start}
         with open(history_path, 'a') as f:

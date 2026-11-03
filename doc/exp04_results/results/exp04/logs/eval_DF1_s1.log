@@ -1,0 +1,6 @@
+{"run_name": "DF1_s1", "split": "val", "prior_override": "none", "prior_noise": "none", "GT_LEAKAGE": false, "instance_source": {"official": 26}, "lambdas": []}
+mIoU 83.70 | bg 98.29 crop 76.63 weed 76.20 | BIoU crop 64.88 weed 54.32
+  small  n= 620 recall@0.5=61.77 recall@0.3=74.35 cov>=0.5=70.81
+  medium n= 567 recall@0.5=75.66 recall@0.3=80.07 cov>=0.5=94.36
+  large  n= 621 recall@0.5=48.47 recall@0.3=57.65 cov>=0.5=98.71
+  all    n=1808 recall@0.5=61.56 recall@0.3=70.41 cov>=0.5=87.78

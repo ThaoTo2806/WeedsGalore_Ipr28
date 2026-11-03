@@ -135,6 +135,55 @@ def test_occupancy_and_corruption():
 # Part 1b: metrics
 # ----------------------------------------------------------------------------------------
 
+def test_sinkhorn_marginals_and_placement():
+    from nets.mcsd import sinkhorn_subcell
+    torch.manual_seed(0)
+    b, c, r2, h, w = 2, 3, 16, 5, 7
+    log_q = torch.log_softmax(torch.randn(b, c, h, w), dim=1)
+    scores = torch.randn(b, c, r2, h, w) * 2
+    log_p = sinkhorn_subcell(log_q, scores, iters=50)
+    p = log_p.exp()
+    assert torch.allclose(p.sum(1), torch.ones(b, r2, h, w), atol=1e-5)          # columns exact
+    assert torch.allclose(p.sum(2), r2 * log_q.exp(), atol=1e-3)                 # class mass kept
+    # uniform placement -> every sub-pixel gets the cell fractions
+    p0 = sinkhorn_subcell(log_q, torch.zeros(b, c, r2, h, w), iters=5).exp()
+    assert torch.allclose(p0, log_q.exp().unsqueeze(2).expand_as(p0), atol=1e-5)
+    # a 1/16 weed fraction goes to the sub-pixel with the highest weed score
+    log_q1 = torch.log(torch.tensor([15 / 16 - 1e-4, 1e-4, 1 / 16]).view(1, 3, 1, 1))
+    sc = torch.zeros(1, 3, 16, 1, 1)
+    sc[0, 2, 5] = 8.0
+    p1 = sinkhorn_subcell(log_q1, sc, iters=50).exp()
+    assert p1[0, :, 5, 0, 0].argmax() == 2 and p1[0, 2].sum() > 0.95
+
+
+def test_pixel_shuffle_layout_and_gradient():
+    from nets.mcsd import sinkhorn_subcell
+    import torch.nn.functional as F
+    b, c, r, h, w = 1, 3, 4, 2, 2
+    log_q = torch.log_softmax(torch.randn(b, c, h, w), 1).requires_grad_()
+    scores = torch.randn(b, c, r * r, h, w, requires_grad=True)
+    log_p = sinkhorn_subcell(log_q, scores, iters=5)
+    out = F.pixel_shuffle(log_p.reshape(b, c * r * r, h, w), r)
+    assert out.shape == (b, c, h * r, w * r)
+    # cell (0,0) of the output = sub-pixels of decoder cell (0,0)
+    cell = out[0, :, :r, :r].reshape(c, r * r)
+    assert torch.allclose(cell, log_p[0, :, :, 0, 0])
+    out.exp()[0, 2].sum().backward()
+    assert torch.isfinite(log_q.grad).all() and torch.isfinite(scores.grad).all()
+
+
+def test_occupancy_loss_minimum_at_true_fractions():
+    from nets.mcsd import occupancy_loss
+    labels = torch.zeros(1, 8, 8, dtype=torch.long)
+    labels[0, :2, :2] = 2
+    target = torch.zeros(1, 3, 2, 2)
+    target[0, 0] = 1.0
+    target[0, :, 0, 0] = torch.tensor([12 / 16, 0, 4 / 16])
+    good = occupancy_loss(torch.log(target.clamp(min=1e-6)), labels, 3)
+    bad = occupancy_loss(torch.zeros(1, 3, 2, 2), labels, 3)
+    assert good < bad
+
+
 def test_instance_matching_one_to_one():
     label = np.zeros((60, 60), dtype=np.uint8)
     label[5:10, 5:10] = 2      # small, detected
@@ -310,3 +359,37 @@ def test_stage1_modulation_is_rejected():
     from nets.ccmc_sr import CCMCSegFormer
     with pytest.raises(ValueError):
         CCMCSegFormer(prior_mode='learned_weed', stages=(1, 2))
+
+
+@needs_hf
+@pytest.mark.parametrize('head,guide', [('mcsd', False), ('mcsd', True), ('pixelshuffle', False)])
+def test_mcsd_forward_backward(head, guide):
+    from nets.mcsd import MCSDSegFormer, occupancy_loss
+    torch.manual_seed(0)
+    net = MCSDSegFormer(head=head, spectral_guide=guide).train()
+    x = torch.rand(2, 5, 600, 600)
+    labels = torch.randint(0, 3, (2, 600, 600))
+    out, extras = net(x, return_aux=True)
+    assert out.shape == (2, 3, 600, 600)
+    assert torch.allclose(out.exp().sum(1), torch.ones(2, 600, 600), atol=1e-4)  # valid log-probs
+    loss = torch.nn.functional.cross_entropy(out, labels) + occupancy_loss(extras['occ_logits'], labels, 3)
+    loss.backward()
+    assert net.placement.weight.grad.abs().sum() > 0
+    for name, p in net.named_parameters():
+        if p.grad is not None:
+            assert torch.isfinite(p.grad).all(), name
+
+
+@needs_hf
+def test_mcsd_decoder_init_matches_l0():
+    from nets.mcsd import MCSDSegFormer
+    from nets.segformer import SegFormer5Band
+    torch.manual_seed(0)
+    l0 = SegFormer5Band(pretrained_backbone=True, use_low_level_refine=False)
+    torch.manual_seed(0)
+    m = MCSDSegFormer(head='mcsd')
+    sd0, sdm = l0.state_dict(), m.state_dict()
+    for k in sd0:
+        if k.startswith('classifier'):
+            continue
+        assert torch.equal(sd0[k], sdm[k]), k

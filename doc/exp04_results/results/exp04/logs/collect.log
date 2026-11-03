@@ -1,0 +1,21 @@
+12 eval summaries -> results/exp04/metrics.csv
+DF1_s0                       val   ovr=none     mIoU=83.69 crop=76.09 weed=76.62 SWR=56.45 lam=
+DF1_s1                       val   ovr=none     mIoU=83.70 crop=76.62 weed=76.20 SWR=61.77 lam=
+DF1_s2                       val   ovr=none     mIoU=83.77 crop=76.27 weed=76.76 SWR=55.97 lam=
+Dnone_s0                     val   ovr=none     mIoU=83.47 crop=75.70 weed=76.41 SWR=59.52 lam=
+Dnone_s1                     val   ovr=none     mIoU=83.79 crop=76.48 weed=76.60 SWR=60.97 lam=
+Dnone_s2                     val   ovr=none     mIoU=83.62 crop=76.41 weed=76.17 SWR=62.74 lam=
+L0_s0                        val   ovr=none     mIoU=82.94 crop=75.11 weed=75.55 SWR=49.68 lam=
+L0_s1                        val   ovr=none     mIoU=82.79 crop=74.74 weed=75.46 SWR=46.77 lam=
+L0_s2                        val   ovr=none     mIoU=82.59 crop=74.89 weed=74.75 SWR=52.90 lam=
+LiteSent_s0                  val   ovr=none     mIoU=84.56 crop=77.44 weed=77.81 SWR=64.19 lam=
+LiteSent_s1                  val   ovr=none     mIoU=84.47 crop=77.46 weed=77.58 SWR=58.06 lam=
+LiteSent_s2                  val   ovr=none     mIoU=84.48 crop=77.11 weed=77.92 SWR=68.39 lam=
+train: {"run_name": "DF1__s0", "best_val_miou": 83.6850357055664, "best_epoch": 93, "final_lambdas": [], "split_hash": "675667edf3f35f16"}
+train: {"run_name": "DF1__s1", "best_val_miou": 83.70311737060547, "best_epoch": 98, "final_lambdas": [], "split_hash": "675667edf3f35f16"}
+train: {"run_name": "DF1__s2", "best_val_miou": 83.77317810058594, "best_epoch": 87, "final_lambdas": [], "split_hash": "675667edf3f35f16"}
+train: {"run_name": "Dnone__s0", "best_val_miou": 83.47427368164062, "best_epoch": 94, "final_lambdas": [], "split_hash": "675667edf3f35f16"}
+train: {"run_name": "Dnone__s1", "best_val_miou": 83.7938232421875, "best_epoch": 90, "final_lambdas": [], "split_hash": "675667edf3f35f16"}
+train: {"run_name": "Dnone__s2", "best_val_miou": 83.62419891357422, "best_epoch": 96, "final_lambdas": [], "split_hash": "675667edf3f35f16"}
+train: {"run_name": "LiteSent__s1", "best_val_miou": 84.47386932373047, "best_epoch": 92, "final_lambdas": [], "split_hash": "675667edf3f35f16"}
+train: {"run_name": "LiteSent__s2", "best_val_miou": 84.4824447631836, "best_epoch": 79, "final_lambdas": [], "split_hash": "675667edf3f35f16"}

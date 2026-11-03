@@ -55,6 +55,8 @@ def main(_):
                          'the configuration is frozen on validation (single final run).')
     if FLAGS.num_classes != 3:
         raise SystemExit('CCMC-SR evaluation expects num_classes=3')
+    if FLAGS.head != 'bilinear':
+        FLAGS.ccmc = False  # MCSD / pixelshuffle heads are SegFormer5Band-based, no prior
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     net = load_checkpoint(build_model(FLAGS), FLAGS.ckpt, device).to(device).eval()
     edges, bins_meta = load_bins(FLAGS.bins_json)
@@ -123,7 +125,7 @@ def main(_):
                'prior_override': FLAGS.prior_override, 'prior_noise': FLAGS.prior_noise,
                'GT_LEAKAGE': bool(uses_gt), 'instance_source': sources,
                'bin_edges_px': edges.tolist(), 'bins_source': bins_meta.get('source'),
-               'boundary_px': FLAGS.boundary_px,
+               'boundary_px': FLAGS.boundary_px, 'head': FLAGS.head,
                'lambdas': net.encoder.lambdas() if FLAGS.ccmc else [],
                'metrics': metrics_from_sums(sums)}
     cm = np.array([[sums[f'cm_{g}{p}'] for p in range(3)] for g in range(3)], dtype=float)

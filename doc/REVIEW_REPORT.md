@@ -19,7 +19,8 @@
 | 01 Baseline + chẩn đoán | DONE | L0 s0/s1, LiteSent s0, D0, D2 (2 seed), profile. Diag-D1 NOT RUN (đúng kế hoạch). Xem mục 3 |
 | 02 Oracle C2/C3 | DONE nhưng **vô hiệu về khoa học** | λ không học được; xem mục 4 |
 | 03 Oracle với λ hoạt động, 3 seed | DONE | 13/13 run; xem mục 5 |
-| 04 Định vị nút thắt (decoder 1/2, nguồn chi tiết) | Sẵn sàng chạy | [04_bottleneck_localization.md](04_bottleneck_localization.md) |
+| 04 Định vị nút thắt (decoder 1/2, nguồn chi tiết) | DONE | 8/8 run; nút thắt = độ phân giải dự đoán; xem mục 6 |
+| 05 Phương pháp mới MCSD (3 seed) | Sẵn sàng chạy | [05_mcsd.md](05_mcsd.md) |
 
 ---
 
@@ -329,3 +330,82 @@ Trả lời thẳng: **với gói bằng chứng chẩn đoán và đánh giá t
 Nếu là (ii), hướng ưu tiên là **sửa toán tử patch embedding stage 1 bên trong MiT**: giữ trọng số pretrained, không ghép mô hình. Việc này phải rà soát novelty có ghi lại trước khi code.
 
 Code đã thêm: `--llr_source {raw, none, f1}` cho `SegFormer5Band`. Mặc định là `raw` nên checkpoint LiteSent cũ vẫn tải được.
+
+---
+
+## 6. Exp04 — Định vị nút thắt (review 03/11/2026)
+
+Artifact: [doc/exp04_results/results/exp04](exp04_results/results/exp04). 8/8 run DONE. Mọi mô hình có 3 seed, so sánh bằng bootstrap phân tầng.
+
+### 6.1 Kết quả (val, trung bình 3 seed)
+
+| Mô hình | Small-Weed Recall (s0/s1/s2) | cov_small | mIoU | Weed IoU | BIoU Weed | GFLOPs | Latency T4 |
+|---|---|---|---|---|---|---|---|
+| L0 (1/4 + bilinear) | 49,78 (49,7/46,8/52,9) | 62,47 | 82,77 | 75,25 | 52,04 | 13,27 | 14,85 ms |
+| D½-none (decoder 1/2, không chi tiết) | 61,08 (59,5/61,0/62,7) | 70,81 | 83,63 | 76,39 | 55,72 | 40,07 | 21,16 ms |
+| D½-F1 (decoder 1/2 + F1) | 58,06 | 67,10 | 83,72 | 76,52 | 55,04 | 50,30 | 23,42 ms |
+| LiteSent (decoder 1/2 + băng thô) | 63,55 (64,2/58,1/68,4) | 71,40 | 84,50 | 77,77 | 57,90 | 50,41 | 23,54 ms |
+
+| So sánh | Small-Weed Recall | mIoU | BIoU Weed |
+|---|---|---|---|
+| LiteSent − L0 (tổng lợi ích LLR, giờ đã có 3 seed) | **+13,76 [+10,26; +17,78]** | +1,73 [+1,19; +2,56] | +5,86 |
+| D½-none − L0 (chỉ tăng độ phân giải dự đoán) | **+11,29 [+8,11; +14,82]** | +0,86 [+0,23; +1,67] | +3,68 |
+| LiteSent − D½-none (giá trị thêm của băng thô) | +2,47 [−2,99; +7,44], không có ý nghĩa | **+0,87 [+0,48; +1,25]** | **+2,18 [+0,03; +3,93]** |
+| D½-F1 − D½-none | −3,01 [−6,97; +1,05]; cov_small −3,71 [−7,07; −0,46] | +0,09 | −0,68 |
+| LiteSent − D½-F1 | +5,48 [−2,88; +13,01] | **+0,78 [+0,52; +1,07]** | **+2,86** |
+
+### 6.2 Diễn giải theo bảng đã khóa trong Exp04: **dòng 1 (D½-none ≈ LiteSent cho cỏ nhỏ)**
+
+- **Nút thắt của cỏ nhỏ là độ phân giải của bước dự đoán.** Chỉ cần dự đoán ở 1/2 thay vì 1/4, không thêm thông tin nào, đã lấy lại **82 %** lợi ích cỏ nhỏ của LLR (11,29/13,76). Thông tin về cỏ nhỏ **vẫn còn** trong feature 1/4 của decoder; nó bị mất ở bước "một phân phối lớp cho mỗi ô 4×4 px rồi bilinear ×4".
+- **Băng thô đóng góp cho biên và pixel IoU**: mIoU +0,87, BIoU Weed +2,18, có ý nghĩa. Phần này không giúp phát hiện thêm cỏ nhỏ.
+- **F1 không thay được băng thô**, thậm chí làm giảm coverage cỏ nhỏ. Chi tiết hữu ích cho biên nằm trong đầu vào gốc, không nằm trong F1.
+- **Trả lời hai yêu cầu của thầy** (Ưu tiên 2): lợi ích của nhánh refinement **chủ yếu đến từ việc tăng độ phân giải decoder** (đối với cỏ nhỏ), còn nhánh raw-input góp phần biên/mIoU và tốt hơn dùng F1. Bảng 6.1 dùng thẳng được trong paper.
+- **Chi phí:** D½-none tăng +26,8 GFLOPs (×3,0) và +6,3 ms chỉ cho một conv 3×3 128 kênh trên lưới 300×300.
+- Phương sai seed của LiteSent rất lớn (58,1–68,4). Các so sánh 1 seed trước đây (bài cũ, README cũ) không đáng tin, đúng với A/A test ở Exp03.
+
+### 6.3 Phương pháp mới đề xuất: **MCSD (Mass-Conserving Sub-cell Decoding)**
+
+**Chuỗi lập luận từ bằng chứng sang thiết kế:**
+1. Cỏ nhỏ ≤ 45 px, tức chỉ khoảng 1–3 ô 4×4.
+2. Classifier 1/4 + bilinear + argmax chỉ đưa ra **một** phân phối cho mỗi ô. Nếu Weed chỉ chiếm 15 % ô thì argmax = Background, và cỏ bị xóa. Đây là lỗi chính Weed → Background 6,8 % ở Exp01.
+3. D½-none chứng minh thông tin vẫn nằm trong feature 1/4 (Exp04).
+4. Diag-D2 cho thấy phép trung bình làm loãng bằng chứng cỏ nhỏ.
+
+Vì vậy cần một bước giải mã **bảo toàn khối lượng lớp trong mỗi ô** và đặt khối lượng đó vào đúng sub-pixel, với chi phí nhỏ hơn nhiều so với decoder 1/2 dày đặc.
+
+**Toán tử** ([src/nets/mcsd.py](../src/nets/mcsd.py)): trên feature 1/4 của L0 có hai head 1×1:
+- **occupancy** `q_c` = tỉ lệ lớp của ô, học bằng soft-CE với tỉ lệ GT;
+- **placement** `s_cj` = điểm lớp c tại sub-pixel j (16 sub-pixel mỗi ô).
+
+Xác suất sub-pixel là kế hoạch vận chuyển tối ưu entropic `P = diag(u)·exp(s/τ)·diag(v)` với biên hàng `16·q_c` và biên cột 1, giải bằng 5 vòng Sinkhorn log-domain. Toàn bộ khả vi, không có tham số ở bước ghép, và là một log-prob hợp lệ nên dùng thẳng CE + Dice. Giữ nguyên toàn bộ MiT-B0 pretrained và decoder 1/4; chỉ thay classifier 1×1 + bilinear. Chi phí head ước tính khoảng 0,15 GMAC, so với +13,4 GMAC của D½-none.
+
+**Đối chứng bắt buộc:** PS (cùng head, cùng occupancy loss, bỏ ràng buộc Sinkhorn) để chứng minh lợi ích đến từ **bảo toàn khối lượng**, chứ không phải từ việc có thêm head sub-pixel. Gate đã khóa trong [05_mcsd.md](05_mcsd.md).
+
+**Liên kết với câu chuyện của paper:** ý tưởng "bảo toàn khối lượng" của kế hoạch gốc được giữ, nhưng **chuyển từ K/V SR** (nơi chẩn đoán và oracle cho thấy không phải nút thắt) **sang bước giải mã dự đoán** (nơi Exp04 định vị nút thắt). Paper có mạch: chẩn đoán → loại trừ giả thuyết SR bằng oracle → định vị nút thắt → toán tử nhắm đúng nút thắt.
+
+### 6.4 Rà soát novelty sơ bộ (03/11/2026, ghi lại để tái lập)
+
+| Nguồn / truy vấn | Kết quả |
+|---|---|
+| arXiv API: `Sinkhorn AND upsampling AND segmentation` | 0 kết quả |
+| arXiv API: `"optimal transport" AND upsampling AND segmentation` | 0 |
+| arXiv API: `"mass conserving" AND upsampling`; `"mass conservation" AND segmentation AND upsampling` | 0 / 0 |
+| arXiv API: `"label proportion" AND segmentation AND resolution`; `"sub-pixel" AND "class proportion"` | 0 / 0 |
+| arXiv API: `"subpixel mapping"` | UnMixMamba (arXiv 2610.38507, 10/2026): subpixel mapping cây trồng từ MODIS, dùng tỉ lệ lớp để phân bổ ngân sách refinement |
+
+**Công trình gần nhất phải định vị và trích dẫn:**
+- **SparseRefine** (ECCV 2024, arXiv 2407.19014): entropy selector + refine thưa. Khác MCSD: chọn pixel theo entropy, không bảo toàn khối lượng.
+- **PointRend** (CVPR 2020): refine điểm bất định.
+- **CARAFE / DySample / FADE / SAPA**: upsampler theo nội dung của feature, không có ràng buộc tỉ lệ lớp.
+- **DUC / PixelShuffle head**: tương ứng đối chứng PS.
+- **Sub-pixel mapping trong viễn thám** (Atkinson; pixel-swapping; Hopfield SPM; deep SPM; UnMixMamba): **gần nhất về ý tưởng** (phân bổ sub-pixel theo tỉ lệ lớp). SPM cổ điển là hậu xử lý từ ảnh tỉ lệ (unmixing). MCSD là lớp giải mã khả vi, end-to-end trong mạng phân đoạn, ghép occupancy và placement bằng OT/Sinkhorn.
+
+**Kết luận trung thực:** chưa thấy công bố trùng trong lần tìm sơ bộ này, nhưng arXiv API **không** thay được rà soát đầy đủ. Trước khi nộp phải tìm trên Scopus, IEEE Xplore và Google Scholar với các cụm: "sub-pixel mapping deep learning end-to-end", "Sinkhorn segmentation decoder", "optimal transport upsampling", "proportion-constrained decoding", "area-preserving segmentation". Tuyệt đối không claim "first" nếu chưa làm xong bước này.
+
+### 6.5 Code đã thêm
+
+- [src/nets/mcsd.py](../src/nets/mcsd.py): `sinkhorn_subcell`, `MCSDSegFormer` (`head ∈ {bilinear, mcsd, pixelshuffle}`, `spectral_guide`), `occupancy_loss`.
+- `segformer.py`: tách `decode_features()` (dùng chung decoder 1/4).
+- `train.py`: `--head`, `--sinkhorn_iters`, `--mcsd_tau`, `--spectral_guide`, `--occ_weight`.
+- `ccmc_common.py` / `evaluate_ccmc.py`: hỗ trợ đánh giá và profile MCSD.
+- 6 unit test mới: biên Sinkhorn, xếp sub-pixel, gradient, occupancy loss, forward/backward, decoder khởi tạo trùng L0.

@@ -27,8 +27,9 @@ flowchart LR
 | 01 | [01_baseline_diagnostics.md](01_baseline_diagnostics.md) | D1–D2 / P0–P1, N0–N1 | Bìn kích thước, L0 2 seeds, LiteSent seed 0, Diag-D0, Diag-D2 probe, profile | G1 | DONE — G1 PASS có điều kiện |
 | 02 | [02_oracle_c2_c3.md](02_oracle_c2_c3.md) | D3 / P3a | C2, C3, C3-K5, C3-K6 × 2 seed (oracle, GT leakage) + L0 đánh giá lại | G2-screen | DONE — vô hiệu (λ kẹt 0,05) |
 | 03 | [03_oracle_active_lambda.md](03_oracle_active_lambda.md) | D3 làm lại / P3a | C3a, C2a, C3f, C3K5a × 3 seed + L0 s2, kiểm tra cơ chế hoạt động, A/A test | G2-screen | DONE — CCMC-SR dừng theo quy tắc |
-| 04 | [04_bottleneck_localization.md](04_bottleneck_localization.md) | Định vị nút thắt | LiteSent s1–s2, decoder 1/2 không chi tiết, decoder 1/2 với F1 (3 seed) | Chọn hướng phương pháp mới | Sẵn sàng chạy |
-| 05+ | (tạo sau review Exp04) | — | Phương pháp mới theo nút thắt đã định vị, rà soát novelty, 5 seed, test một lần | — | Chưa tạo |
+| 04 | [04_bottleneck_localization.md](04_bottleneck_localization.md) | Định vị nút thắt | LiteSent s1–s2, decoder 1/2 không chi tiết, decoder 1/2 với F1 (3 seed) | Chọn hướng phương pháp mới | DONE — nút thắt là độ phân giải dự đoán |
+| 05 | [05_mcsd.md](05_mcsd.md) | Phương pháp mới | MCSD, PS (đối chứng), MCSD-g × 3 seed | H-MCSD, H-mech, H-eff | Sẵn sàng chạy |
+| 06+ | (tạo sau review Exp05) | — | Rà soát novelty, 5 seed, test một lần, dataset thứ hai | — | Chưa tạo |
 
 ## Ánh xạ cấu hình → cờ dòng lệnh (`src/train.py --ccmc=True`)
 

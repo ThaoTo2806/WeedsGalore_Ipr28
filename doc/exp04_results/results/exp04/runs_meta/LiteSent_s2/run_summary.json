@@ -1,0 +1,7 @@
+{
+  "run_name": "LiteSent__s2",
+  "best_val_miou": 84.4824447631836,
+  "best_epoch": 79,
+  "final_lambdas": [],
+  "split_hash": "675667edf3f35f16"
+}

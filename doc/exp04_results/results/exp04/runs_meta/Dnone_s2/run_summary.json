@@ -1,0 +1,7 @@
+{
+  "run_name": "Dnone__s2",
+  "best_val_miou": 83.62419891357422,
+  "best_epoch": 96,
+  "final_lambdas": [],
+  "split_hash": "675667edf3f35f16"
+}
