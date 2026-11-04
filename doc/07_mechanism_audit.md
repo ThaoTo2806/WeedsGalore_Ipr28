@@ -74,65 +74,260 @@ Các cell dưới đây không chạy test. Trước khi chạy, commit/push cod
 ### Cell K7.0 — Setup, test và checkpoint check
 
 ```python
-import glob, json, os, shutil, subprocess, sys
 
-os.chdir('/kaggle/working/WeedsGalore_Ipr28')
+# ============================================================
+# Cell K7.0 — Setup, test và checkpoint check
+# ============================================================
+
+import glob
+import json
+import os
+import shutil
+import subprocess
+import sys
+
+# ------------------------------------------------------------
+# 1. Project setup
+# ------------------------------------------------------------
+
+PROJECT = '/kaggle/working/WeedsGalore_Ipr28'
+os.chdir(PROJECT)
+
 if 'DS' not in globals():
-	candidates = glob.glob('/kaggle/input/**/weedsgalore-dataset', recursive=True)
-	assert candidates, 'Cannot find weedsgalore-dataset under /kaggle/input'
-	DS = candidates[0]
+    candidates = glob.glob(
+        '/kaggle/input/**/weedsgalore-dataset',
+        recursive=True
+    )
+    assert candidates, (
+        'Cannot find weedsgalore-dataset under /kaggle/input'
+    )
+    DS = candidates[0]
+
 assert os.path.isdir(DS), f'Invalid dataset path: {DS}'
+
 EXP = 'exp07'
 OUT = f'results/{EXP}'
 BINS = 'results/instance_bins.json'
+
 os.makedirs(f'{OUT}/logs', exist_ok=True)
 
+
+# ------------------------------------------------------------
+# 2. Helper function
+# ------------------------------------------------------------
+
 def run_checked(args, log_path):
-	with open(log_path, 'w') as log_file:
-		subprocess.run(args, stdout=log_file, stderr=subprocess.STDOUT, check=True)
+    with open(log_path, 'w') as log_file:
+        subprocess.run(
+            args,
+            stdout=log_file,
+            stderr=subprocess.STDOUT,
+            check=True
+        )
 
-# Stop here if the synthetic and model integration tests fail.
-run_checked([sys.executable, '-m', 'pytest', '-q', 'tests/test_ccmc_sr.py'],
-			f'{OUT}/logs/unit_tests.log')
+
+# ------------------------------------------------------------
+# 3. Unit tests
+# ------------------------------------------------------------
+
+print('=' * 60)
+print('STEP 1: Running unit and integration tests')
+print('=' * 60)
+
+run_checked(
+    [
+        sys.executable,
+        '-m',
+        'pytest',
+        '-q',
+        'tests/test_ccmc_sr.py'
+    ],
+    f'{OUT}/logs/unit_tests.log'
+)
+
 with open(f'{OUT}/logs/unit_tests.log') as f:
-	test_output = f.read().lower()
-assert ' skipped' not in test_output, 'HF-backed integration tests were skipped; do not start training'
+    test_output = f.read().lower()
 
-for path in glob.glob('/kaggle/input/**/runs/*/best_val.pth', recursive=True):
-	run_dir = os.path.basename(os.path.dirname(path))
-	target_dir = os.path.join('runs', run_dir)
-	os.makedirs(target_dir, exist_ok=True)
-	target = os.path.join(target_dir, 'best_val.pth')
-	if not os.path.exists(target):
-		os.symlink(path, target)
+print(test_output)
 
-required = [f'{model}_s{seed}' for model in ('L0', 'MCSDg', 'PS') for seed in range(5)]
-missing = [run for run in required if not os.path.isfile(f'runs/{run}/best_val.pth')]
-assert not missing, f'Missing Exp06 reference checkpoints: {missing}'
-result_candidates = glob.glob('/kaggle/input/**/MCSDg_s0_val_per_image.csv', recursive=True)
-assert result_candidates, 'Attach the extracted exp06-results dataset'
-EXP06_RESULTS = os.path.dirname(result_candidates[0])
-required_results = [f'{model}_s{seed}_val_{suffix}'
-					for model in ('L0', 'PS', 'MCSDg', 'MCSDgIt1', 'MCSDgIt20')
-					for seed in range(5)
-					for suffix in ('per_image.csv', 'summary.json')]
-missing_results = [name for name in required_results
-				   if not os.path.isfile(os.path.join(EXP06_RESULTS, name))]
-assert not missing_results, f'Missing Exp06 validation CSVs: {missing_results}'
-EXP06_SOURCE = EXP06_RESULTS
+assert ' skipped' not in test_output, (
+    'HF-backed integration tests were skipped; '
+    'do not start training'
+)
+
+print('PASS: Unit and integration tests')
+
+
+# ------------------------------------------------------------
+# 4. Link Exp06 checkpoints
+# ------------------------------------------------------------
+
+print('\n' + '=' * 60)
+print('STEP 2: Checking Exp06 checkpoints')
+print('=' * 60)
+
+checkpoint_candidates = glob.glob(
+    '/kaggle/input/**/runs/*/best_val.pth',
+    recursive=True
+)
+
+for path in checkpoint_candidates:
+    run_dir = os.path.basename(os.path.dirname(path))
+    target_dir = os.path.join('runs', run_dir)
+
+    os.makedirs(target_dir, exist_ok=True)
+
+    target = os.path.join(target_dir, 'best_val.pth')
+
+    if not os.path.exists(target):
+        os.symlink(path, target)
+
+required = [
+    f'{model}_s{seed}'
+    for model in ('L0', 'MCSDg', 'PS')
+    for seed in range(5)
+]
+
+missing = [
+    run for run in required
+    if not os.path.isfile(f'runs/{run}/best_val.pth')
+]
+
+assert not missing, (
+    f'Missing Exp06 reference checkpoints: {missing}'
+)
+
+print('PASS: All 15 Exp06 checkpoints verified')
+
+
+# ------------------------------------------------------------
+# 5. Exp06 validation results
+# ------------------------------------------------------------
+
+print('\n' + '=' * 60)
+print('STEP 3: Checking Exp06 validation results')
+print('=' * 60)
+
+# Actual existing directory in Kaggle working
+EXP06_SOURCE = (
+    '/kaggle/working/WeedsGalore_Ipr28/'
+    'doc/exp06_results/results/exp06'
+)
+
+assert os.path.isdir(EXP06_SOURCE), (
+    f'Exp06 results directory not found: {EXP06_SOURCE}'
+)
+
+required_results = [
+    f'{model}_s{seed}_val_{suffix}'
+    for model in (
+        'L0',
+        'PS',
+        'MCSDg',
+        'MCSDgIt1',
+        'MCSDgIt20'
+    )
+    for seed in range(5)
+    for suffix in (
+        'per_image.csv',
+        'summary.json'
+    )
+]
+
+missing_results = [
+    name for name in required_results
+    if not os.path.isfile(
+        os.path.join(EXP06_SOURCE, name)
+    )
+]
+
+assert not missing_results, (
+    f'Missing Exp06 validation files: {missing_results}'
+)
+
+print('PASS: All 50 source validation files found')
+
+
+# ------------------------------------------------------------
+# 6. Copy Exp06 reference results into Exp07
+# ------------------------------------------------------------
+
 EXP06_RESULTS = f'{OUT}/exp06_reference'
-os.makedirs(EXP06_RESULTS, exist_ok=True)
-for model in ('L0', 'PS', 'MCSDg', 'MCSDgIt1', 'MCSDgIt20'):
-	for seed in range(5):
-		for suffix in ('_val_per_image.csv', '_val_summary.json'):
-			filename = f'{model}_s{seed}{suffix}'
-			shutil.copy(os.path.join(EXP06_SOURCE, filename),
-			            os.path.join(EXP06_RESULTS, filename))
 
-run_checked([sys.executable, 'src/scripts/make_instance_bins.py',
-             f'--dataset_path={DS}', f'--out={BINS}'], f'{OUT}/logs/bins.log')
+os.makedirs(EXP06_RESULTS, exist_ok=True)
+
+for filename in required_results:
+    shutil.copy2(
+        os.path.join(EXP06_SOURCE, filename),
+        os.path.join(EXP06_RESULTS, filename)
+    )
+
+copied_files = [
+    f for f in required_results
+    if os.path.isfile(
+        os.path.join(EXP06_RESULTS, f)
+    )
+]
+
+assert len(copied_files) == 50, (
+    f'Expected 50 copied files, got {len(copied_files)}'
+)
+
+print('PASS: Exp06 reference files copied:', len(copied_files))
+print('Reference directory:', EXP06_RESULTS)
+
+
+# ------------------------------------------------------------
+# 7. Generate instance bins
+# ------------------------------------------------------------
+
+print('\n' + '=' * 60)
+print('STEP 4: Generating instance bins')
+print('=' * 60)
+
+run_checked(
+    [
+        sys.executable,
+        'src/scripts/make_instance_bins.py',
+        f'--dataset_path={DS}',
+        f'--out={BINS}'
+    ],
+    f'{OUT}/logs/bins.log'
+)
+
+assert os.path.isfile(BINS), (
+    f'Instance bins file not generated: {BINS}'
+)
+
 with open(BINS) as f:
-	assert json.load(f)['edges'] == [45.0, 147.0]
+    bins = json.load(f)
+
+assert bins['edges'] == [45.0, 147.0], (
+    f'Unexpected instance bin edges: {bins["edges"]}'
+)
+
+print('PASS: Instance bins verified:', bins['edges'])
+
+
+# ------------------------------------------------------------
+# 8. Final checkpoint
+# ------------------------------------------------------------
+
+print('\n' + '=' * 60)
+print('CELL K7.0 — ALL CHECKS PASSED')
+print('=' * 60)
+
+print('Project:', PROJECT)
+print('Dataset:', DS)
+print('Experiment:', EXP)
+print('Output:', OUT)
+print('Checkpoints verified:', len(required))
+print('Exp06 validation files:', len(copied_files))
+print('Instance bin edges:', bins['edges'])
+print('Unit test log:', f'{OUT}/logs/unit_tests.log')
+print('Bins log:', f'{OUT}/logs/bins.log')
+
+print('\nREADY FOR NEXT EXP07 SETUP STEP')
 ```
 
 ### Cell K7.1 — Train OccCond-g, seed 0–4
@@ -250,7 +445,7 @@ Script xuất Weed precision, pixel false positives, Crop→Weed rate và confus
 ### Cell K7.5 — Đóng gói kết quả
 
 ```python
-import shutil, zipfile
+import csv, shutil, tempfile, zipfile
 
 for run_dir in sorted(glob.glob('runs/OccCondg_s*')):
 	if os.path.islink(f'{run_dir}/best_val.pth') or not os.path.exists(f'{run_dir}/history.jsonl'):
@@ -261,9 +456,43 @@ for run_dir in sorted(glob.glob('runs/OccCondg_s*')):
 		if os.path.exists(f'{run_dir}/{filename}'):
 			shutil.copy(f'{run_dir}/{filename}', dst)
 
-run_checked([sys.executable, 'src/scripts/collect_results.py', f'--results_dir={OUT}',
-             '--runs_dir=runs', f'--out={OUT}/metrics.csv'], f'{OUT}/logs/collect.log')
-assert os.path.isfile(f'{OUT}/metrics.csv')
+expected_runs = [f'OccCondg_s{seed}' for seed in range(5)]
+collector_metrics = (
+	'mIoU', 'IoU_bg', 'IoU_crop', 'IoU_weed', 'BIoU_crop', 'BIoU_weed',
+	'SmallWeedRecall', 'recall30_small', 'cov_small', 'recall50_medium',
+	'recall50_large', 'recall50_all', 'n_small', 'n_medium', 'n_large'
+)
+for run in expected_runs:
+	assert os.path.isfile(f'{OUT}/runs_meta/{run}/run_summary.json'), f'{run}: missing run metadata'
+	assert os.path.isfile(f'{OUT}/{run}_val_summary.json'), f'{run}: missing evaluation summary'
+	with open(f'{OUT}/{run}_val_summary.json') as f:
+		summary = json.load(f)
+	assert 'metrics' in summary, f'{run}: evaluation summary has no metrics'
+	missing_metrics = [key for key in collector_metrics if key not in summary['metrics']]
+	assert not missing_metrics, f'{run}: missing collector metric keys {missing_metrics}'
+
+# The collector expects the full evaluate_ccmc metric schema. Stage only these five
+# validation summaries so reference/audit metadata cannot be mistaken for evaluations.
+collect_log = f'{OUT}/logs/collect.log'
+try:
+	with tempfile.TemporaryDirectory(prefix='exp07_collect_') as collect_dir:
+		for run in expected_runs:
+			shutil.copy2(f'{OUT}/{run}_val_summary.json', collect_dir)
+		run_checked(
+			[sys.executable, 'src/scripts/collect_results.py',
+			 f'--results_dir={collect_dir}', f'--runs_dir={OUT}/runs_meta',
+			 f'--out={OUT}/metrics.csv'],
+			collect_log
+		)
+except subprocess.CalledProcessError:
+	with open(collect_log) as f:
+		print(f.read())
+	raise
+
+assert os.path.isfile(f'{OUT}/metrics.csv'), 'Collector did not create metrics.csv'
+with open(f'{OUT}/metrics.csv', newline='') as f:
+	metric_rows = list(csv.DictReader(f))
+assert len(metric_rows) == 5, f'Expected 5 OccCondg evaluation rows, got {len(metric_rows)}'
 new_ckpts = ' '.join(sorted(glob.glob('runs/OccCondg_s*/best_val.pth')))
 assert len(new_ckpts.split()) == 5
 with zipfile.ZipFile('/kaggle/working/exp07_results.zip', 'w', zipfile.ZIP_DEFLATED) as archive:

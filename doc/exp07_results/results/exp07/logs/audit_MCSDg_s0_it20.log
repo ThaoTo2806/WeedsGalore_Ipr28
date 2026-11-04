@@ -1,0 +1,1 @@
+{"csv": "results/exp07/audit_MCSDg_s0_it20_marginal_by_image.csv", "pred_weed_csv": "results/exp07/audit_MCSDg_s0_it20_predweed_by_image.csv", "summary": "results/exp07/audit_MCSDg_s0_it20_marginal_summary.json", "pred_weed_mass_over_gt": 1.0931342818958107}

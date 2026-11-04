@@ -13,17 +13,17 @@
 | G3     | H2: learned Weed prior hơn learned Veg prior?                 | L3 − L2 ≥ +3 pp Small-Weed Recall, CI > 0, Crop không giảm quá 1 pp (Exp03) | PENDING                                                                                                                                                   | —                 |
 | G4     | Lợi ích có đến từ việc nối prior vào SR?                      | L3 > K1, K2, K3, K5, K6 (Exp04–05)                                          | PENDING                                                                                                                                                   | —                 |
 
-| Exp                                               | Trạng thái                                             | Ghi chú                                                                                     |
-| ------------------------------------------------- | ------------------------------------------------------ | ------------------------------------------------------------------------------------------- |
-| 00 Code + setup                                   | DONE                                                   | 44/44 unit test pass trên Kaggle (`transformers 4.45.2`, torch 2.11, T4, commit `ea354cd`)  |
-| 01 Baseline + chẩn đoán                           | DONE                                                   | L0 s0/s1, LiteSent s0, D0, D2 (2 seed), profile. Diag-D1 NOT RUN (đúng kế hoạch). Xem mục 3 |
-| 02 Oracle C2/C3                                   | DONE nhưng **vô hiệu về khoa học**                     | λ không học được; xem mục 4                                                                 |
-| 03 Oracle với λ hoạt động, 3 seed                 | DONE                                                   | 13/13 run; xem mục 5                                                                        |
-| 04 Định vị nút thắt (decoder 1/2, nguồn chi tiết) | DONE                                                   | 8/8 run; nút thắt = độ phân giải dự đoán; xem mục 6                                         |
-| 05 Phương pháp mới MCSD (3 seed)                  | DONE                                                   | 9/9 run; **MCSD-g PASS trên val**; MCSD và H-mech INCONCLUSIVE; xem mục 7                   |
-| 06 Xác nhận seed 3–4, bảng 5 seed                 | DONE — xác nhận MCSD-g PASS; xem mục 8                 | [06_confirm_5seeds.md](06_confirm_5seeds.md)                                                |
-| 07 Kiểm toán cơ chế MCSD                          | Kế hoạch đã khóa; chỉ validation, không mở test        | [07_mechanism_audit.md](07_mechanism_audit.md)                                              |
-| 08 Dataset thứ hai + khóa test                    | Chưa chạy; chọn dataset và protocol trước khi xem test | [07_mechanism_audit.md](07_mechanism_audit.md)                                              |
+| Exp                                               | Trạng thái                                                                   | Ghi chú                                                                                     |
+| ------------------------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| 00 Code + setup                                   | DONE                                                                         | 44/44 unit test pass trên Kaggle (`transformers 4.45.2`, torch 2.11, T4, commit `ea354cd`)  |
+| 01 Baseline + chẩn đoán                           | DONE                                                                         | L0 s0/s1, LiteSent s0, D0, D2 (2 seed), profile. Diag-D1 NOT RUN (đúng kế hoạch). Xem mục 3 |
+| 02 Oracle C2/C3                                   | DONE nhưng **vô hiệu về khoa học**                                           | λ không học được; xem mục 4                                                                 |
+| 03 Oracle với λ hoạt động, 3 seed                 | DONE                                                                         | 13/13 run; xem mục 5                                                                        |
+| 04 Định vị nút thắt (decoder 1/2, nguồn chi tiết) | DONE                                                                         | 8/8 run; nút thắt = độ phân giải dự đoán; xem mục 6                                         |
+| 05 Phương pháp mới MCSD (3 seed)                  | DONE                                                                         | 9/9 run; **MCSD-g PASS trên val**; MCSD và H-mech INCONCLUSIVE; xem mục 7                   |
+| 06 Xác nhận seed 3–4, bảng 5 seed                 | DONE — xác nhận MCSD-g PASS; xem mục 8                                       | [06_confirm_5seeds.md](06_confirm_5seeds.md)                                                |
+| 07 Kiểm toán cơ chế MCSD                          | DONE — OccCond-g 5 seed; không xác nhận lợi ích mIoU của Sinkhorn; xem mục 9 | [07_mechanism_audit.md](07_mechanism_audit.md)                                              |
+| 08 Dataset thứ hai + khóa test                    | NOT RUN — giữ test khóa; cần quyết định claim và protocol dataset 2          | [07_mechanism_audit.md](07_mechanism_audit.md)                                              |
 
 ---
 
@@ -527,9 +527,56 @@ Kết quả 1 vòng cho thấy một **trade-off suy luận** rõ: recall/covera
 
 **Lưu ý định nghĩa:** `pred_weed_mass_over_gt` là tổng xác suất Weed dự đoán chia tổng pixel Weed GT. Nó không đo việc Sinkhorn có khớp occupancy dự đoán hay không. Chỉ số marginal error mới là chênh giữa trung bình xác suất sub-pixel đầu ra và `q` từ occupancy head. Hai đại lượng trả lời hai câu hỏi khác nhau; không gọi tỷ lệ 1,09 là “sai số bảo toàn khối lượng”.
 
-### 8.4 Quyết định và việc tiếp theo
+### 8.4 Quyết định tại thời điểm review Exp06 (lịch sử)
+
+Các gạch đầu dòng dưới đây ghi kế hoạch ngay sau Exp06; Exp07 đã chạy và kết luận mới nhất được cập nhật tại mục 9.
 
 - **Exp06 hoàn tất; MCSD-g qua gate confirmatory và được giữ nguyên cấu hình 5 vòng, τ=1, occupancy loss 0,3.** Chưa mở test, chưa chọn 1/20 vòng thay cấu hình chính.
 - Tiếp theo là **Exp07 — kiểm toán cơ chế**, theo protocol mới trong [07_mechanism_audit.md](07_mechanism_audit.md): thêm occupancy-conditioned baseline không Sinkhorn; đo marginal error theo từng lớp và occupancy GT nhỏ; phân tích ảnh/instance nơi 1 vòng tăng recall nhưng giảm accuracy. Không điều chỉnh cấu hình chính từ kết quả thăm dò.
 - Song song rà soát novelty có ghi log, ưu tiên fractional class occupancy, sub-pixel mapping, constrained decoding và optimal transport/Sinkhorn. Chuẩn bị Exp08 cho WeedMap hoặc dataset đa phổ tương đương bằng giao thức được định trước; xác nhận số băng, GSD, nhãn, split và định nghĩa small-object trước khi chạy.
 - Chỉ sau khi Exp07, lựa chọn dataset thứ hai, rà soát novelty và quyết định phương pháp hoàn tất mới khóa cấu hình/protocol cuối cùng. Khi khóa xong mới mở test **một lần**, không dùng test để chọn model hay hyperparameter.
+
+---
+
+## 9. Exp07 — Kiểm toán cơ chế MCSD-g với OccCond-g (04/11/2026)
+
+Artifact: [doc/exp07_results/results/exp07](exp07_results/results/exp07). Có **5/5 run OccCond-g** hoàn tất 100 epoch, seed 0–4; cùng split hash `675667edf3f35f16`, commit `de402b5`, Tesla T4, Python 3.13.15, torch 2.11.0+cu128, transformers 4.45.2. Unit/integration tests: **54 passed**. Các comparison paired dùng 5 seed, 26 ảnh, 10.000 hierarchical bootstrap draws (paired seed + image). Marginal audits có đủ MCSD-g seed 0–4 ở 1/5/20 vòng và OccCond-g seed 0–4 ở 5 vòng. **Chỉ validation, không chạy test.**
+
+### 9.1 Kết quả chính: Sinkhorn không cho thấy lợi ích mIoU trên OccCond-g
+
+| Metric, MCSD-g − OccCond-g |              Delta [CI 95%] | Diễn giải                                                               |
+| -------------------------- | --------------------------: | ----------------------------------------------------------------------- |
+| Small-Weed Recall          |     −2,71 [−6,02; +0,40] pp | MCSD-g không hơn; không đạt non-inferiority biên −1 pp (cận dưới −6,02) |
+| `cov_small`                | **−4,45 [−7,56; −1,32] pp** | OccCond-g cao hơn rõ                                                    |
+| mIoU                       |     +0,06 [−0,17; +0,36] pp | Không có bằng chứng MCSD-g cải thiện mIoU                               |
+| Crop IoU                   |     −0,06 [−0,50; +0,44] pp | Đạt biên non-inferiority −1 pp                                          |
+| Weed IoU                   |     +0,20 [−0,12; +0,70] pp | Chưa phân biệt được                                                     |
+| Weed Boundary IoU          | **+1,10 [+0,16; +2,17] pp** | MCSD-g tốt hơn về biên                                                  |
+| Weed pixel precision       | **+0,98 [+0,28; +2,19] pp** | MCSD-g có precision cao hơn                                             |
+| Crop→Weed rate             |     +0,07 [−0,69; +0,62] pp | Không khác biệt rõ                                                      |
+
+Kết luận theo tiêu chí đã đăng ký: **không đạt điều kiện để claim Sinkhorn cải thiện chất lượng phân đoạn tổng thể**. mIoU CI không nằm hoàn toàn trên 0 và Small-Weed Recall không đạt non-inferiority. Kết quả cho thấy trade-off metric-specific: MCSD-g có marginal fidelity, Weed precision và boundary tốt hơn; OccCond-g có recall/coverage cỏ nhỏ cao hơn, trong khi mIoU/Crop IoU tương đương trong CI. Đây là bằng chứng có ích để thu hẹp claim, không phải thất bại của toàn bộ occupancy-conditioned decoder.
+
+Đáng chú ý, OccCond-g so với L0 cũng tăng Small-Weed Recall **+10,55 [6,39; 14,84] pp**, `cov_small` **+7,55 [2,97; 12,47] pp**, và mIoU **+0,88 [0,42; 1,54] pp** trên 5 seed. Điều này hỗ trợ occupancy conditioning/sub-cell placement như một hướng decoder; không chứng minh Sinkhorn là thành phần tạo lợi ích recall.
+
+### 9.2 Marginal audit
+
+Gộp theo số cell qua năm seed, mean absolute `q_out − q_pred` trên tất cả lớp/cell xấp xỉ **0,000435 với MCSD-g 5 vòng**, so với **0,007369 với OccCond-g**. Đây là mô tả cell-weighted từ artifacts, không phải một CI đã bootstrap trực tiếp cho chênh lệch hai model. Kết quả xác nhận Sinkhorn 5 vòng ép marginal gần occupancy dự đoán hơn nhiều; tự thân điều đó không bảo đảm mIoU cao hơn.
+
+Với Weed của MCSD-g 5 vòng, MAE marginal trung bình theo GT occupancy là khoảng 0,00349 ở 1–3/16 pixel, 0,00684 ở 4–7/16, và 0,00273 ở 8–16/16. Theo occupancy dự đoán, MAE lớn nhất ở nhóm `q_pred_weed ≥ 0,15` (≈0,00343) và vùng 0,05–0,15 (≈0,00265); nhóm dưới 0,01 rất nhỏ. Vì vậy dữ liệu **không** cho thấy sai số lớn nhất ở occupancy Weed dự đoán cực thấp; đỉnh nằm ở occupancy trung bình/cao hơn. OccCond-g có residual lớn hơn trong mọi tầng, nhất là vùng `q_pred_weed ≥ 0,05`.
+
+Sai số ở 20 vòng nhỏ hơn 5 vòng, nhưng so với inference 5 vòng, 20 vòng giảm nhẹ Small-Weed Recall **−0,61 [−1,31; −0,09] pp**, coverage **−0,48 [−1,09; −0,09] pp**, mIoU **−0,12 [−0,22; −0,07] pp**, Crop IoU **−0,25 [−0,44; −0,14] pp**. Chưa có lý do đổi cấu hình chính 5 vòng; không cần thêm train ablation số vòng lúc này.
+
+### 9.3 Vì sao 1 vòng tăng recall: sensitivity tăng, có Crop spill nhỏ
+
+Inference 1 vòng trên cùng checkpoint 5-vòng cho Small-Weed Recall **+9,77 [6,67; 12,76] pp** và coverage **+10,00 [6,97; 12,80] pp** so với inference 5 vòng. Weed precision gần như không đổi: **0,00 [−1,48; +0,42] pp** theo paired seed/image bootstrap; Crop→Weed rate tăng **+0,15 [+0,06; +0,24] pp**. Như vậy có một mức Crop spill tăng nhỏ, nhưng không thấy precision giảm có ý nghĩa trong comparison phân tầng seed.
+
+Đối chiếu cùng GT instance ID trên 5 seed: 1 vòng tìm thêm **335** instance nhỏ chưa match ở 5 vòng và mất match **32** instance mà 5 vòng match được, trên tổng 3.100 instance nhỏ (xấp xỉ 10,8% newly detected và 1,0% lost). Kết hợp với marginal audit, điều này phù hợp với trade-off tăng sensitivity khi constraint lỏng hơn; không chứng minh marginal error là nguyên nhân duy nhất. Precision và confusion là pixel-level, không diễn giải false-positive pixels thành FP instance.
+
+### 9.4 Quyết định và bước tiếp theo
+
+- **Exp07 DONE; chưa mở test.** 54/54 tests pass; 5/5 run đầy đủ; comparison và audit artifacts có mặt.
+- **Không claim “Sinkhorn cải thiện mIoU/segmentation quality tổng thể”** so với OccCond-g theo protocol này. Claim thận trọng có thể nêu: Sinkhorn hữu hạn vòng áp đặt occupancy marginals chính xác hơn và cho precision/BIoU Weed cao hơn, đổi lại recall/coverage cỏ nhỏ thấp hơn OccCond-g. Cần trình bày cả hai phía và không gọi là exact mass conservation.
+- Occupancy-conditioned decoder không Sinkhorn là một đối chứng mạnh và đạt kết quả tốt hơn MCSD-g về recall/coverage với mIoU tương đương; cần cân nhắc trung thực biến thể nào là phương pháp chính trước khi khóa paper/test. Không chọn theo test.
+- Không chạy train với số vòng khác: inference audit đã trả lời câu hỏi hiện tại, còn training-iteration ablation chỉ exploratory và chưa cần thiết.
+- Tiếp theo: hoàn tất rà soát novelty và protocol dataset thứ hai; quyết định trước khi khóa cấu hình cuối. Chỉ mở test một lần sau các quyết định này. **Không chạy thêm test trong Exp07.**

@@ -1,0 +1,6 @@
+{"run_name": "OccCondg_s2", "split": "val", "prior_override": "none", "prior_noise": "none", "GT_LEAKAGE": false, "instance_source": {"official": 26}, "lambdas": []}
+mIoU 83.65 | bg 98.31 crop 76.31 weed 76.33 | BIoU crop 64.75 weed 55.41
+  small  n= 620 recall@0.5=57.10 recall@0.3=69.52 cov>=0.5=65.48
+  medium n= 567 recall@0.5=74.07 recall@0.3=79.19 cov>=0.5=92.06
+  large  n= 621 recall@0.5=50.24 recall@0.3=58.78 cov>=0.5=98.23
+  all    n=1808 recall@0.5=60.07 recall@0.3=68.86 cov>=0.5=85.07

@@ -1,0 +1,109 @@
+{
+  "checkpoint": "runs/MCSDg_s2/best_val.pth",
+  "split": "val",
+  "iterations_a": 1,
+  "iterations_b": 5,
+  "rate_scale": "fraction_0_to_1",
+  "n_images": 26,
+  "n_small_instances_compared": 620,
+  "newly_detected_at_a": 65,
+  "lost_at_a": 7,
+  "metrics": {
+    "weed_precision": {
+      "it1": 0.8370368796285474,
+      "it5": 0.841147763906481,
+      "delta_a_minus_b": -0.004110884277933602,
+      "paired_image_bootstrap_ci95": [
+        -0.02131834116488516,
+        0.0002154650134019105
+      ]
+    },
+    "crop_to_weed_rate": {
+      "it1": 0.05538667976026717,
+      "it5": 0.054730750345768506,
+      "delta_a_minus_b": 0.0006559294144986641,
+      "paired_image_bootstrap_ci95": [
+        0.000258363724040378,
+        0.0010305099566678504
+      ]
+    },
+    "small_recall50": {
+      "it1": 0.6838709677419355,
+      "it5": 0.5903225806451613,
+      "delta_a_minus_b": 0.09354838709677415,
+      "paired_image_bootstrap_ci95": [
+        0.06025855309529671,
+        0.12111801242236031
+      ]
+    },
+    "new_small_instance_rate_at_a": {
+      "numerator": 65,
+      "denominator": 620,
+      "rate": 0.10483870967741936,
+      "image_bootstrap_ci95": [
+        0.0774925690196046,
+        0.12974483933749673
+      ]
+    },
+    "aggregate_it1": {
+      "weed_precision": 0.8370368796285474,
+      "crop_to_weed_rate": 0.05538667976026717,
+      "crop_to_weed_fraction_of_weed_fp": 0.19268986021281034,
+      "weed_false_positive_pixels": 76688,
+      "crop_to_weed_pixels": 14777,
+      "confusion_matrix_gt_rows_pred_columns": [
+        [
+          8563352,
+          27345,
+          61911
+        ],
+        [
+          23176,
+          228844,
+          14777
+        ],
+        [
+          37136,
+          9562,
+          393897
+        ]
+      ],
+      "small_recall50": 0.6838709677419355,
+      "small_recall30": 0.7870967741935484,
+      "small_coverage_rate": 0.7629032258064516,
+      "small_instances": 620
+    },
+    "aggregate_it5": {
+      "weed_precision": 0.841147763906481,
+      "crop_to_weed_rate": 0.054730750345768506,
+      "crop_to_weed_fraction_of_weed_fp": 0.19470112137818846,
+      "weed_false_positive_pixels": 74997,
+      "crop_to_weed_pixels": 14602,
+      "confusion_matrix_gt_rows_pred_columns": [
+        [
+          8564430,
+          27783,
+          60395
+        ],
+        [
+          19795,
+          232400,
+          14602
+        ],
+        [
+          33961,
+          9513,
+          397121
+        ]
+      ],
+      "small_recall50": 0.5903225806451613,
+      "small_recall30": 0.7241935483870968,
+      "small_coverage_rate": 0.6629032258064517,
+      "small_instances": 620
+    }
+  },
+  "outputs": {
+    "per_image_csv": "results/exp07/iteration_audit_MCSDg_s2_it1_vs_it5_per_image.csv",
+    "small_instances_csv": "results/exp07/iteration_audit_MCSDg_s2_it1_vs_it5_small_instances.csv"
+  }
+}

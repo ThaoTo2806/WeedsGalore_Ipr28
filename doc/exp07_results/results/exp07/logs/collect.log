@@ -1,0 +1,11 @@
+5 eval summaries -> results/exp07/metrics.csv
+OccCondg_s0                  val   ovr=none     mIoU=83.44 crop=75.79 weed=76.27 SWR=61.29 lam=
+OccCondg_s1                  val   ovr=none     mIoU=83.60 crop=75.94 weed=76.54 SWR=56.29 lam=
+OccCondg_s2                  val   ovr=none     mIoU=83.65 crop=76.31 weed=76.33 SWR=57.10 lam=
+OccCondg_s3                  val   ovr=none     mIoU=83.65 crop=76.26 weed=76.43 SWR=61.77 lam=
+OccCondg_s4                  val   ovr=none     mIoU=83.51 crop=75.88 weed=76.37 SWR=58.71 lam=
+train: {"run_name": "OccCondg__s0", "best_val_miou": 83.43894958496094, "best_epoch": 90, "final_lambdas": [], "split_hash": "675667edf3f35f16"}
+train: {"run_name": "OccCondg__s1", "best_val_miou": 83.59940338134766, "best_epoch": 87, "final_lambdas": [], "split_hash": "675667edf3f35f16"}
+train: {"run_name": "OccCondg__s2", "best_val_miou": 83.64779663085938, "best_epoch": 96, "final_lambdas": [], "split_hash": "675667edf3f35f16"}
+train: {"run_name": "OccCondg__s3", "best_val_miou": 83.64861297607422, "best_epoch": 90, "final_lambdas": [], "split_hash": "675667edf3f35f16"}
+train: {"run_name": "OccCondg__s4", "best_val_miou": 83.51024627685547, "best_epoch": 98, "final_lambdas": [], "split_hash": "675667edf3f35f16"}

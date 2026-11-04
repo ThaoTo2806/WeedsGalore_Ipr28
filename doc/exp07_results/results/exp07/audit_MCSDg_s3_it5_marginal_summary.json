@@ -1,0 +1,405 @@
+{
+  "checkpoint": "runs/MCSDg_s3/best_val.pth",
+  "split": "val",
+  "head": "mcsd",
+  "sinkhorn_iters": 5,
+  "n_images": 26,
+  "bootstrap_samples": 2000,
+  "pred_weed_mass_over_gt": 1.1047546244726592,
+  "groups": [
+    {
+      "class_id": 0,
+      "class_name": "background",
+      "gt_occupancy_bin": "0/16",
+      "n_cells": 24409,
+      "residual_mean": 0.00048431940557040407,
+      "marginal_mae": 0.000499240883725132,
+      "marginal_p95_abs": 0.0018412321805953951,
+      "marginal_max_abs": 0.06467385590076447,
+      "occupancy_mae": 0.03919429770738022,
+      "image_bootstrap_ci95": {
+        "residual_mean": [
+          0.00026250323349133974,
+          0.0013373404692100354
+        ],
+        "marginal_mae": [
+          0.0002728973204837446,
+          0.0013727373852052138
+        ],
+        "occupancy_mae": [
+          0.035811827592646624,
+          0.04979466400818712
+        ]
+      }
+    },
+    {
+      "class_id": 0,
+      "class_name": "background",
+      "gt_occupancy_bin": "1-3/16",
+      "n_cells": 7936,
+      "residual_mean": 0.005773731115456734,
+      "marginal_mae": 0.006075711567562746,
+      "marginal_p95_abs": 0.028208784759044647,
+      "marginal_max_abs": 0.08139069378376007,
+      "occupancy_mae": 0.09292967719656806,
+      "image_bootstrap_ci95": {
+        "residual_mean": [
+          0.004087878406035359,
+          0.007819690807184136
+        ],
+        "marginal_mae": [
+          0.00434455121577186,
+          0.008212448824262813
+        ],
+        "occupancy_mae": [
+          0.08679666740426482,
+          0.09863998183869205
+        ]
+      }
+    },
+    {
+      "class_id": 0,
+      "class_name": "background",
+      "gt_occupancy_bin": "4-7/16",
+      "n_cells": 9817,
+      "residual_mean": 0.010235461998720273,
+      "marginal_mae": 0.012286213142041251,
+      "marginal_p95_abs": 0.04414852261543272,
+      "marginal_max_abs": 0.09523583948612213,
+      "occupancy_mae": 0.16059165191805824,
+      "image_bootstrap_ci95": {
+        "residual_mean": [
+          0.007655096158310949,
+          0.01316658847635177
+        ],
+        "marginal_mae": [
+          0.00913800304449927,
+          0.01571243244949904
+        ],
+        "occupancy_mae": [
+          0.14614054954068686,
+          0.17509687206118915
+        ]
+      }
+    },
+    {
+      "class_id": 0,
+      "class_name": "background",
+      "gt_occupancy_bin": "8-16/16",
+      "n_cells": 542838,
+      "residual_mean": -5.345670372005226e-05,
+      "marginal_mae": 0.00038425078180058156,
+      "marginal_p95_abs": 2.1576881408691406e-05,
+      "marginal_max_abs": 0.09878221154212952,
+      "occupancy_mae": 0.011998681631832415,
+      "image_bootstrap_ci95": {
+        "residual_mean": [
+          -9.205206022814416e-05,
+          -1.5762537016892122e-05
+        ],
+        "marginal_mae": [
+          0.00028325219884523884,
+          0.0005100282354312068
+        ],
+        "occupancy_mae": [
+          0.006509695859781945,
+          0.022014586524769647
+        ]
+      }
+    },
+    {
+      "class_id": 1,
+      "class_name": "crop",
+      "gt_occupancy_bin": "0/16",
+      "n_cells": 558617,
+      "residual_mean": 1.5754372815732098e-05,
+      "marginal_mae": 2.307529735949202e-05,
+      "marginal_p95_abs": 2.5918707251547683e-07,
+      "marginal_max_abs": 0.05595329403877258,
+      "occupancy_mae": 0.0020687666062198674,
+      "image_bootstrap_ci95": {
+        "residual_mean": [
+          1.1263433575256875e-05,
+          2.0890150051386445e-05
+        ],
+        "marginal_mae": [
+          1.729662124705726e-05,
+          2.923000869470105e-05
+        ],
+        "occupancy_mae": [
+          0.0013528649646412114,
+          0.003062079698343959
+        ]
+      }
+    },
+    {
+      "class_id": 1,
+      "class_name": "crop",
+      "gt_occupancy_bin": "1-3/16",
+      "n_cells": 4330,
+      "residual_mean": 0.0030984322177403495,
+      "marginal_mae": 0.005069877896559404,
+      "marginal_p95_abs": 0.019705801829695703,
+      "marginal_max_abs": 0.08025309443473816,
+      "occupancy_mae": 0.11539675925124876,
+      "image_bootstrap_ci95": {
+        "residual_mean": [
+          0.0021256682716903584,
+          0.004140410430518932
+        ],
+        "marginal_mae": [
+          0.003932217523398011,
+          0.006335145397918874
+        ],
+        "occupancy_mae": [
+          0.09501279637437392,
+          0.13430252195511744
+        ]
+      }
+    },
+    {
+      "class_id": 1,
+      "class_name": "crop",
+      "gt_occupancy_bin": "4-7/16",
+      "n_cells": 4697,
+      "residual_mean": -0.0010838505500701627,
+      "marginal_mae": 0.011365762376250031,
+      "marginal_p95_abs": 0.03864157199859618,
+      "marginal_max_abs": 0.0962897539138794,
+      "occupancy_mae": 0.17720424862448042,
+      "image_bootstrap_ci95": {
+        "residual_mean": [
+          -0.002330150228108798,
+          6.798325822850168e-05
+        ],
+        "marginal_mae": [
+          0.00887118651647317,
+          0.013831137019744097
+        ],
+        "occupancy_mae": [
+          0.15696989574950374,
+          0.1984681418949439
+        ]
+      }
+    },
+    {
+      "class_id": 1,
+      "class_name": "crop",
+      "gt_occupancy_bin": "8-16/16",
+      "n_cells": 17356,
+      "residual_mean": -0.00678591642314005,
+      "marginal_mae": 0.007885734928966116,
+      "marginal_p95_abs": 0.03951886296272278,
+      "marginal_max_abs": 0.09833788871765137,
+      "occupancy_mae": 0.1403776791052325,
+      "image_bootstrap_ci95": {
+        "residual_mean": [
+          -0.01011564283120434,
+          -0.004725355330824036
+        ],
+        "marginal_mae": [
+          0.005445216406890686,
+          0.011789663756060088
+        ],
+        "occupancy_mae": [
+          0.1068937325246226,
+          0.16380076983787917
+        ]
+      }
+    },
+    {
+      "class_id": 2,
+      "class_name": "weed",
+      "gt_occupancy_bin": "0/16",
+      "n_cells": 544136,
+      "residual_mean": 1.7718940733357365e-05,
+      "marginal_mae": 2.728063538106622e-05,
+      "marginal_p95_abs": 3.7954305298626423e-07,
+      "marginal_max_abs": 0.05888780951499939,
+      "occupancy_mae": 0.005754356926403833,
+      "image_bootstrap_ci95": {
+        "residual_mean": [
+          1.1957223719814622e-05,
+          2.5003253723877684e-05
+        ],
+        "marginal_mae": [
+          1.7334882456779054e-05,
+          3.920701431512866e-05
+        ],
+        "occupancy_mae": [
+          0.0017668634696916827,
+          0.012797270156016791
+        ]
+      }
+    },
+    {
+      "class_id": 2,
+      "class_name": "weed",
+      "gt_occupancy_bin": "1-3/16",
+      "n_cells": 6530,
+      "residual_mean": 0.002744053670772188,
+      "marginal_mae": 0.003565207494375639,
+      "marginal_p95_abs": 0.015306543186306951,
+      "marginal_max_abs": 0.05107453465461731,
+      "occupancy_mae": 0.14297201673615764,
+      "image_bootstrap_ci95": {
+        "residual_mean": [
+          0.0017013036731282766,
+          0.003940782526851747
+        ],
+        "marginal_mae": [
+          0.002501367493100117,
+          0.0048792173312605
+        ],
+        "occupancy_mae": [
+          0.08852479867678495,
+          0.20858231693147877
+        ]
+      }
+    },
+    {
+      "class_id": 2,
+      "class_name": "weed",
+      "gt_occupancy_bin": "4-7/16",
+      "n_cells": 6284,
+      "residual_mean": 0.0011787331438689172,
+      "marginal_mae": 0.006877731161826675,
+      "marginal_p95_abs": 0.02465422898530955,
+      "marginal_max_abs": 0.07388705015182495,
+      "occupancy_mae": 0.19618989531968067,
+      "image_bootstrap_ci95": {
+        "residual_mean": [
+          0.0002333129566087642,
+          0.002350090449243978
+        ],
+        "marginal_mae": [
+          0.004861866026771427,
+          0.00944492702774152
+        ],
+        "occupancy_mae": [
+          0.149262721581474,
+          0.24624272479611298
+        ]
+      }
+    },
+    {
+      "class_id": 2,
+      "class_name": "weed",
+      "gt_occupancy_bin": "8-16/16",
+      "n_cells": 28050,
+      "residual_mean": -0.0022607670059761093,
+      "marginal_mae": 0.0029844878636656035,
+      "marginal_p95_abs": 0.018862527608871454,
+      "marginal_max_abs": 0.08569949865341187,
+      "occupancy_mae": 0.09766529004204082,
+      "image_bootstrap_ci95": {
+        "residual_mean": [
+          -0.004869924999922655,
+          -0.0012012289220147785
+        ],
+        "marginal_mae": [
+          0.0015606716673698484,
+          0.006514663922942839
+        ],
+        "occupancy_mae": [
+          0.08988888296585608,
+          0.1203730538525097
+        ]
+      }
+    }
+  ],
+  "pred_weed_occupancy_bins": [
+    {
+      "pred_weed_occupancy_bin": "[0,.01)",
+      "n_cells": 526203,
+      "residual_mean": 1.3586978323438352e-06,
+      "marginal_mae": 2.470254620478648e-06,
+      "marginal_p95_abs": 9.313225746154785e-10,
+      "marginal_max_abs": 0.0032334690913558006,
+      "occupancy_mae": 0.000895325120889471,
+      "image_bootstrap_ci95": {
+        "residual_mean": [
+          9.428413434747914e-07,
+          1.814651521507771e-06
+        ],
+        "marginal_mae": [
+          1.7869105048319576e-06,
+          3.215491207558705e-06
+        ],
+        "occupancy_mae": [
+          0.0007220263351584115,
+          0.0011658062650110451
+        ]
+      }
+    },
+    {
+      "pred_weed_occupancy_bin": "[.01,.05)",
+      "n_cells": 12331,
+      "residual_mean": 0.00016131626460050185,
+      "marginal_mae": 0.00020107623901453517,
+      "marginal_p95_abs": 0.0009969454258680344,
+      "marginal_max_abs": 0.016219131648540497,
+      "occupancy_mae": 0.04495931068057223,
+      "image_bootstrap_ci95": {
+        "residual_mean": [
+          0.0001009041067649391,
+          0.0002473688636090771
+        ],
+        "marginal_mae": [
+          0.0001417876288838135,
+          0.0002797948479695324
+        ],
+        "occupancy_mae": [
+          0.03999154450872733,
+          0.04956025038886139
+        ]
+      }
+    },
+    {
+      "pred_weed_occupancy_bin": "[.05,.15)",
+      "n_cells": 6758,
+      "residual_mean": 0.002705216780415157,
+      "marginal_mae": 0.0027650017561415803,
+      "marginal_p95_abs": 0.012914644926786421,
+      "marginal_max_abs": 0.0479312464594841,
+      "occupancy_mae": 0.11177053653336587,
+      "image_bootstrap_ci95": {
+        "residual_mean": [
+          0.0016699669060513747,
+          0.004238260929328198
+        ],
+        "marginal_mae": [
+          0.001738426424132015,
+          0.004274993599235395
+        ],
+        "occupancy_mae": [
+          0.10319149668353378,
+          0.121291015854221
+        ]
+      }
+    },
+    {
+      "pred_weed_occupancy_bin": "[.15,1]",
+      "n_cells": 39708,
+      "residual_mean": -0.0012449170991446637,
+      "marginal_mae": 0.0035910778579976584,
+      "marginal_p95_abs": 0.019546286761760713,
+      "marginal_max_abs": 0.08569949865341187,
+      "occupancy_mae": 0.15755685285774015,
+      "image_bootstrap_ci95": {
+        "residual_mean": [
+          -0.002371202418620007,
+          -0.0007664822450225608
+        ],
+        "marginal_mae": [
+          0.001997721454292109,
+          0.0073403117504270326
+        ],
+        "occupancy_mae": [
+          0.12290507708532525,
+          0.1843351166671188
+        ]
+      }
+    }
+  ]
+}

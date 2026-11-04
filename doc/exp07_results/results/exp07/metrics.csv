@@ -1,0 +1,6 @@
+file,run_name,split,prior_mode,injection,prior_perturb,override,noise,GT_LEAKAGE,lambdas,mIoU,IoU_bg,IoU_crop,IoU_weed,BIoU_crop,BIoU_weed,SmallWeedRecall,recall30_small,cov_small,recall50_medium,recall50_large,recall50_all,n_small,n_medium,n_large,prior_soft_iou_weed
+OccCondg_s0_val_summary.json,OccCondg_s0,val,n/a,n/a,n/a,none,none,False,,83.439,98.261,75.788,76.268,64.048,54.006,61.29,74.194,71.613,73.545,48.953,60.896,620,567,621,
+OccCondg_s1_val_summary.json,OccCondg_s1,val,n/a,n/a,n/a,none,none,False,,83.599,98.316,75.941,76.541,64.804,54.808,56.29,67.903,65.484,73.192,49.275,59.181,620,567,621,
+OccCondg_s2_val_summary.json,OccCondg_s2,val,n/a,n/a,n/a,none,none,False,,83.648,98.307,76.309,76.327,64.755,55.407,57.097,69.516,65.484,74.074,50.242,60.066,620,567,621,
+OccCondg_s3_val_summary.json,OccCondg_s3,val,n/a,n/a,n/a,none,none,False,,83.649,98.252,76.264,76.43,64.419,54.57,61.774,74.516,72.258,72.487,50.081,61.117,620,567,621,
+OccCondg_s4_val_summary.json,OccCondg_s4,val,n/a,n/a,n/a,none,none,False,,83.51,98.28,75.876,76.374,64.255,54.732,58.71,70.323,68.226,73.545,50.081,60.398,620,567,621,

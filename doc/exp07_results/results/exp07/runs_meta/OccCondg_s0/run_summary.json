@@ -1,0 +1,7 @@
+{
+  "run_name": "OccCondg__s0",
+  "best_val_miou": 83.43894958496094,
+  "best_epoch": 90,
+  "final_lambdas": [],
+  "split_hash": "675667edf3f35f16"
+}

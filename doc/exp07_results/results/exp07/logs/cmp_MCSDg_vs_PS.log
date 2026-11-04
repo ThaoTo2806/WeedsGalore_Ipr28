@@ -1,0 +1,11 @@
+MCSDg vs PS | seeds=5 | cluster=image (n=26) | seed_bootstrap=True
+metric                    A        B    delta   95% CI           P(d<=0)
+SmallWeedRecall       56.32    54.55    +1.77   [ -1.39,  +4.67]   0.1262
+recall30_small        70.19    69.19    +1.00   [ -1.29,  +3.16]   0.1735
+cov_small             64.16    66.55    -2.39   [ -4.89,  +0.03]   0.9738
+mIoU                  83.63    81.41    +2.21   [ +1.27,  +3.54]   0.0
+IoU_crop              75.97    72.30    +3.68   [ +1.82,  +6.38]   0.0
+IoU_weed              76.59    73.92    +2.67   [ +1.66,  +4.11]   0.0
+BIoU_weed             55.81    49.64    +6.16   [ +4.37,  +8.62]   0.0
+PrecisionWeed         83.08    79.56    +3.53   [ +1.92,  +5.74]   0.0
+CropToWeedRate         5.70     6.38    -0.68   [ -2.43,  +0.89]   0.7887
