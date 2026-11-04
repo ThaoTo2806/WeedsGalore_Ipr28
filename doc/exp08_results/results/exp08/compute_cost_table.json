@@ -1,0 +1,77 @@
+{
+  "protocol": "600x600, batch=1, fp32, warmup=50, synchronized runs=300",
+  "profiles": [
+    {
+      "method": "L0",
+      "params_M": 3.455619,
+      "GFLOPs": 13.268002048,
+      "GMACs": 6.634001024,
+      "latency_ms_median": 14.225264072418213,
+      "latency_ms_p10": 14.162086009979248,
+      "latency_ms_p90": 14.307817554473877,
+      "peak_mem_MB": 145.3662109375,
+      "device": "Tesla T4",
+      "input": [
+        1,
+        5,
+        600,
+        600
+      ],
+      "precision": "fp32"
+    },
+    {
+      "method": "PS",
+      "params_M": 3.461811,
+      "GFLOPs": 13.544482048,
+      "GMACs": 6.772241024,
+      "latency_ms_median": 14.469696044921875,
+      "latency_ms_p10": 14.334787082672118,
+      "latency_ms_p90": 14.59116792678833,
+      "peak_mem_MB": 145.39013671875,
+      "device": "Tesla T4",
+      "input": [
+        1,
+        5,
+        600,
+        600
+      ],
+      "precision": "fp32"
+    },
+    {
+      "method": "OccCondg",
+      "params_M": 3.462614,
+      "GFLOPs": 14.097442048,
+      "GMACs": 7.048721024,
+      "latency_ms_median": 15.799295902252197,
+      "latency_ms_p10": 15.713894462585449,
+      "latency_ms_p90": 15.898742771148681,
+      "peak_mem_MB": 145.396484375,
+      "device": "Tesla T4",
+      "input": [
+        1,
+        5,
+        600,
+        600
+      ],
+      "precision": "fp32"
+    },
+    {
+      "method": "MCSDg",
+      "params_M": 3.462614,
+      "GFLOPs": 14.097442048,
+      "GMACs": 7.048721024,
+      "latency_ms_median": 17.832688331604004,
+      "latency_ms_p10": 17.692842102050783,
+      "latency_ms_p90": 17.981689262390137,
+      "peak_mem_MB": 145.396484375,
+      "device": "Tesla T4",
+      "input": [
+        1,
+        5,
+        600,
+        600
+      ],
+      "precision": "fp32"
+    }
+  ]
+}

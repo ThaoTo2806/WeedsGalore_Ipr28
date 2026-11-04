@@ -1,0 +1,25 @@
+{
+  "label": "OccCondg",
+  "input": [
+    1,
+    5,
+    600,
+    600
+  ],
+  "device": "Tesla T4",
+  "torch": "2.11.0+cu128",
+  "precision": "fp32",
+  "batch": 1,
+  "params_M": 3.462614,
+  "prior_head_params": 0,
+  "GFLOPs_flopcounter": 14.097442048,
+  "GMACs": 7.048721024,
+  "modulation_elementwise_Mops": 0.0,
+  "latency_ms_median": 15.799295902252197,
+  "latency_ms_p10": 15.713894462585449,
+  "latency_ms_p90": 15.898742771148681,
+  "latency_ms_mean": 15.809246285756428,
+  "runs": 300,
+  "warmup": 50,
+  "peak_mem_MB": 145.396484375
+}

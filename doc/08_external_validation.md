@@ -1,16 +1,16 @@
 # Exp08 — External-domain validation and one-time test lock
 
-> **Status (2026-11-05): NOT READY TO OPEN TEST.** K8.0 preflight and K8.1 profiling outputs are saved in `doc/exp123.ipynb`; no WeedMap inference/model predictions or WeedsGalore test evaluation have been run. The official ETH Zurich release document now resolves the annotation codes, but radiometric compatibility and the mask-validity discrepancy remain unresolved. Exp08 is frozen external-domain validation, **not** method development. No fine-tuning, calibration, threshold selection, architecture changes, or hyperparameter search on WeedMap.
+> **Status (2026-11-05): NOT READY TO OPEN TEST.** K8.0/K8.0b/K8.0c/K8.1 outputs are saved in `doc/exp123.ipynb`; no WeedMap inference/model predictions or WeedsGalore test evaluation have been run. Official iMap codes are sourced. Across 204 aligned iMaps, code 1 is absent globally, but valid-area interpretation depends on the unresolved mask polarity. The 8-bit WeedMap tiles and 16-bit WeedsGalore inputs produce different one-image `plt.imread` ranges; physical radiometry compatibility is unverified. Synthetic loader/metric helpers and tests have been prepared; their actual Kaggle execution and an end-to-end checkpoint evaluator are not yet accepted. Exp08 remains frozen external-domain validation, **not** method development.
 
 ## Readiness verdict
 
-| Requirement                                                 | Current evidence                                                                                                                                                                        | Status / action before test                                                                                                                                                                                                                          |
-| ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Novelty of both decoder directions                          | Initial Google/Scholar web snippets and cited papers; no full-text systematic review or Scopus/Web of Science query log                                                                 | **INCOMPLETE.** Treat novelty as a narrow hypothesis; finish and archive the review before any “novel/first” claim.                                                                                                                                  |
-| WeedMap five-band data, labels, metadata, and test identity | Archive structure and channel IDs are present. Official release PDF, p. 2, defines `iMap`: 0 background, 1 crop, 2 weed, 10000 non-class (ignore). Four inspected frames had no code 1. | **ANNOTATION SEMANTICS VERIFIED; INPUT/VALIDITY PARTIAL.** Crop absence in four frames is not proof of absence across all of 003. Mask polarity conflicts with the inspected mask/signal relation; radiometry and co-registration remain unverified. |
-| Second-dataset experiment type                              | The three existing WeedsGalore-trained checkpoints are evaluated without target training or adaptation                                                                                  | **DECIDED: external-domain, zero-shot confirmation.** It is not a WeedMap method-development experiment. Any later WeedMap training/tuning would require a new protocol and a separate untouched test set.                                           |
-| OccCond-g compute cost                                      | K8.1 output saved in `doc/exp123.ipynb`: four forward profiles, Tesla T4, FP32, batch 1, 600×600, 50 warmup/300 timed runs                                                              | **DONE.** Values are transcribed in the cost table below. FLOP counter omits elementwise work.                                                                                                                                                       |
-| One-time WeedsGalore test lock                              | K8.2/K8.3 provide a preliminary lock and live logging; official label codes are resolved, but mask validity, radiometry, class support, and a WeedMap evaluator remain open             | **BLOCKED ON WEEDMAP.** Keep WeedsGalore test closed until full preflight, a dedicated evaluator with tests, and an immutable manifest are ready.                                                                                                    |
+| Requirement                                                 | Current evidence                                                                                                                                                                                         | Status / action before test                                                                                                                                                                                                                   |
+| ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Novelty of both decoder directions                          | Initial Google/Scholar web snippets and cited papers; no full-text systematic review or Scopus/Web of Science query log                                                                                  | **INCOMPLETE.** Treat novelty as a narrow hypothesis; finish and archive the review before any “novel/first” claim.                                                                                                                           |
+| WeedMap five-band data, labels, metadata, and test identity | Inventory has 204 tiles per band; archive SHA-256 `f3a5…e7f5d`. Official PDF defines iMap codes. Saved audit aligns all 204 iMaps/masks and finds no code 1; counts under both mask values are retained. | **EXPORTED iMAP HAS NO CROP CODE.** Do not claim three-class validation. Valid-area support remains conditional because the release says white-valid but observed masks track signal with zero; radiometry/co-registration remain unverified. |
+| Second-dataset experiment type                              | The three existing WeedsGalore-trained checkpoints are evaluated without target training or adaptation                                                                                                   | **DECIDED: external-domain, zero-shot confirmation.** It is not a WeedMap method-development experiment. Any later WeedMap training/tuning would require a new protocol and a separate untouched test set.                                    |
+| OccCond-g compute cost                                      | K8.1 output saved in `doc/exp123.ipynb`: four forward profiles, Tesla T4, FP32, batch 1, 600×600, 50 warmup/300 timed runs                                                                               | **DONE.** Values are transcribed in the cost table below. FLOP counter omits elementwise work.                                                                                                                                                |
+| One-time WeedsGalore test lock                              | iMap semantics/class-support audit and pure metric core are documented; mask/radiometry and a data-loading evaluator remain unaccepted                                                                   | **NO-GO.** K8.2/K8.3 remain unrun until mask/radiometry are resolved, evaluator synthetic tests pass, and the immutable manifest/prechecks are complete.                                                                                      |
 
 ### Model identity and scope
 
@@ -26,7 +26,11 @@ Use the official **WeedMap RedEdge-M dataset 003** only as a candidate second-da
 
 **Official annotation semantics (verified from ETH Zurich Research Collection release document, p. 2):** `GroundTruth_iMap` code `0=Background`, `1=Crop`, `2=Weed`, `10000=Non-class`. Treat `10000` as ignore and exclude it from the confusion matrix; do not infer semantics from the RGB render color. The release describes iMap as grayscale 16-bit and the color render as black/green/red for Background/Crop/Weed. Citation/source: [ETH Zurich WeedMap release PDF](https://www.research-collection.ethz.ch/server/api/core/bitstreams/3ae97814-1570-4760-95b8-a9a3eac21975/content), p. 2; dataset DOI `10.3929/ethz-c-000788571`.
 
-**Latest preflight interpretation:** the authoritative indexed-map table takes precedence over the inconsistent render observed for code `10000`: its meaning is Non-class/ignore. Code `1` was absent from the four inspected frames, but this does not establish that Crop is absent from all of dataset 003. The release document says white mask pixels are valid, while the inspected mask/signal relationship appeared opposite (`0` over signal and `255` over padding); do not choose a mask polarity from appearance alone. Resolve that discrepancy from source docs/code before evaluation. The dataset DOI metadata states “In Copyright - Non-Commercial Use Permitted”; confirm applicable reuse terms before redistributing data or derived artifacts.
+**Latest preflight interpretation:** the authoritative indexed-map table defines `10000` as Non-class/ignore, regardless of RGB rendering. The saved audit paired 204/204 iMap and mask files with no shape mismatch and found no code `1` anywhere in the exported iMaps. All-iMap counts: background `0=34,239,045`, crop `1=0`, weed `2=343,926`, ignore `10000=668,229`. With the audit's `mask==0` branch, counts were `0=12,000,413`, `2=343,799`, `10000=668,227`; with `mask==255`, `0=22,238,632`, `2=127`, `10000=2`. The mask distribution was 102 all-255, 57 mixed, and 45 all-0 frames. The release says white is valid, whereas the notebook's signal audit associated nonzero imagery with mask zero. Thus full-index iMaps contain no Crop annotation, but which weed/background pixels are valid remains unresolved. Do not report three-class mIoU/Crop IoU; a future approved transfer analysis would be weed-only and explicitly limited.
+
+The saved K8.0c compared one predeclared image per domain (`WeedMap frame0020` and `WeedsGalore 2023-05-25_0109`). WeedsGalore files were 16-bit grayscale PNGs (`uint16`); WeedMap tile PNGs were 8-bit grayscale (`uint8`). Both became float32 through `plt.imread`, but sample distributions differed (NIR median/P99: 0.5098/0.7285 vs 0.2784/0.5922). These are descriptive statistics for one image per dataset, not calibration evidence and not a normalization recipe. Crossref's paper abstract says the orthomosaic channels are radiometrically calibrated/aligned, but the accessible material does not specify the transform from reflectance product to 8-bit tile PNG. This is a hard radiometry blocker until the export transform is sourced.
+
+The class/mask audit is preserved in `doc/exp123.ipynb`; K8.0/K8.0b/K8.0c outputs are under `doc/exp08_results/results/exp08/`. The downloaded `weedmap_003_preflight.json` remains an old `PENDING` snapshot; do not treat it as the reviewed decision artifact. K8.0 now writes a separate inventory. DataCite lists the dataset as “In Copyright - Non-Commercial Use Permitted”; verify reuse conditions before redistributing data/derived outputs.
 
 **External-domain claim boundary:** this tests frozen models on WeedMap 003 without adaptation. It supports transfer evidence only for the inspected WeedMap test collection, not generalization to all crops/sites. If radiometric alignment requires fitting statistics on WeedMap, or if set 003 is not an independent testing partition, stop before inference and preregister a different experiment. The current repository evaluator only instantiates `WeedsGaloreDataset`; passing a WeedMap path to `src/evaluate_ccmc.py` does not evaluate WeedMap. A separate loader/evaluator and tests for band order, label mapping, tile alignment, nodata, and metric aggregation are prerequisites.
 
@@ -76,7 +80,7 @@ The Kaggle test cell below creates a `test_started` marker **before** its first 
 
 ## Kaggle cells
 
-Run the inventory/documentation/range-review cells in order after the dataset is available. Cells that launch subprocesses stream stdout to the Kaggle notebook output and save it under `results/exp08/logs/`. K8.0 writes only the regenerable inventory. K8.0b and K8.0c do not run inference or read labels. K8.1 is already complete and must not be rerun just to refresh this protocol. K8.2/K8.3 remain blocked until the WeedMap evaluator has passed synthetic tests and its source, mask, radiometry, and statistical-protocol evidence artifacts pass the hash checks.
+**Kaggle only — do not run tests locally.** Copy the cells below from the committed/pushed documentation into the Kaggle notebook after updating the project checkout. Current order: K8.0 inventory (already done), K8.0b ZIP documentation (already done), K8.0c single-frame encoding (already done), K8.0d full-index class/mask audit (run only if not already saved), K8.0e revised synthetic loader/metric tests (run on Kaggle after code push), K8.0f backup. K8.1 profiling is already DONE and need not be rerun. K8.2/K8.3 are strictly NO-GO pending independently verified mask/radiometry/split/grouping, checkpoint integration and evaluator acceptance evidence. All diagnostic artifacts remain separate from the reviewed preflight and locked test manifest.
 
 ### Cell K8.0 — WeedMap RedEdge-M 003 inventory (no inference)
 
@@ -394,6 +398,212 @@ print('Saved audit:', AUDIT_LOG, flush=True)
 The source loader in `src/datasets/weedsgalore/weedsgalore.py` calls `plt.imread` on each PNG and stacks `R,G,B,NIR,RE`; `src/train.py` converts batches to the device without an explicit `/255`, standardization, or per-band normalization. Thus the effective numeric scale depends on the stored PNG bit depth and `plt.imread` behavior. Matching numeric ranges after `plt.imread` is necessary but not sufficient: the WeedMap PNGs may be display-stretched/quantized rather than calibrated reflectance. Do not authorize inference until the release/source documents establish the tile PNG radiometry or supply a fixed transform to align it with the WeedsGalore training inputs.
 
 **Radiometry gate:** the WeedMap landing page distinguishes per-channel tile PNGs from orthomosaic reflectance TIFFs. The paper's statement that channels are aligned/calibrated across the map does not, by itself, specify the numerical encoding of each exported tile PNG or show that it matches WeedsGalore's PNG input scale. Before inference, identify the tile PNG export/reflectance conversion rule from the release materials, or document a deterministic mapping from the calibrated reflectance product to the checkpoint's source-domain numeric scale. Do not estimate per-band normalization from WeedMap test tiles. If the release only provides display-stretched PNGs without a documented invertible/fixed mapping, stop the zero-shot evaluation rather than claiming radiometric transfer.
+
+### Cell K8.0d — Full-index class support and mask-polarity integrity audit (no inference)
+
+This is a data-integrity audit of all index-003 iMap/mask pairs. It reports class counts for the complete iMap and separately under `mask==0` and `mask==255`; it does not decide which mask value is valid, tune a method, or run inference. Use the authoritative iMap codes from the ETH release: 0 background, 1 crop, 2 weed, 10000 non-class/ignore. Save the output and compare the mask branches against the documented mask policy. This is the evidence source for determining whether three-class metrics are defined on the evaluated partition.
+
+```python
+import json
+from collections import Counter
+from pathlib import Path
+
+import numpy as np
+from PIL import Image
+
+ROOT = Path('/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003')
+OUT = Path('results/exp08')
+LOG = OUT / 'logs' / 'class_support_mask_integrity.log'
+REPORT = OUT / 'weedmap_003_class_support_integrity.json'
+OUT.mkdir(parents=True, exist_ok=True)
+LOG.parent.mkdir(parents=True, exist_ok=True)
+BANDS = ('R', 'G', 'B', 'NIR', 'RE')
+CODE_NAMES = {0: 'background', 1: 'crop', 2: 'weed', 10000: 'non_class_ignore'}
+frames = sorted(path.stem for path in (ROOT / 'tile' / 'R').glob('frame*.png'))
+assert len(frames) == 204, f'Expected 204 R frames in index 003, found {len(frames)}'
+
+all_counts = Counter()
+counts_by_mask = {0: Counter(), 255: Counter()}
+mask_patterns = Counter()
+imap_modes = Counter()
+missing_pairs = []
+shape_mismatches = []
+frame_rows = []
+band_frame_sets = {
+    band: {path.stem for path in (ROOT / 'tile' / band).glob('frame*.png')}
+    for band in BANDS
+}
+for band, band_frames in band_frame_sets.items():
+    assert band_frames == set(frames), f'{band} frame IDs differ from R'
+
+with LOG.open('w', encoding='utf-8', buffering=1) as log:
+    def emit(message):
+        print(message, flush=True)
+        log.write(message + '\n')
+
+    emit('WeedMap 003 class-support/mask integrity audit; no model inference.')
+    emit('Counts are reported separately for mask==0 and mask==255; neither is presumed valid.')
+    for frame in frames:
+        imap_path = ROOT / 'groundtruth' / f'003_{frame}_GroundTruth_iMap.png'
+        mask_path = ROOT / 'mask' / f'{frame}.png'
+        if not imap_path.is_file() or not mask_path.is_file():
+            missing_pairs.append(frame)
+            continue
+        with Image.open(imap_path) as image:
+            imap = np.asarray(image)
+            imap_mode = image.mode
+        with Image.open(mask_path) as image:
+            mask = np.asarray(image)
+        if imap.ndim != 2 or mask.ndim != 2 or imap.shape != mask.shape:
+            shape_mismatches.append({'frame': frame, 'imap_shape': list(imap.shape),
+                                     'mask_shape': list(mask.shape)})
+            continue
+        unknown = set(np.unique(imap).tolist()) - set(CODE_NAMES)
+        assert not unknown, f'Unexpected iMap codes in {frame}: {sorted(unknown)}'
+        imap_modes[imap_mode] += 1
+        mask_values, mask_counts = np.unique(mask, return_counts=True)
+        mask_patterns[tuple(int(value) for value in mask_values)] += 1
+        frame_counts = Counter({int(code): int(count) for code, count in
+                                zip(*np.unique(imap, return_counts=True))})
+        all_counts.update(frame_counts)
+        for mask_value in (0, 255):
+            values, counts = np.unique(imap[mask == mask_value], return_counts=True)
+            counts_by_mask[mask_value].update({int(code): int(count) for code, count in zip(values, counts)})
+        frame_rows.append({'frame': frame, 'imap_mode': imap_mode,
+                           'mask_counts': {str(int(value)): int(count) for value, count
+                                           in zip(mask_values, mask_counts)},
+                           'class_counts': {str(code): frame_counts.get(code, 0) for code in CODE_NAMES}})
+
+    assert not missing_pairs, f'Missing iMap/mask pairs: {missing_pairs}'
+    assert not shape_mismatches, f'iMap/mask shape mismatches: {shape_mismatches[:10]}'
+    crop_count = all_counts.get(1, 0)
+    result = {
+        'dataset_index': '003',
+        'tile_archive': '/kaggle/working/weedmap-2018/Tiles/RedEdge/003.zip',
+        'frames_expected': len(frames),
+        'frames_aligned': len(frame_rows),
+        'band_frame_counts': {band: len(ids) for band, ids in band_frame_sets.items()},
+        'imap_modes': dict(imap_modes),
+        'mask_patterns_by_frame': {str(key): value for key, value in mask_patterns.items()},
+        'class_codes': {str(code): name for code, name in CODE_NAMES.items()},
+        'all_imap_counts': {str(code): int(all_counts.get(code, 0)) for code in CODE_NAMES},
+        'counts_if_mask_zero_valid': {str(code): int(counts_by_mask[0].get(code, 0)) for code in CODE_NAMES},
+        'counts_if_mask_255_valid': {str(code): int(counts_by_mask[255].get(code, 0)) for code in CODE_NAMES},
+        'crop_code_present_in_any_imap_pixel': bool(crop_count),
+        'mask_validity_decision': 'PENDING; both hypotheses retained',
+        'inference_run': False,
+        'per_frame': frame_rows,
+    }
+    with REPORT.open('w', encoding='utf-8') as stream:
+        json.dump(result, stream, indent=2)
+    emit(f'Frames aligned: {len(frame_rows)} / {len(frames)}')
+    emit(f'iMap modes: {dict(imap_modes)}')
+    emit(f'Mask patterns by frame: {dict(mask_patterns)}')
+    emit(f'All iMap class counts: {result["all_imap_counts"]}')
+    emit(f'Counts if mask==0 is valid: {result["counts_if_mask_zero_valid"]}')
+    emit(f'Counts if mask==255 is valid: {result["counts_if_mask_255_valid"]}')
+    emit(f'Crop code 1 present anywhere: {bool(crop_count)}')
+    emit('No mask polarity selected; no model inference performed.')
+    emit(f'Saved report: {REPORT}')
+    emit(f'Saved log: {LOG}')
+```
+
+### Cell K8.0e — Run synthetic WeedMap loader/metric tests on Kaggle (no real dataset/inference)
+
+**Only Kaggle, never local.** First commit/push the revised `src/weedmap_evaluation.py` and `tests/test_weedmap_evaluation.py`, then pull that exact commit into the Kaggle clone (or restart the notebook against the updated checkout). This test cell must operate on the revised files from the review package; the earlier 78-line metric-only implementation and its 7 tests are not equivalent. Check that you are in the project root and the source/test files exist. The tests create temporary synthetic PNGs under pytest's temporary directory; they do **not** open WeedMap/WeedsGalore imagery, load a checkpoint, or evaluate predictions from a held-out test set.
+
+This cell saves the **actual Kaggle** pytest transcript and a hash-bound synthetic-core test report. It does *not* set `weedmap_evaluator_acceptance.json` to PASS, choose `valid_mask_code`, provide radiometric calibration evidence, or authorize K8.2/K8.3. Do not fabricate acceptance metadata from successful unit tests.
+
+```python
+import hashlib
+import json
+import os
+import subprocess
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
+
+PROJECT = Path('/kaggle/working/WeedsGalore_Ipr28')
+assert PROJECT.is_dir(), f'Project not found: {PROJECT}'
+os.chdir(PROJECT)
+source_path = Path('src/weedmap_evaluation.py')
+test_path = Path('tests/test_weedmap_evaluation.py')
+assert source_path.is_file() and test_path.is_file(), 'Push/clone both revised Python files first'
+
+# Prevent accidentally testing the older metric-only files.
+source_text = source_path.read_text(encoding='utf-8')
+test_text = test_path.read_text(encoding='utf-8')
+for symbol in ('def discover_frames(', 'def load_tile(', 'def resolve_valid_pixels(',
+               'def aggregate_predictions('):
+    assert symbol in source_text, f'Expected revised evaluator primitive missing: {symbol}'
+assert test_text.count('def test_') >= 14, 'Expected revised synthetic test suite (14 tests)'
+
+OUT = Path('results/exp08')
+LOGS = OUT / 'logs'
+LOGS.mkdir(parents=True, exist_ok=True)
+log_path = LOGS / 'weedmap_synthetic_core_tests.log'
+report_path = OUT / 'weedmap_synthetic_core_test_report.json'
+
+def sha256(path):
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+command = [sys.executable, '-m', 'pytest', '-q', '-ra', str(test_path)]
+print('$', ' '.join(command), flush=True)
+with log_path.open('w', encoding='utf-8', buffering=1) as log:
+    proc = subprocess.Popen(command, stdout=subprocess.PIPE,
+                            stderr=subprocess.STDOUT, text=True, bufsize=1)
+    for line in proc.stdout:
+        print(line, end='', flush=True)
+        log.write(line)
+    exit_code = proc.wait()
+
+report = {
+    'status': 'SYNTHETIC_CORE_PASS' if exit_code == 0 else 'SYNTHETIC_CORE_FAIL',
+    'authorization': 'NOT_AUTHORIZED_FOR_WEEDMAP_INFERENCE_OR_K8_2_K8_3',
+    'timestamp_utc': datetime.now(timezone.utc).isoformat(),
+    'git_commit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip(),
+    'command': command,
+    'pytest_exit_code': exit_code,
+    'source_file': str(source_path),
+    'source_sha256': sha256(source_path),
+    'test_file': str(test_path),
+    'test_sha256': sha256(test_path),
+    'log_file': str(log_path),
+    'log_sha256': sha256(log_path),
+    'scope': 'Synthetic loader, band order, mask-code handling, labels, confusion and aggregation only',
+    'not_verified': ['radiometry', 'official mask polarity', 'official test split',
+                     'spatial grouping', 'checkpoint inference integration'],
+}
+report_path.write_text(json.dumps(report, indent=2), encoding='utf-8')
+print('Saved synthetic test report:', report_path, flush=True)
+print('Saved pytest log:', log_path, flush=True)
+assert exit_code == 0, 'Synthetic tests failed: inspect the saved pytest log'
+print('Synthetic code tests PASS; K8.2/K8.3 remain NO-GO.', flush=True)
+```
+
+Expected output for the revised uploaded test suite: **`14 passed`**. The exact Kaggle output, not a local run, is the evidence. If fewer tests are collected, a test fails, or the code is stale, stop; do not create a PASS acceptance report.
+
+### Cell K8.0f — Backup Exp08 audit/test artifacts (no inference)
+
+After K8.0e, back up the Exp08 inventory, class/mask audit, radiometry inspection, synthetic-test report and logs. This does not change any reviewed preflight or open any test. The ZIP does not contain checkpoints, test predictions, or other `results/` experiments.
+
+```python
+from pathlib import Path
+from zipfile import ZipFile, ZIP_DEFLATED
+
+PROJECT = Path('/kaggle/working/WeedsGalore_Ipr28')
+exp08 = PROJECT / 'results' / 'exp08'
+backup = Path('/kaggle/working/exp08_preflight_synthetic_backup.zip')
+assert exp08.is_dir(), f'Exp08 outputs not found: {exp08}'
+with ZipFile(backup, 'w', compression=ZIP_DEFLATED) as archive:
+    for path in sorted(exp08.rglob('*')):
+        if path.is_file():
+            archive.write(path, arcname=str(path.relative_to(PROJECT)))
+print('Saved:', backup)
+print('Size MB:', round(backup.stat().st_size / 1024**2, 2))
+from IPython.display import FileLink, display
+display(FileLink(str(backup)))
+```
 
 ### Cell K8.1 — Profile L0, OccCond-g, MCSD-g, PS (600×600)
 

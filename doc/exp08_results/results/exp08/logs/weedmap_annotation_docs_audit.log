@@ -1,0 +1,11 @@
+WeedMap annotation documentation/source audit
+Root: /kaggle/working/weedmap-2018
+Scope: text files only; no PNG/TIFF/mask pixels opened.
+Text files scanned: 0 (max 4 MiB each)
+ZIP Tiles/RedEdge/003.zip sha256=f3a5ffcca6921ce146bb3ee92235142bbb16a96375ea81ee9a744128094e7f5d
+  text members eligible: 0
+
+ARCHIVE TEXT SEARCH: COMPLETE; this is supplementary and does not determine label semantics.
+Official semantics remain those in the cited ETH Zurich release PDF, page 2.
+Files with relevant text: 0; exact code/name hits: 0
+Saved audit: results/exp08/logs/weedmap_annotation_docs_audit.log

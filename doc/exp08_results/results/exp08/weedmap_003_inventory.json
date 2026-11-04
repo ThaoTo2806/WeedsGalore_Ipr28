@@ -1,0 +1,288 @@
+{
+  "source_page": "https://projects.asl.ethz.ch/datasets/weedmap-2018/",
+  "paper_doi": "10.3390/rs10091423",
+  "dataset_doi": "10.3929/ethz-c-000788571",
+  "dataset_root": "/kaggle/working/weedmap-2018",
+  "dataset_index_root": "/kaggle/working/weedmap-2018/Tiles/RedEdge/003",
+  "file_count": 2455,
+  "dataset_003_rededge_candidate_count": 1020,
+  "rededge_sample_paths": [
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0045.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0164.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0073.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0034.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0166.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0163.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0126.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0023.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0048.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0042.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0123.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0091.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0061.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0055.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0178.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0161.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0104.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0068.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0134.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0081.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0155.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0100.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0175.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0085.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0014.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0054.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0058.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0107.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0110.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0200.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0000.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0160.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0189.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0096.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0140.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0011.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0125.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0004.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0077.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0066.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0128.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0084.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0060.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0119.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0029.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0050.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0035.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0201.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0089.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0038.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0198.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0088.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0093.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0188.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0039.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0092.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0027.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0008.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0148.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0121.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0114.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0129.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0179.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0019.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0157.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0162.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0101.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0071.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0037.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0180.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0069.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0021.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0108.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0111.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0046.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0202.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0173.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0118.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0169.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0167.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0145.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0170.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0139.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0094.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0146.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0181.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0082.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0183.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0143.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0109.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0009.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0130.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0087.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0196.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0031.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0076.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0154.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0044.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0199.png",
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/tile/R/frame0195.png"
+  ],
+  "label_samples": [
+    {
+      "path": "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/groundtruth/003_frame0139_GroundTruth_iMap.png",
+      "mode": "L",
+      "size": [
+        480,
+        360
+      ],
+      "bands": [
+        "L"
+      ],
+      "format": "PNG",
+      "info_keys": []
+    },
+    {
+      "path": "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/groundtruth/003_frame0033_GroundTruth_iMap.png",
+      "mode": "I;16",
+      "size": [
+        480,
+        360
+      ],
+      "bands": [
+        "I"
+      ],
+      "format": "PNG",
+      "info_keys": []
+    },
+    {
+      "path": "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/groundtruth/003_frame0005_GroundTruth_color.png",
+      "mode": "L",
+      "size": [
+        480,
+        360
+      ],
+      "bands": [
+        "L"
+      ],
+      "format": "PNG",
+      "info_keys": []
+    },
+    {
+      "path": "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/groundtruth/003_frame0077_GroundTruth_color.png",
+      "mode": "RGB",
+      "size": [
+        480,
+        360
+      ],
+      "bands": [
+        "R",
+        "G",
+        "B"
+      ],
+      "format": "PNG",
+      "info_keys": []
+    },
+    {
+      "path": "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/groundtruth/003_frame0109_GroundTruth_iMap.png",
+      "mode": "I;16",
+      "size": [
+        480,
+        360
+      ],
+      "bands": [
+        "I"
+      ],
+      "format": "PNG",
+      "info_keys": []
+    },
+    {
+      "path": "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/groundtruth/003_frame0038_GroundTruth_iMap.png",
+      "mode": "L",
+      "size": [
+        480,
+        360
+      ],
+      "bands": [
+        "L"
+      ],
+      "format": "PNG",
+      "info_keys": []
+    },
+    {
+      "path": "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/groundtruth/003_frame0049_GroundTruth_iMap.png",
+      "mode": "L",
+      "size": [
+        480,
+        360
+      ],
+      "bands": [
+        "L"
+      ],
+      "format": "PNG",
+      "info_keys": []
+    },
+    {
+      "path": "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/groundtruth/003_frame0167_GroundTruth_iMap.png",
+      "mode": "L",
+      "size": [
+        480,
+        360
+      ],
+      "bands": [
+        "L"
+      ],
+      "format": "PNG",
+      "info_keys": []
+    },
+    {
+      "path": "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/groundtruth/003_frame0035_GroundTruth_color.png",
+      "mode": "L",
+      "size": [
+        480,
+        360
+      ],
+      "bands": [
+        "L"
+      ],
+      "format": "PNG",
+      "info_keys": []
+    },
+    {
+      "path": "/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003/groundtruth/003_frame0182_GroundTruth_iMap.png",
+      "mode": "I;16",
+      "size": [
+        480,
+        360
+      ],
+      "bands": [
+        "I"
+      ],
+      "format": "PNG",
+      "info_keys": []
+    }
+  ],
+  "metadata_files": [],
+  "archive_hashes": {
+    "/kaggle/working/weedmap-2018/Tiles/RedEdge/003.zip": "f3a5ffcca6921ce146bb3ee92235142bbb16a96375ea81ee9a744128094e7f5d"
+  },
+  "dataset_identity": {
+    "dataset_index": "003",
+    "sensor": "MicaSense RedEdge-M",
+    "tile_archive": "/kaggle/working/weedmap-2018/Tiles/RedEdge/003.zip",
+    "tile_archive_sha256": "f3a5ffcca6921ce146bb3ee92235142bbb16a96375ea81ee9a744128094e7f5d"
+  },
+  "mask_validity_policy": "PENDING: release says white is valid; inspected mask/signal relation appeared opposite",
+  "verified_class_map": {
+    "0": "background",
+    "1": "crop",
+    "2": "weed",
+    "10000": "ignore"
+  },
+  "verified_label_semantics": {
+    "verified": true,
+    "codes": {
+      "0": "background",
+      "1": "crop",
+      "2": "weed",
+      "10000": "non-class_ignore"
+    },
+    "source": "ETH Zurich Research Collection WeedMap release PDF, page 2",
+    "source_url": "https://www.research-collection.ethz.ch/server/api/core/bitstreams/3ae97814-1570-4760-95b8-a9a3eac21975/content"
+  },
+  "verified_mask_validity": null,
+  "verified_class_support": null,
+  "verified_input_transform": null,
+  "inventory_status": "STRUCTURE_ONLY_NOT_AUTHORIZATION",
+  "source_test_split_citation": null,
+  "verified_grouping": null,
+  "manual_review_fields": [
+    "official partition 003 and source citation",
+    "five co-registered RedEdge-M bands and channel order",
+    "radiometric calibration/PNG encoding and fixed source-compatible transform",
+    "mask validity polarity resolved against release",
+    "indexed semantics verified; class support and instance availability documented",
+    "license/reuse conditions and tile/orthomosaic grouping reviewed"
+  ],
+  "preflight_note": "Inventory only. Copy to a separate reviewed preflight artifact; do not authorize from this file."
+}

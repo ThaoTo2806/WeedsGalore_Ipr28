@@ -1,0 +1,25 @@
+{
+  "label": "MCSDg",
+  "input": [
+    1,
+    5,
+    600,
+    600
+  ],
+  "device": "Tesla T4",
+  "torch": "2.11.0+cu128",
+  "precision": "fp32",
+  "batch": 1,
+  "params_M": 3.462614,
+  "prior_head_params": 0,
+  "GFLOPs_flopcounter": 14.097442048,
+  "GMACs": 7.048721024,
+  "modulation_elementwise_Mops": 0.0,
+  "latency_ms_median": 17.832688331604004,
+  "latency_ms_p10": 17.692842102050783,
+  "latency_ms_p90": 17.981689262390137,
+  "latency_ms_mean": 17.85287743250529,
+  "runs": 300,
+  "warmup": 50,
+  "peak_mem_MB": 145.396484375
+}

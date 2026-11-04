@@ -580,3 +580,101 @@ Inference 1 vòng trên cùng checkpoint 5-vòng cho Small-Weed Recall **+9,77 [
 - Occupancy-conditioned decoder không Sinkhorn là một đối chứng mạnh và đạt kết quả tốt hơn MCSD-g về recall/coverage với mIoU tương đương; cần cân nhắc trung thực biến thể nào là phương pháp chính trước khi khóa paper/test. Không chọn theo test.
 - Không chạy train với số vòng khác: inference audit đã trả lời câu hỏi hiện tại, còn training-iteration ablation chỉ exploratory và chưa cần thiết.
 - Tiếp theo: hoàn tất rà soát novelty và protocol dataset thứ hai; quyết định trước khi khóa cấu hình cuối. Chỉ mở test một lần sau các quyết định này. **Không chạy thêm test trong Exp07.**
+- Tiếp theo: hoàn tất rà soát novelty và protocol dataset thứ hai; quyết định trước khi khóa cấu hình cuối. Chỉ mở test một lần sau các quyết định này. **Không chạy thêm test trong Exp07.**
+
+## 10. Exp08 — WeedMap external-domain preflight (05/11/2026)
+
+**Quyết định: NO-GO mở inference/test.** K8.0 inventory, K8.0b archive-text audit, K8.0c encoding inspection và K8.1 compute profiling đã có output trong `doc/exp123.ipynb`; không có WeedMap prediction và không mở WeedsGalore test. Các artifact tải về được lưu tại [doc/exp08_results/results/exp08](exp08_results/results/exp08). Exp08 vẫn là giao thức zero-shot external-domain validation đã khóa phương pháp, không phải phát triển/tune model trên WeedMap.
+
+### 10.1 Inventory và annotation
+
+- Archive được nhận diện là `Tiles/RedEdge/003.zip`, SHA-256 `f3a5ffcca6921ce146bb3ee92235142bbb16a96375ea81ee9a744128094e7f5d`. Inventory đúng index có 2.455 file (bao gồm file phụ trợ), 204 tile PNG cho mỗi band `R,G,B,NIR,RE`, tổng 1.020 per-band images.
+- Tài liệu phát hành ETH Zurich, trang 2, định nghĩa `GroundTruth_iMap`: `0=Background`, `1=Crop`, `2=Weed`, `10000=Non-class`; `10000` phải bị ignore và không vào confusion matrix. Nguồn: [ETH Zurich WeedMap release PDF](https://www.research-collection.ethz.ch/server/api/core/bitstreams/3ae97814-1570-4760-95b8-a9a3eac21975/content). K8.0b quét 0 file văn bản đã giải nén và 0 text member trong `003.zip`; điều đó không thay đổi định nghĩa đã xác minh từ PDF.
+- Notebook integrity audit ghép iMap với mask trên 204/204 frame, không resize, không có shape mismatch. Trên toàn bộ iMap có `Background=34,239,045`, `Crop=0`, `Weed=343,926`, `Non-class=668,229` pixel. Như vậy code Crop không xuất hiện trong iMap export của index 003; không thể trình bày đây là xác nhận đầy đủ phân đoạn ba lớp hay báo mIoU ba lớp/Crop IoU.
+- Mask-pattern audit có 102 frame all-255, 57 mixed, 45 all-0. Theo nhánh giả định `mask==0` là valid, class counts là Background 12,000,413, Weed 343,799, Non-class 668,227. Theo nhánh `mask==255` là valid, counts là Background 22,238,632, Weed 127, Non-class 2. Release document mô tả trắng là valid, trong khi audit tín hiệu phổ gắn vùng có tín hiệu với mask zero. **Không dùng một nhánh làm valid mask trước khi xác minh polarity từ mã nguồn/maintainer.** Đây là integrity report, không phải cách chọn model.
+- Một cell K8.0d đã được thêm để lưu class counts toàn index và cả hai mask hypotheses vào `weedmap_003_class_support_integrity.json`; cell chưa chạy trong phiên này.
+
+### 10.2 Radiometry
+
+K8.0c đã kiểm tra một ảnh mẫu được định trước mỗi miền: WeedsGalore `2023-05-25_0109` và WeedMap `frame0020`. Đây là quantile mô tả một ảnh, không phải thống kê hiệu chỉnh.
+
+| Band | WeedsGalore PNG / median / P99 | WeedMap 003 PNG / median / P99 |
+| ---- | ------------------------------ | ------------------------------ |
+| R    | 16-bit / 0.4746 / 0.7100       | 8-bit / 0.3294 / 0.5294        |
+| G    | 16-bit / 0.4482 / 0.6973       | 8-bit / 0.3569 / 0.6196        |
+| B    | 16-bit / 0.4072 / 0.6524       | 8-bit / 0.2980 / 0.5020        |
+| NIR  | 16-bit / 0.5098 / 0.7285       | 8-bit / 0.2784 / 0.5922        |
+| RE   | 16-bit / 0.4941 / 0.7276       | 8-bit / 0.3176 / 0.6627        |
+
+Trong mã WeedsGalore, loader dùng `plt.imread` rồi stack các band; train không có phép chia `/255`, standardize hay normalization thêm. Cả hai loại PNG được `plt.imread` chuyển về float32 trong miền gần `[0,1]`, nhưng điều đó không chứng minh chúng biểu diễn cùng đại lượng vật lý. Crossref abstract của bài WeedMap chỉ nói các channel trên orthomosaic được radiometrically calibrated/aligned; chưa tìm được quy tắc ánh xạ từ reflectance/orthomosaic sang tile PNG 8-bit. Không dùng median/P99 ở trên để chuẩn hóa WeedMap. **Radiometry là blocker** cho tới khi tìm được export/calibration procedure cố định hoặc xác nhận không thể thực hiện chuyển giao hợp lệ.
+
+### 10.3 Compute profile
+
+K8.1 DONE: Tesla T4, FP32, batch 1, input `600×600`, 50 warmup, 300 lần đo đồng bộ; forward-only. FLOP counter bỏ sót một số phép elementwise như Sinkhorn, latency bao gồm chi phí đó.
+
+| Model     | Parameters (M) | Counted GFLOPs |    GMACs |    Median ms [p10, p90] | Peak memory (MB) |
+| --------- | -------------: | -------------: | -------: | ----------------------: | ---------------: |
+| L0        |       3.455619 |      13.268002 | 6.634001 | 14.225 [14.162, 14.308] |          145.366 |
+| PS        |       3.461811 |      13.544482 | 6.772241 | 14.470 [14.335, 14.591] |          145.390 |
+| OccCond-g |       3.462614 |      14.097442 | 7.048721 | 15.799 [15.714, 15.899] |          145.396 |
+| MCSD-g    |       3.462614 |      14.097442 | 7.048721 | 17.833 [17.693, 17.982] |          145.396 |
+
+### 10.4 Evaluator groundwork và next steps
+
+Đã thêm [src/weedmap_evaluation.py](../src/weedmap_evaluation.py) và [tests/test_weedmap_evaluation.py](../tests/test_weedmap_evaluation.py) làm metric core thuần: `10000` luôn ignore, valid mask phải được truyền tường minh, và khi không có GT Crop thì không trả mIoU/Crop IoU ba lớp. Đây **chưa phải** end-to-end loader/evaluator. Synthetic tests đã viết nhưng chưa runtime-pass: workspace `.venv` thiếu NumPy và pytest; tool cài pytest đã được bỏ qua, Pylance runtime smoke test cũng dừng vì thiếu NumPy. Static syntax/editor check không thay thế test execution.
+
+1. Radiometry: yêu cầu ETHZ/data maintainers hoặc tìm source export script để xác định cách tạo tile PNG 8-bit từ reflectance/calibrated products. Không thể suy ra phép chuyển đổi từ một ảnh mẫu. Nếu không có mapping cố định, dừng external validation hoặc đổi sang protocol khác có test độc lập.
+2. Mask/class support: chạy K8.0d để lưu artifact toàn index; đối chiếu hai mask branches với tài liệu/mã nguồn phát hành. Crop code không có trong toàn bộ iMap export, nên metric protocol phải là Weed-only; không tuyên bố mIoU ba lớp.
+3. Evaluator: sau khi khóa mask và transform, hoàn thiện loader riêng và kiểm thử synthetic cho band order, iMap 16-bit/8-bit, ignore `10000`, mask polarity, output shape, và metrics. Chạy test trong Kaggle/repo có NumPy + pytest và lưu report/hash.
+4. K8.1 đã DONE, không chạy lại. K8.2/K8.3 vẫn NO-GO cho đến khi evaluator acceptance, mask/radiometry evidence, class-support artifact, 15 checkpoints/configs, protocol thống kê và immutable manifest hoàn chỉnh. WeedsGalore test vẫn khóa.
+
+- Tiếp theo: hoàn tất rà soát novelty và protocol dataset thứ hai; quyết định trước khi khóa cấu hình cuối. Chỉ mở test một lần sau các quyết định này. **Không chạy thêm test trong Exp07.**
+
+## 10. Exp08 — External-domain preflight cho WeedMap 003 (05/11/2026)
+
+**Quyết định: NO-GO mở test/inference.** Đã chạy K8.0 inventory, K8.0b archive-text audit, K8.0c input-encoding inspection và K8.1 compute profiling. Không chạy WeedMap inference, không mở WeedsGalore test, không chạy K8.2/K8.3. Artifacts đã tải nằm tại [doc/exp08_results/results/exp08](exp08_results/results/exp08); notebook log gốc tại [doc/exp123.ipynb](exp123.ipynb). Các kết quả này chỉ là preflight và integrity audit, không phải đánh giá mô hình ngoài miền.
+
+### 10.1 Dataset, annotation và class support
+
+- Archive identity: `Tiles/RedEdge/003.zip`, SHA-256 `f3a5ffcca6921ce146bb3ee92235142bbb16a96375ea81ee9a744128094e7f5d`. Inventory có 204 tile PNG cho từng band `R,G,B,NIR,RE` (1.020 channel tiles), 2.455 file dưới index directory gồm cả metadata/`__MACOSX`; 93/204 iMap-mask pairs có shape `(360,480)` và mode iMap `I;16`, 9 pair signal-positive có iMap grayscale `L`, 102 frame còn lại không có signal theo audit tile ảnh. Không quy ước mask từ các mode này.
+- Tài liệu phát hành ETH Zurich, trang 2, định nghĩa indexed map: `0=Background`, `1=Crop`, `2=Weed`, `10000=Non-class`. Vì vậy map `10000` sang ignore, không dùng màu trong `GroundTruth_color` để suy ra nhãn. Nguồn: [ETH Zurich WeedMap release PDF](https://www.research-collection.ethz.ch/server/api/core/bitstreams/3ae97814-1570-4760-95b8-a9a3eac21975/content).
+- Integrity audit khớp iMap-mask shape trên **204/204** frame, không resize/relable. Trong iMap toàn index, counts là Background `34,239,045`, Crop `0`, Weed `343,926`, Non-class `668,229`. Kết quả này cho thấy nhãn Crop không được mã hóa trong các iMap xuất bản của index 003; vì vậy không thể coi đây là xác nhận đầy đủ ba lớp hay báo mIoU ba lớp/Crop IoU.
+- Mask-conditioned counts được lưu riêng vì polarity chưa xác minh. Với `mask=0`: Background `12,000,413`, Weed `343,799`, Non-class `668,227`; với `mask=255`: Background `22,238,632`, Weed `127`, Non-class `2`. Mask patterns: 102 frame all-255, 57 mixed, 45 all-0. Audit notebook đã dùng `mask==0` như valid cho một số thống kê; tài liệu release mô tả trắng là valid, còn pixel audit thấy mask zero đi cùng vùng có signal. Do mâu thuẫn này, không dùng các conditional counts làm valid-area metrics cho đến khi có giải thích từ source code/maintainer. Class-code absence là toàn-index finding, độc lập với cách chia mask.
+- K8.0b quét 0 file văn bản đã giải nén và 0 text member trong `003.zip`; điều đó không thay đổi định nghĩa từ PDF phát hành, nhưng package tile không kèm thêm tài liệu/mã nguồn giải thích mask hoặc radiometry.
+
+### 10.2 Radiometry và input compatibility
+
+K8.0c dùng một mẫu cố định, không đọc nhãn và không fit transform: WeedsGalore `2023-05-25_0109` và WeedMap `frame0020`. Cả hai được `plt.imread` chuyển thành `float32`, nhưng WeedsGalore PNG là 16-bit (`I;16`/`uint16`) còn WeedMap tile là 8-bit grayscale (`L`/`uint8`). Bảng median/P99 dưới đây chỉ mô tả từng ảnh mẫu, không phải thống kê hiệu chỉnh:
+
+| Band | WeedsGalore median / P99 | WeedMap 003 median / P99 |
+| ---- | -----------------------: | -----------------------: |
+| R    |          0.4746 / 0.7100 |          0.3294 / 0.5294 |
+| G    |          0.4482 / 0.6973 |          0.3569 / 0.6196 |
+| B    |          0.4072 / 0.6524 |          0.2980 / 0.5020 |
+| NIR  |          0.5098 / 0.7285 |          0.2784 / 0.5922 |
+| RE   |          0.4941 / 0.7276 |          0.3176 / 0.6627 |
+
+Source loader WeedsGalore chỉ `plt.imread` rồi stack năm band, không chia `/255`, standardize hay per-band normalize trong loader/train. Bài WeedMap nói các channel trên orthomosaic được aligned/calibrated radiometrically; nguồn truy cập được chưa chỉ rõ phép biến đổi từ reflectance/orthomosaic sang tile PNG 8-bit hoặc quan hệ số học với PNG 16-bit của WeedsGalore. Miền số float `[0,1]` chung không chứng minh cùng đại lượng vật lý. Không chuẩn hóa theo median/quantile WeedMap test. **Radiometry vẫn là blocker**; cần nguồn export/calibration cố định hoặc dừng external transfer claim.
+
+### 10.3 Compute profile (K8.1 DONE)
+
+Tesla T4, FP32, batch 1, input `600×600`, 50 warmup và 300 lượt đo đồng bộ; forward only. FLOP counter bỏ qua một số elementwise operations như Sinkhorn, còn latency đo forward thực tế.
+
+| Model     | Parameters (M) | Counted GFLOPs |    GMACs |    Median ms [p10, p90] | Peak memory (MB) |
+| --------- | -------------: | -------------: | -------: | ----------------------: | ---------------: |
+| L0        |       3.455619 |      13.268002 | 6.634001 | 14.225 [14.162, 14.308] |          145.366 |
+| PS        |       3.461811 |      13.544482 | 6.772241 | 14.470 [14.335, 14.591] |          145.390 |
+| OccCond-g |       3.462614 |      14.097442 | 7.048721 | 15.799 [15.714, 15.899] |          145.396 |
+| MCSD-g    |       3.462614 |      14.097442 | 7.048721 | 17.833 [17.693, 17.982] |          145.396 |
+
+### 10.4 Evaluator groundwork and remaining gates
+
+Added [src/weedmap_evaluation.py](../src/weedmap_evaluation.py) and [tests/test_weedmap_evaluation.py](../tests/test_weedmap_evaluation.py) as a pure metric core: code `10000` is ignored, mask polarity must be supplied explicitly, and three-class metrics are omitted when Crop GT support is zero. This is **not** a dataset loader or accepted evaluator. Synthetic tests were authored but not run: the configured workspace venv lacks `pytest` and `numpy`, and no package install was performed. Static syntax/editor checks alone do not count as runtime acceptance.
+
+Next steps, still without inference:
+
+1. Ask ETHZ/data maintainers for the exported tile PNG radiometry/bit-depth conversion and mask polarity/source code. The article's orthomosaic calibration statement is insufficient to infer tile encoding.
+2. Run K8.0d to persist full-index counts under both mask hypotheses as `weedmap_003_class_support_integrity.json`; do not select a model or thresholds from these counts. Use the existing notebook count only as preliminary saved evidence until the artifact is captured.
+3. Configure a test environment with `numpy` and `pytest`, run only `tests/test_weedmap_evaluation.py`, and extend synthetic coverage for mask polarity, no-Crop metric branch, invalid codes, and confusion aggregation. Then implement a separate WeedMap loader/evaluator with fixed band order and an explicitly sourced radiometric transform; unit tests must not use WeedMap test labels to tune parameters.
+4. Create `weedmap_evaluator_acceptance.json` only from real passing test logs plus SHA-256 for evaluator, test report, mask-policy evidence, radiometry evidence, and frozen statistical protocol. K8.2 remains fail-closed until these artifacts and all 15 checkpoints/configs are present.
+5. Keep K8.1 as DONE. Keep K8.2 and K8.3 unrun; WeedsGalore test remains locked.
