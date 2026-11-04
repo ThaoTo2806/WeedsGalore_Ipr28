@@ -33,7 +33,8 @@ flags.DEFINE_integer('n_boot', 10000, 'bootstrap replicates')
 flags.DEFINE_integer('seed', 0, 'bootstrap seed')
 flags.DEFINE_list('metrics', ['SmallWeedRecall', 'recall30_small', 'cov_small', 'recall50_medium',
                               'recall50_large', 'recall50_all', 'IoU_weed', 'IoU_crop', 'IoU_bg',
-                              'mIoU', 'BIoU_weed', 'BIoU_crop'], 'metrics to compare')
+                              'mIoU', 'BIoU_weed', 'BIoU_crop', 'PrecisionWeed',
+                              'CropToWeedRate'], 'metrics to compare')
 flags.DEFINE_enum('gate', 'none', ['none', 'h2', 'g3', 'g4', 'abs', 'screen'], 'decision rule')
 flags.DEFINE_float('min_delta', None, 'override primary-metric threshold (pp)')
 flags.DEFINE_float('max_crop_drop', 1.0, 'max allowed Crop IoU drop (pp)')
@@ -75,6 +76,14 @@ def metric_values(sums, col, metric):
         return ratio(f'binter_{c}', f'bunion_{c}')
     if metric == 'SmallWeedRecall':
         return ratio('tp50_small', 'n_small')
+    if metric == 'PrecisionWeed':
+        denominator = get('cm_02') + get('cm_12') + get('cm_22')
+        with np.errstate(invalid='ignore', divide='ignore'):
+            return np.where(denominator > 0, 100.0 * get('cm_22') / denominator, np.nan)
+    if metric == 'CropToWeedRate':
+        denominator = get('cm_10') + get('cm_11') + get('cm_12')
+        with np.errstate(invalid='ignore', divide='ignore'):
+            return np.where(denominator > 0, 100.0 * get('cm_12') / denominator, np.nan)
     if metric.startswith('recall'):
         t, b = metric[6:].split('_')
         return ratio(f'tp{t}_{b}', f'n_{b}')

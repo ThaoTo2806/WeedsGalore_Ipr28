@@ -7,8 +7,9 @@ Motivation (doc/REVIEW_REPORT.md, Exp01-Exp04):
     +11.3 pp Small-Weed Recall without any extra input, at +27 GFLOPs);
   * Diag-D2: averaging dilutes small-weed evidence, max-like aggregation keeps it.
 
-MCSD replaces "1x1 classifier at 1/4 res + bilinear x4" by two cheap heads on the same
-1/4-res decoder feature and an exact, differentiable coupling:
+MCSD replaces "1x1 classifier at 1/4 res + bilinear x4" by two heads on the same
+1/4-res decoder feature and a finite-step differentiable entropic transport coupling
+with approximate row-marginal conservation:
   occupancy  q_c(cell)    : softmax over classes = predicted class FRACTIONS of each cell,
                             supervised with soft occupancy targets (avg-pooled one-hot GT);
   placement  s_c(cell, j) : score of class c at sub-pixel j (r*r sub-pixels per cell).

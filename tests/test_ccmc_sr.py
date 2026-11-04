@@ -158,7 +158,7 @@ def test_sinkhorn_marginals_and_placement():
 
 def test_occupancy_conditioned_subcell():
     from nets.mcsd import occupancy_conditioned_subcell
-    log_q = torch.log(torch.tensor([0.7, 0.2, 0.1])).view(1, 3, 1, 1)
+    log_q = torch.log(torch.tensor([0.7, 0.2, 0.1])).view(1, 3, 1, 1).requires_grad_()
     scores = torch.zeros(1, 3, 16, 1, 1, requires_grad=True)
     log_p = occupancy_conditioned_subcell(log_q, scores)
     p = log_p.exp()
@@ -172,7 +172,9 @@ def test_occupancy_conditioned_subcell():
     changed = occupancy_conditioned_subcell(log_q, placed_scores).exp()
     assert changed[0, 2, 0, 0, 0] > p[0, 2, 0, 0, 0]
     assert not torch.allclose(changed.mean(2), log_q.exp(), atol=1e-4)
-    changed[0, 2].sum().backward()
+    weights = torch.linspace(-1.0, 1.0, 16).view(1, 1, 16, 1, 1)
+    (changed * weights).sum().backward()
+    assert torch.isfinite(log_q.grad).all() and log_q.grad.abs().sum() > 0
     assert torch.isfinite(placed_scores.grad).all()
 
 
@@ -382,9 +384,10 @@ def test_stage1_modulation_is_rejected():
 
 
 @needs_hf
-@pytest.mark.parametrize('head,guide', [('mcsd', False), ('mcsd', True), ('pixelshuffle', False)])
+@pytest.mark.parametrize('head,guide', [('mcsd', False), ('mcsd', True),
+                                       ('pixelshuffle', False), ('occ_conditioned', True)])
 def test_mcsd_forward_backward(head, guide):
-    from nets.mcsd import MCSDSegFormer, occupancy_loss
+    from nets.mcsd import MCSDSegFormer
     torch.manual_seed(0)
     net = MCSDSegFormer(head=head, spectral_guide=guide).train()
     x = torch.rand(2, 5, 600, 600)
@@ -392,9 +395,14 @@ def test_mcsd_forward_backward(head, guide):
     out, extras = net(x, return_aux=True)
     assert out.shape == (2, 3, 600, 600)
     assert torch.allclose(out.exp().sum(1), torch.ones(2, 600, 600), atol=1e-4)  # valid log-probs
-    loss = torch.nn.functional.cross_entropy(out, labels) + occupancy_loss(extras['occ_logits'], labels, 3)
-    loss.backward()
+    segmentation_loss = torch.nn.functional.nll_loss(out, labels)
+    segmentation_loss.backward()
     assert net.placement.weight.grad.abs().sum() > 0
+    if head == 'occ_conditioned':
+        assert net.occupancy.weight.grad is not None
+        assert net.occupancy.weight.grad.abs().sum() > 0
+        assert net.guide[-1].weight.grad is not None
+        assert net.guide[-1].weight.grad.abs().sum() > 0
     for name, p in net.named_parameters():
         if p.grad is not None:
             assert torch.isfinite(p.grad).all(), name
@@ -413,3 +421,16 @@ def test_mcsd_decoder_init_matches_l0():
         if k.startswith('classifier'):
             continue
         assert torch.equal(sd0[k], sdm[k]), k
+
+
+@needs_hf
+def test_occ_conditioned_init_matches_mcsd_g_same_seed():
+    from nets.mcsd import MCSDSegFormer
+    torch.manual_seed(17)
+    mcsd_g = MCSDSegFormer(head='mcsd', spectral_guide=True)
+    torch.manual_seed(17)
+    occ_cond = MCSDSegFormer(head='occ_conditioned', spectral_guide=True)
+    state_mcsd, state_occ = mcsd_g.state_dict(), occ_cond.state_dict()
+    assert state_mcsd.keys() == state_occ.keys()
+    for key in state_mcsd:
+        assert torch.equal(state_mcsd[key], state_occ[key]), key

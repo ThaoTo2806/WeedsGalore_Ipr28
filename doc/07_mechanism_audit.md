@@ -14,25 +14,25 @@ Exp07 chỉ dùng **validation**. Cấu hình đề xuất vẫn là MCSD-g, 5 v
 
 - Dùng bin instance đã khóa `[45, 147]` px, validation split hiện tại, `boundary_px=3`, seed bootstrap paired + image cluster.
 - Giữ nguyên loss, augmentation, optimizer, 100 epoch, checkpoint theo val mIoU, decoder/backbone và seed 0–4. Ghi commit, split hash, phiên bản thư viện và cấu hình trong artifacts.
-- Không thay MCSD-g đã xác nhận. Mọi code mới phải có unit test cho forward shape, xác suất mỗi sub-pixel tổng bằng 1, gradient hữu hạn, occupancy conditioning và khác biệt với Sinkhorn khi placement không đồng đều.
+- Không thay MCSD-g đã xác nhận. Unit tests phải xác minh forward/backward `occ_conditioned` với spectral guide, xác suất mỗi sub-pixel tổng bằng 1, `P(c,j)=q_c` khi placement scores bằng nhau, marginal lệch khi scores không đều, segmentation-only gradient tới occupancy/placement/guide, và cùng seed tạo state dict khởi tạo khớp MCSD-g.
 - Không chạy test ở bất kỳ cell nào của Exp07.
 
 ## E7.1 — Occupancy-conditioned baseline không Sinkhorn
 
-Thêm head/variant riêng, ví dụ `head=occ_conditioned`, dùng cùng occupancy head, placement head, spectral guide 5-band và occupancy loss như MCSD-g. Khác biệt duy nhất là cách tạo xác suất cho mỗi sub-pixel. Với occupancy dự đoán `q_c` và placement score `s_cj`, dùng:
+Thêm head/variant riêng, ví dụ `head=occ_conditioned`, dùng cùng occupancy head, placement head, spectral guide 5-band và occupancy loss như MCSD-g. Khác biệt chính là cách tạo xác suất cho mỗi sub-pixel. Với occupancy dự đoán `q_c` và placement score `s_cj`, dùng:
 
 ```text
 log P(c, j) = log_softmax_c(log(q_c) + s(c, j) / tau)
 ```
 
-Chuẩn hóa theo lớp độc lập ở từng sub-pixel; **không** chạy Sinkhorn và không ép tổng xác suất lớp qua 16 sub-pixel phải khớp `16*q`. Khi placement scores bằng nhau, đầu ra vẫn theo `q`; khi scores khác nhau, marginal có thể lệch. Đây là occupancy-conditioned control, không phải PS cũ: PS có occupancy auxiliary loss nhưng occupancy head không điều kiện hóa placement output.
+Chuẩn hóa theo lớp độc lập ở từng sub-pixel; **không** chạy Sinkhorn và không ép tổng xác suất lớp qua 16 sub-pixel phải khớp `16*q`. Khi placement scores bằng nhau, đầu ra vẫn theo `q`; khi scores khác nhau, marginal có thể lệch. Đây là occupancy-conditioned, unconstrained sub-pixel normalization. Nó liên quan về mặt toán học tới một bước normalization có prior occupancy, không mô tả hai công thức như không liên quan. Đây không phải PS cũ: PS có occupancy auxiliary loss nhưng occupancy head không điều kiện hóa placement output.
 
 ### Train và so sánh
 
 - Train `OccCond-g` seed 0–4, cùng init recipe, 5-band guide, `tau=1`, occupancy loss 0,3 và mọi thiết lập còn lại của MCSD-g. Ghi rõ đây là baseline mới; không tái sử dụng tên PS.
 - Đánh giá paired trên validation: `OccCond-g` so với MCSD-g, L0 và PS hiện có. So sánh chính là MCSD-g − OccCond-g; các so sánh còn lại là bối cảnh.
 - Báo cáo Small-Weed Recall, `cov_small`, mIoU, Crop/Weed IoU, BIoU, false positive Weed trên GT không-Weed, tổng Weed probability và marginal error. Dùng CI 95% phân tầng seed + ảnh; không chọn biến thể theo test.
-- Exp07 là audit cơ chế, không chọn winner và không có gate PASS/FAIL. Chỉ claim lợi ích downstream của Sinkhorn nếu marginal MAE giảm, mIoU delta MCSD-g − OccCond-g có CI 95% hoàn toàn trên 0, Crop IoU không kém quá 1 pp (CI dưới lớn hơn −1 pp), và Small-Weed Recall không kém quá 1 pp (CI dưới lớn hơn −1 pp). Nếu điều kiện không đạt, chỉ báo cáo các estimate/CI và khả năng áp đặt marginal; không claim Sinkhorn cải thiện accuracy.
+- Estimand chính là trung bình paired delta MCSD-g − OccCond-g trên 5 seed, với hierarchical bootstrap paired seed + image-cluster percentile CI 95% (`compare_runs.py --seed_bootstrap=True`). Exp07 không chọn winner và không có gate PASS/FAIL. Chỉ mô tả lợi ích downstream của iterative occupancy-constrained coupling nếu marginal MAE giảm, mIoU delta có CI 95% hoàn toàn trên 0, và hai điều kiện non-inferiority đều đạt: cận dưới CI của Crop IoU delta > −1 pp và cận dưới CI của Small-Weed Recall delta > −1 pp. Biên −1 pp áp dụng trên thang percentage-point cho từng metric. Đây là tiêu chí nghiêm ngặt đã khóa trước khi chạy. Ngay cả khi đạt, kết luận giới hạn ở “iterative occupancy-constrained coupling improves segmentation quality over direct occupancy-conditioned normalization under the evaluated protocol”; không kết luận exact mass conservation là nguyên nhân, vì Sinkhorn hữu hạn vòng chỉ gần bảo toàn marginal.
 
 ## E7.2 — Sai số marginal theo lớp và occupancy
 
@@ -44,11 +44,11 @@ q_out(c)  = average_pool_4x4(P_c)
 residual(c) = q_out(c) - q_pred(c)
 ```
 
-Ghi theo lớp và theo tầng occupancy GT của từng ô: 0/16, 1–3/16, 4–7/16, 8–16/16 pixel của lớp. Nhóm 1–3 Weed pixel/ô là vùng occupancy nhỏ cần chú ý; ngưỡng được cố định trước khi chạy. Cho từng lớp/tầng, báo số ô, signed bias, MAE, p95 absolute error và max absolute error; bootstrap CI theo ảnh cho metric tổng hợp. Đánh giá đồng thời `q_pred` so với occupancy GT để tách lỗi occupancy head khỏi lỗi coupling Sinkhorn.
+Ghi theo lớp và theo tầng occupancy GT của từng ô: 0/16, 1–3/16, 4–7/16, 8–16/16 pixel của lớp. Đồng thời, riêng Weed, phân tầng theo occupancy dự đoán đã khóa trước: `[0, 0.01)`, `[0.01, 0.05)`, `[0.05, 0.15)`, `[0.15, 1]`. Nhóm GT 1–3 Weed pixel/ô và nhóm `q_pred_weed < 0.01` là trọng tâm kiểm toán. Cho từng lớp/tầng, báo số ô, signed bias, MAE, p95 absolute error và max absolute error; bootstrap CI theo ảnh cho metric tổng hợp. Đánh giá đồng thời `q_pred` so với occupancy GT để tách lỗi occupancy head khỏi lỗi coupling Sinkhorn.
 
 Không gộp các đại lượng sau thành một “mass error” duy nhất:
 
-- `q_out - q_pred`: mức độ đầu ra tuân theo occupancy dự đoán; đây là sai số marginal của Sinkhorn.
+- `q_out - q_pred`: mức độ đầu ra tuân theo occupancy dự đoán; đây là sai số marginal gần đúng của Sinkhorn ở MCSD-g và độ lệch unconstrained ở OccCond-g.
 - `q_pred - q_GT`: lỗi occupancy head so với tỉ lệ lớp thật trong ô.
 - Tổng xác suất Weed / tổng pixel Weed GT: độ lệch tổng lượng dự đoán so với nhãn; không đo bảo toàn theo occupancy head.
 
@@ -58,10 +58,10 @@ Không gộp các đại lượng sau thành một “mass error” duy nhất:
 
 - instance TP/FN theo recall@IoU 0,5 và recall@0,3; false positive được đo ở mức pixel bằng Background/Crop→Weed, không diễn giải thành FP-instance;
 - coverage instance và số pixel dự đoán Weed trên vùng GT không-Weed;
-- confusion Weed→Background, Background/Crop→Weed, Crop IoU và boundary IoU;
+- confusion Weed→Background, Background/Crop→Weed, Weed pixel precision, Crop→Weed rate, Crop IoU và boundary IoU;
 - các đại lượng trên theo GT Weed occupancy 1–3/16, 4–7/16, 8–16/16 trong ô và theo ngày bay.
 
-Kiểm tra mối liên hệ giữa marginal residual Weed, tổng lượng Weed dự đoán, số instance được khôi phục và phần suy giảm Crop/mIoU. Báo kết quả theo từng seed/ảnh, không suy luận từ một ví dụ trực quan. Giả thuyết cần kiểm tra là một vòng chưa hội tụ làm lệch row marginals, từ đó phân bổ nhiều xác suất Weed hơn cho một số ô; nếu false positive hoặc Crop→Weed tăng cùng recall thì mô tả đúng trade-off, không gọi đó là cải thiện phát hiện thuần túy.
+Tính `Precision_Weed = TP_Weed / (TP_Weed + FP_Weed)` từ confusion matrix pixel và `Crop→Weed rate = cm_12 / (cm_10 + cm_11 + cm_12)`; báo thêm số pixel Crop→Weed. Đối chiếu instance theo cùng GT instance ID để đếm cỏ nhỏ mới được match ở 1 vòng mà chưa match ở 5 vòng, và cỏ nhỏ bị mất match theo chiều ngược lại. Kiểm tra mối liên hệ giữa marginal residual Weed, tổng lượng Weed dự đoán, số instance được khôi phục và phần suy giảm Crop/mIoU. Báo kết quả theo từng seed/ảnh, không suy luận từ một ví dụ trực quan. Giả thuyết cần kiểm tra là một vòng chưa hội tụ làm lệch row marginals, từ đó phân bổ nhiều xác suất Weed hơn cho một số ô; nếu pixel false positives hoặc Crop→Weed tăng cùng recall thì mô tả trade-off sensitivity/specificity, không gọi đó là cải thiện phát hiện thuần túy. Pixel false positives không được gọi là FP instance.
 
 ## E7.4 — Thử nghiệm train với số vòng khác nhau (thăm dò)
 
@@ -69,7 +69,7 @@ Chỉ chạy nếu E7.1–E7.3 cho thấy câu hỏi này còn cần thiết. N�
 
 ## Kaggle cells
 
-Các cell dưới đây không chạy test. Trước khi chạy, commit/push code mới (`occ_conditioned` head và `mcsd_audit.py`) rồi clone đúng commit đó trên Kaggle. Gắn dataset WeedsGalore cùng các checkpoint datasets dùng ở Exp06: `ccmc-ckpts`, `exp03-ckpts`, `exp04-ckpts`, `exp05-ckpts`, `exp06-ckpts`. Biến `DS` cần trỏ tới thư mục gốc `weedsgalore-dataset`, như các notebook Exp01–06.
+Các cell dưới đây không chạy test. Trước khi chạy, commit/push code mới (`occ_conditioned` head, `mcsd_audit.py`, `mcsd_iteration_audit.py`) rồi clone đúng commit đó trên Kaggle. Gắn dataset WeedsGalore, checkpoint datasets dùng ở Exp06 (`ccmc-ckpts`, `exp03-ckpts`, `exp04-ckpts`, `exp05-ckpts`, `exp06-ckpts`) và một dataset `exp06-results` có chứa các file đã giải nén `results/exp06/*_val_per_image.csv`/`*_val_summary.json`. Cell sẽ tái dùng validation artifacts Exp06, không evaluate lại các model cũ. Biến `DS` cần trỏ tới thư mục gốc `weedsgalore-dataset`, như các notebook Exp01–06.
 
 ### Cell K7.0 — Setup, test và checkpoint check
 
@@ -77,14 +77,26 @@ Các cell dưới đây không chạy test. Trước khi chạy, commit/push cod
 import glob, json, os, shutil, subprocess, sys
 
 os.chdir('/kaggle/working/WeedsGalore_Ipr28')
+if 'DS' not in globals():
+	candidates = glob.glob('/kaggle/input/**/weedsgalore-dataset', recursive=True)
+	assert candidates, 'Cannot find weedsgalore-dataset under /kaggle/input'
+	DS = candidates[0]
 assert os.path.isdir(DS), f'Invalid dataset path: {DS}'
 EXP = 'exp07'
 OUT = f'results/{EXP}'
 BINS = 'results/instance_bins.json'
 os.makedirs(f'{OUT}/logs', exist_ok=True)
 
-# Stop here if the new synthetic and model integration tests fail.
-subprocess.run([sys.executable, '-m', 'pytest', '-q', 'tests/test_ccmc_sr.py'], check=True)
+def run_checked(args, log_path):
+	with open(log_path, 'w') as log_file:
+		subprocess.run(args, stdout=log_file, stderr=subprocess.STDOUT, check=True)
+
+# Stop here if the synthetic and model integration tests fail.
+run_checked([sys.executable, '-m', 'pytest', '-q', 'tests/test_ccmc_sr.py'],
+			f'{OUT}/logs/unit_tests.log')
+with open(f'{OUT}/logs/unit_tests.log') as f:
+	test_output = f.read().lower()
+assert ' skipped' not in test_output, 'HF-backed integration tests were skipped; do not start training'
 
 for path in glob.glob('/kaggle/input/**/runs/*/best_val.pth', recursive=True):
 	run_dir = os.path.basename(os.path.dirname(path))
@@ -97,8 +109,28 @@ for path in glob.glob('/kaggle/input/**/runs/*/best_val.pth', recursive=True):
 required = [f'{model}_s{seed}' for model in ('L0', 'MCSDg', 'PS') for seed in range(5)]
 missing = [run for run in required if not os.path.isfile(f'runs/{run}/best_val.pth')]
 assert not missing, f'Missing Exp06 reference checkpoints: {missing}'
+result_candidates = glob.glob('/kaggle/input/**/MCSDg_s0_val_per_image.csv', recursive=True)
+assert result_candidates, 'Attach the extracted exp06-results dataset'
+EXP06_RESULTS = os.path.dirname(result_candidates[0])
+required_results = [f'{model}_s{seed}_val_{suffix}'
+					for model in ('L0', 'PS', 'MCSDg', 'MCSDgIt1', 'MCSDgIt20')
+					for seed in range(5)
+					for suffix in ('per_image.csv', 'summary.json')]
+missing_results = [name for name in required_results
+				   if not os.path.isfile(os.path.join(EXP06_RESULTS, name))]
+assert not missing_results, f'Missing Exp06 validation CSVs: {missing_results}'
+EXP06_SOURCE = EXP06_RESULTS
+EXP06_RESULTS = f'{OUT}/exp06_reference'
+os.makedirs(EXP06_RESULTS, exist_ok=True)
+for model in ('L0', 'PS', 'MCSDg', 'MCSDgIt1', 'MCSDgIt20'):
+	for seed in range(5):
+		for suffix in ('_val_per_image.csv', '_val_summary.json'):
+			filename = f'{model}_s{seed}{suffix}'
+			shutil.copy(os.path.join(EXP06_SOURCE, filename),
+			            os.path.join(EXP06_RESULTS, filename))
 
-!python src/scripts/make_instance_bins.py --dataset_path={DS} --out={BINS} > {OUT}/logs/bins.log 2>&1
+run_checked([sys.executable, 'src/scripts/make_instance_bins.py',
+             f'--dataset_path={DS}', f'--out={BINS}'], f'{OUT}/logs/bins.log')
 with open(BINS) as f:
 	assert json.load(f)['edges'] == [45.0, 147.0]
 ```
@@ -117,47 +149,60 @@ ARCH = ('--ccmc=False --segformer=True --use_low_level_refine=False '
 
 for seed in range(5):
 	run = f'OccCondg_s{seed}'
-	if os.path.exists(f'runs/{run}/run_summary.json'):
-		print('skip (done)', run)
-		continue
-	!python src/train.py {COMMON} {ARCH} --seed={seed} --run_name=OccCondg__s{seed} --out_dir=runs/{run} 2>&1 | tee {OUT}/logs/train_{run}.log | grep --line-buffered -E "Saved best|Traceback|Error" | tail -n 2
+	if not os.path.exists(f'runs/{run}/run_summary.json'):
+		args = [sys.executable, 'src/train.py', *COMMON.split(), *ARCH.split(),
+		        f'--seed={seed}', f'--run_name=OccCondg__s{seed}', f'--out_dir=runs/{run}']
+		run_checked(args, f'{OUT}/logs/train_{run}.log')
+	assert os.path.isfile(f'runs/{run}/run_summary.json'), f'{run}: missing run_summary.json'
+	assert os.path.isfile(f'runs/{run}/best_val.pth'), f'{run}: missing best_val.pth'
+	with open(f'runs/{run}/run_summary.json') as f:
+		summary = json.load(f)
+	assert summary['best_epoch'] >= 0 and summary['best_val_miou'] > 0, f'{run}: invalid summary'
+	with open(f'runs/{run}/history.jsonl') as f:
+		history = [json.loads(line) for line in f if line.strip()]
+	assert len(history) == 100 and history[-1]['epoch'] == 99, f'{run}: incomplete training history'
 ```
 
 ### Cell K7.2 — Evaluate, compare
 
 ```python
-EVAL_ARCH = {
-	'L0': '--ccmc=True --prior_mode=none --use_low_level_refine=False',
-	'PS': '--ccmc=False --head=pixelshuffle --spectral_guide=False',
-	'MCSDg': '--ccmc=False --head=mcsd --spectral_guide=True',
-	'OccCondg': '--ccmc=False --head=occ_conditioned --spectral_guide=True',
-}
+EVAL_ARCH = '--ccmc=False --head=occ_conditioned --spectral_guide=True'
 
 def evaluate(model, seed, arch, tag=None, extra=''):
 	ckpt = f'runs/{model}_s{seed}/best_val.pth'
 	if not os.path.isfile(ckpt):
 		raise FileNotFoundError(ckpt)
 	name = f'{tag or model}_s{seed}'
-	!python src/evaluate_ccmc.py --dataset_path={DS} --split=val --ckpt={ckpt} {arch} {extra} --bins_json={BINS} --boundary_px=3 --run_name={name} --out_prefix={OUT}/{name}_val > {OUT}/logs/eval_{name}.log 2>&1
+	args = [sys.executable, 'src/evaluate_ccmc.py', f'--dataset_path={DS}', '--split=val',
+	        f'--ckpt={ckpt}', *arch.split(), *extra.split(), f'--bins_json={BINS}',
+	        '--boundary_px=3', f'--run_name={name}', f'--out_prefix={OUT}/{name}_val']
+	run_checked(args, f'{OUT}/logs/eval_{name}.log')
+	assert os.path.isfile(f'{OUT}/{name}_val_per_image.csv'), f'{name}: missing per-image CSV'
+	assert os.path.isfile(f'{OUT}/{name}_val_summary.json'), f'{name}: missing summary JSON'
 
-for model in ('L0', 'PS', 'MCSDg', 'OccCondg'):
-	for seed in range(5):
-		evaluate(model, seed, EVAL_ARCH[model])
+for seed in range(5):
+	evaluate('OccCondg', seed, EVAL_ARCH)
 
-for iters in (1, 20):
-	for seed in range(5):
-		evaluate('MCSDg', seed, EVAL_ARCH['MCSDg'], tag=f'MCSDgIt{iters}',
-				 extra=f'--sinkhorn_iters={iters}')
+def evaluation_csv(model, seed):
+	root = OUT if model == 'OccCondg' else EXP06_RESULTS
+	path = os.path.join(root, f'{model}_s{seed}_val_per_image.csv')
+	if not os.path.isfile(path):
+		raise FileNotFoundError(path)
+	return path
 
 def compare(a, b):
-	common = [seed for seed in range(5)
-			  if os.path.isfile(f'{OUT}/{a}_s{seed}_val_per_image.csv')
-			  and os.path.isfile(f'{OUT}/{b}_s{seed}_val_per_image.csv')]
-	if len(common) != 5:
-		raise RuntimeError(f'{a} vs {b}: expected 5 paired seeds, got {common}')
-	files_a = ','.join(f'{OUT}/{a}_s{seed}_val_per_image.csv' for seed in common)
-	files_b = ','.join(f'{OUT}/{b}_s{seed}_val_per_image.csv' for seed in common)
-	!python src/scripts/compare_runs.py --a={files_a} --b={files_b} --name_a={a} --name_b={b} --gate=none --seed_bootstrap=True --out={OUT}/cmp_{a}_vs_{b}.json 2>&1 | tee {OUT}/logs/cmp_{a}_vs_{b}.log
+	common = list(range(5))
+	files_a = ','.join(evaluation_csv(a, seed) for seed in common)
+	files_b = ','.join(evaluation_csv(b, seed) for seed in common)
+	out_path = f'{OUT}/cmp_{a}_vs_{b}.json'
+	args = [sys.executable, 'src/scripts/compare_runs.py', f'--a={files_a}', f'--b={files_b}',
+	        f'--name_a={a}', f'--name_b={b}', '--gate=none', '--seed_bootstrap=True',
+	        '--metrics=SmallWeedRecall,recall30_small,cov_small,mIoU,IoU_crop,IoU_weed,BIoU_weed,PrecisionWeed,CropToWeedRate',
+	        f'--out={out_path}']
+	run_checked(args, f'{OUT}/logs/cmp_{a}_vs_{b}.log')
+	assert os.path.isfile(out_path), f'{a} vs {b}: comparison JSON missing'
+	with open(out_path) as f:
+		assert 'PrecisionWeed' in json.load(f)['metrics']
 
 for a, b in (('MCSDg', 'OccCondg'), ('MCSDg', 'L0'), ('OccCondg', 'L0'),
 			 ('MCSDg', 'PS'), ('MCSDgIt1', 'MCSDg'), ('MCSDgIt20', 'MCSDg')):
@@ -167,11 +212,19 @@ for a, b in (('MCSDg', 'OccCondg'), ('MCSDg', 'L0'), ('OccCondg', 'L0'),
 ### Cell K7.3 — Audit marginal theo lớp/occupancy
 
 ```python
-for seed in range(5):
-	ckpt = f'runs/MCSDg_s{seed}/best_val.pth'
-	for iters in (1, 5, 20):
-		prefix = f'{OUT}/audit_MCSDg_s{seed}_it{iters}'
-		!python src/scripts/mcsd_audit.py --dataset_path={DS} --ckpt={ckpt} --head=mcsd --spectral_guide=True --sinkhorn_iters={iters} --mcsd_tau=1.0 --bootstrap_samples=2000 --out_prefix={prefix} > {OUT}/logs/audit_MCSDg_s{seed}_it{iters}.log 2>&1
+audit_specs = [('MCSDg', 'mcsd', (1, 5, 20)), ('OccCondg', 'occ_conditioned', (5,))]
+for model, head, iteration_counts in audit_specs:
+	for seed in range(5):
+		ckpt = f'runs/{model}_s{seed}/best_val.pth'
+		for iters in iteration_counts:
+			prefix = f'{OUT}/audit_{model}_s{seed}_it{iters}'
+			args = [sys.executable, 'src/scripts/mcsd_audit.py', f'--dataset_path={DS}',
+			        f'--ckpt={ckpt}', f'--head={head}', '--spectral_guide=True',
+			        f'--sinkhorn_iters={iters}', '--mcsd_tau=1.0', '--bootstrap_samples=2000',
+			        f'--out_prefix={prefix}']
+			run_checked(args, f'{OUT}/logs/audit_{model}_s{seed}_it{iters}.log')
+			for suffix in ('_marginal_by_image.csv', '_predweed_by_image.csv', '_marginal_summary.json'):
+				assert os.path.isfile(prefix + suffix), f'Missing audit output: {prefix + suffix}'
 ```
 
 Cell này sinh CSV theo từng ảnh/lớp/occupancy và JSON summary gồm signed residual, MAE, p95/max, occupancy-head MAE cùng CI bootstrap theo ảnh. Các sai số được ghi ở dạng fraction 0–1. Giữ cả các file này trong zip kết quả.
@@ -179,29 +232,25 @@ Cell này sinh CSV theo từng ảnh/lớp/occupancy và JSON summary gồm sign
 ### Cell K7.4 — Delta per-image cho 1 vòng so với 5 vòng
 
 ```python
-import pandas as pd
-
-columns = ['n_small', 'tp50_small', 'tp30_small', 'cov_small', 'cm_02', 'cm_12', 'cm_20',
-		   'cm_21', 'inter_2', 'union_2', 'binter_2', 'bunion_2']
 for seed in range(5):
-	one = pd.read_csv(f'{OUT}/MCSDgIt1_s{seed}_val_per_image.csv')
-	five = pd.read_csv(f'{OUT}/MCSDg_s{seed}_val_per_image.csv')
-	merged = one[['name', *columns]].merge(five[['name', *columns]], on='name',
-											suffixes=('_it1', '_it5'), validate='one_to_one')
-	for column in columns:
-		merged[f'delta_{column}'] = merged[f'{column}_it1'] - merged[f'{column}_it5']
-	for metric in ('tp50', 'tp30'):
-		merged[f'fn{metric[2:]}_small_it1'] = merged['n_small_it1'] - merged[f'{metric}_small_it1']
-		merged[f'fn{metric[2:]}_small_it5'] = merged['n_small_it5'] - merged[f'{metric}_small_it5']
-	merged.to_csv(f'{OUT}/per_image_it1_vs_it5_s{seed}.csv', index=False)
+	ckpt = f'runs/MCSDg_s{seed}/best_val.pth'
+	prefix = f'{OUT}/iteration_audit_MCSDg_s{seed}_it1_vs_it5'
+	args = [sys.executable, 'src/scripts/mcsd_iteration_audit.py',
+	        f'--dataset_path={DS}', f'--ckpt={ckpt}', f'--bins_json={BINS}',
+	        '--head=mcsd', '--spectral_guide=True', '--mcsd_tau=1.0',
+	        '--iters_a=1', '--iters_b=5', '--bootstrap_samples=2000',
+	        f'--out_prefix={prefix}']
+	run_checked(args, f'{OUT}/logs/iteration_audit_MCSDg_s{seed}.log')
+	for suffix in ('_per_image.csv', '_small_instances.csv', '_summary.json'):
+		assert os.path.isfile(prefix + suffix), f'Missing iteration audit output: {prefix + suffix}'
 ```
 
-`tp50_small`/`tp30_small` và `n_small` cho TP/FN instance tổng hợp theo ảnh; `cm_02/cm_12` theo dõi Background/Crop→Weed pixel, còn `cm_20/cm_21` theo dõi Weed→Background/Crop pixel. Evaluator hiện không đếm FP-instance riêng, nên không suy diễn pixel false positives thành số weed instance giả.
+Script xuất Weed precision, pixel false positives, Crop→Weed rate và confusion matrix; CSV instance ghép trên cùng GT instance ID để đếm đối tượng nhỏ mới được phát hiện ở 1 vòng và đối tượng bị mất so với 5 vòng. Point estimate và paired bootstrap CI theo ảnh nằm trong từng JSON; paired seed/image CI tổng hợp cho Precision, Crop→Weed và recall được tính từ CSV evaluation bằng `compare_runs.py` ở K7.2.
 
 ### Cell K7.5 — Đóng gói kết quả
 
 ```python
-import shutil
+import shutil, zipfile
 
 for run_dir in sorted(glob.glob('runs/OccCondg_s*')):
 	if os.path.islink(f'{run_dir}/best_val.pth') or not os.path.exists(f'{run_dir}/history.jsonl'):
@@ -212,12 +261,23 @@ for run_dir in sorted(glob.glob('runs/OccCondg_s*')):
 		if os.path.exists(f'{run_dir}/{filename}'):
 			shutil.copy(f'{run_dir}/{filename}', dst)
 
-!python src/scripts/collect_results.py --results_dir={OUT} --runs_dir=runs --out={OUT}/metrics.csv > {OUT}/logs/collect.log 2>&1
+run_checked([sys.executable, 'src/scripts/collect_results.py', f'--results_dir={OUT}',
+             '--runs_dir=runs', f'--out={OUT}/metrics.csv'], f'{OUT}/logs/collect.log')
+assert os.path.isfile(f'{OUT}/metrics.csv')
 new_ckpts = ' '.join(sorted(glob.glob('runs/OccCondg_s*/best_val.pth')))
 assert len(new_ckpts.split()) == 5
-!zip -qr /kaggle/working/exp07_results.zip {OUT}
-!zip -qr /kaggle/working/exp07_occcond_ckpts.zip {new_ckpts}
-!ls -lh /kaggle/working/exp07_*.zip
+with zipfile.ZipFile('/kaggle/working/exp07_results.zip', 'w', zipfile.ZIP_DEFLATED) as archive:
+	for root, _, files in os.walk(OUT):
+		for filename in files:
+			path = os.path.join(root, filename)
+			archive.write(path, arcname=path)
+with zipfile.ZipFile('/kaggle/working/exp07_occcond_ckpts.zip', 'w', zipfile.ZIP_DEFLATED) as archive:
+	for path in new_ckpts.split():
+		archive.write(path, arcname=path)
+assert os.path.isfile('/kaggle/working/exp07_results.zip')
+assert os.path.isfile('/kaggle/working/exp07_occcond_ckpts.zip')
+print('/kaggle/working/exp07_results.zip')
+print('/kaggle/working/exp07_occcond_ckpts.zip')
 ```
 
 Tải `exp07_results.zip` về repo, giải nén vào `doc/exp07_results/` và gửi lại cùng trạng thái 5 run `OccCondg`. Không mở test. Giữ `exp07_occcond_ckpts.zip` làm đầu vào tái lập cho các thí nghiệm tiếp theo.
