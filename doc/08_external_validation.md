@@ -1,16 +1,16 @@
 # Exp08 — External-domain validation and one-time test lock
 
-> **Status (2026-11-04): NOT READY TO RUN.** Kaggle cells have not been run. No WeedMap archive or predictions have been inspected, no Exp08 compute profiles exist yet, and no WeedsGalore test result has been opened. Exp08 is preregistered as frozen external-domain validation, **not** method development. No fine-tuning, calibration, threshold selection, architecture changes, or hyperparameter search on WeedMap.
+> **Status (2026-11-04): NOT READY TO OPEN TEST.** K8.0 preflight and K8.1 profiling have saved outputs in `doc/exp123.ipynb`; no WeedMap inference or model predictions have been run, and no WeedsGalore test result has been opened. Four annotation frames show a consistent stored-code/render-color structure, but official semantics for code `10000` remain **PENDING**. Exp08 is frozen external-domain validation, **not** method development. No fine-tuning, calibration, threshold selection, architecture changes, or hyperparameter search on WeedMap.
 
 ## Readiness verdict
 
-| Requirement                                                 | Current evidence                                                                                                                                                                                                                                                                      | Status / action before test                                                                                                                                                                                |
-| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Novelty of both decoder directions                          | Initial Google/Scholar web snippets and cited papers; no full-text systematic review or Scopus/Web of Science query log                                                                                                                                                               | **INCOMPLETE.** Treat novelty as a narrow hypothesis; finish and archive the review before any “novel/first” claim.                                                                                        |
-| WeedMap five-band data, labels, metadata, and test identity | ETHZ ASL page confirms RedEdge-M/Sequoia, tiles, reflectance TIFFs, semantic background/crop/weed maps, and documentation. It does not by itself verify the downloaded 003 archive's exact five aligned channels, value scale, class codes, instance IDs, license, or split grouping. | **NOT VERIFIED.** K8.0 is an inventory, not a compatibility test. Do not infer success from filenames or the landing page.                                                                                 |
-| Second-dataset experiment type                              | The three existing WeedsGalore-trained checkpoints are evaluated without target training or adaptation                                                                                                                                                                                | **DECIDED: external-domain, zero-shot confirmation.** It is not a WeedMap method-development experiment. Any later WeedMap training/tuning would require a new protocol and a separate untouched test set. |
-| OccCond-g compute cost                                      | Exp07 has no OccCond-g profile; K8.1 specifies a common profile run but has not produced data                                                                                                                                                                                         | **PENDING.** Run the profile cell and insert measured values/artifact hashes; do not copy MCSD-g or estimate OccCond-g cost.                                                                               |
-| One-time WeedsGalore test lock                              | K8.2/K8.3 provide a preliminary lock and live logging, but the manifest lacks the verified WeedMap input transform/data identity and K8.3 only runs the WeedsGalore test                                                                                                              | **INCOMPLETE.** Finalize the manifest after WeedMap preflight and implement/validate a WeedMap loader/evaluator before claiming two-dataset evaluation.                                                    |
+| Requirement                                                 | Current evidence                                                                                                                                                                              | Status / action before test                                                                                                                                                                                |
+| ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Novelty of both decoder directions                          | Initial Google/Scholar web snippets and cited papers; no full-text systematic review or Scopus/Web of Science query log                                                                       | **INCOMPLETE.** Treat novelty as a narrow hypothesis; finish and archive the review before any “novel/first” claim.                                                                                        |
+| WeedMap five-band data, labels, metadata, and test identity | K8.0 confirms the expected RedEdge channel/mask and annotation file structure. Four frames show `iMap` codes 0/2/10000 with black/red/green render colors; code 1 was absent in those frames. | **STRUCTURE PASS; SEMANTICS PENDING.** This does not define code 10000, prove code 1 means crop, verify radiometry/co-registration, or establish split independence.                                       |
+| Second-dataset experiment type                              | The three existing WeedsGalore-trained checkpoints are evaluated without target training or adaptation                                                                                        | **DECIDED: external-domain, zero-shot confirmation.** It is not a WeedMap method-development experiment. Any later WeedMap training/tuning would require a new protocol and a separate untouched test set. |
+| OccCond-g compute cost                                      | K8.1 output saved in `doc/exp123.ipynb`: four forward profiles, Tesla T4, FP32, batch 1, 600×600, 50 warmup/300 timed runs                                                                    | **DONE.** Values are transcribed in the cost table below. FLOP counter omits elementwise work.                                                                                                             |
+| One-time WeedsGalore test lock                              | K8.2/K8.3 provide a preliminary lock and live logging; WeedMap label semantics and radiometry remain unresolved, and K8.3 only runs the WeedsGalore test                                      | **BLOCKED ON WEEDMAP.** Keep WeedsGalore test closed until full preflight, a dedicated evaluator with tests, and an immutable manifest are ready.                                                          |
 
 ### Model identity and scope
 
@@ -23,6 +23,8 @@ Method development and selection belong to the existing WeedsGalore train/valida
 Freeze **OccCond-g as the primary method candidate** because it had the stronger validation evidence for the stated small-weed objective: versus L0, Small-Weed Recall +10.55 [6.39; 14.84] pp and coverage +7.55 [2.97; 12.47] pp, with mIoU +0.88 [0.42; 1.54] pp. Keep **MCSD-g as the constrained-decoding comparator/ablation**, not as a second co-primary claim: Exp07 found similar mIoU versus OccCond-g but lower recall/coverage and higher marginal fidelity, Weed precision, and Boundary IoU. Freeze L0, OccCond-g, and MCSD-g as the complete comparison set with five existing validation-selected checkpoints per method. Do not select or alter any method using WeedMap or test data. This choice is based on the stated recall objective and Exp07 validation only; the full novelty review remains a prerequisite to opening test.
 
 Use the official **WeedMap RedEdge-M dataset 003** only as a candidate second-dataset external evaluation. WeedMap covers sugar-beet fields in Switzerland/Germany, unlike WeedsGalore maize fields. Do not substitute Sequoia set 005: it does not match the five-channel input contract. The ETHZ ASL page confirms the broad availability of RedEdge/Sequoia imagery, tiles/orthomosaics, reflectance TIFFs, and background/crop/weed annotations, but the exact downloaded 003 files and compatibility are not verified here. Before inference, record the exact original-paper passage/table/page identifying 003 as test, release DOI/version, metadata for all five aligned bands and radiometry, label codes/instances, license, and tile/site grouping. If any gate fails, stop and do not silently substitute another set.
+
+**Latest preflight interpretation:** the observed per-frame mapping is structurally consistent (`iMap 0` renders black, `2` red, and `10000` green in the checked frames), but this is not semantic documentation. Do not treat `10000` as Crop or Ignore, and do not treat absent code `1` as proof of a class definition. DataCite lists this release as in-copyright with non-commercial use permitted; confirm the exact reuse terms before redistribution of data or derived artifacts.
 
 **External-domain claim boundary:** this tests frozen models on WeedMap 003 without adaptation. It supports transfer evidence only for the inspected WeedMap test collection, not generalization to all crops/sites. If radiometric alignment requires fitting statistics on WeedMap, or if set 003 is not an independent testing partition, stop before inference and preregister a different experiment. The current repository evaluator only instantiates `WeedsGaloreDataset`; passing a WeedMap path to `src/evaluate_ccmc.py` does not evaluate WeedMap. A separate loader/evaluator and tests for band order, label mapping, tile alignment, nodata, and metric aggregation are prerequisites.
 
@@ -158,7 +160,91 @@ print('Saved:', f'{OUT}/weedmap_003_preflight.json')
 print('Archive inspection only. Do not evaluate model predictions or tune from these labels.')
 ```
 
-K8.0 chỉ inventory/kiểm tra cấu trúc; không đủ để xác nhận radiometric compatibility. Lưu console output và danh sách file. Trước khi đặt `manual_review_decision` thành `GO`, bổ sung trực tiếp vào JSON các trường `dataset_identity`, `verified_input_transform`, `verified_class_map`, `verified_grouping`, và `source_test_split_citation` bằng bằng chứng từ archive/source docs; K8.2 sẽ từ chối nếu thiếu trường nào. Nếu tile assets không cung cấp năm channel aligned hoặc transform không thể cố định từ sensor/source docs, dừng trước test.
+K8.0 chỉ inventory/kiểm tra cấu trúc; không đủ để xác nhận radiometric compatibility. Trong cell cũ, điều kiện `'003' in str(path)` có thể bắt nhầm index khác nếu tên frame chứa chuỗi `003` (ví dụ `frame0030`); không dùng riêng danh sách path đó làm bằng chứng index 003. Lưu console output, xác minh index từ thành phần thư mục đúng, và dùng K8.0b để rà tài liệu/mã nguồn dạng text. Trước khi đặt `manual_review_decision` thành `GO`, bổ sung bằng chứng cho `dataset_identity`, `verified_input_transform`, `verified_class_map`, `verified_label_semantics`, `verified_grouping`, và `source_test_split_citation`; K8.2 sẽ từ chối nếu thiếu trường nào. Không chạy thêm pixel statistics theo nhãn test. Nếu radiometry/co-registration không thể xác minh từ tài liệu nguồn, dừng trước inference.
+
+### Cell K8.0b — Read WeedMap annotation documentation/source only (no label pixels)
+
+Run this after K8.0. It reads only text files bundled with the mounted release (README/docs, XML/JSON metadata, and MATLAB/Python source); it does not open PNG/TIFF masks or count any labels. It prints each matching excerpt to Kaggle output and saves the same audit transcript. A missing definition is a **PENDING** result, not evidence that 10000 means Ignore or Crop.
+
+```python
+import hashlib
+import os
+import pathlib
+import re
+
+WM_ROOT = pathlib.Path('/kaggle/input/weedmap-2018')
+AUDIT_LOG = pathlib.Path('results/exp08/logs/weedmap_annotation_docs_audit.log')
+AUDIT_LOG.parent.mkdir(parents=True, exist_ok=True)
+assert WM_ROOT.is_dir(), f'WeedMap root not found: {WM_ROOT}'
+
+text_extensions = {
+    '.txt', '.md', '.rst', '.html', '.htm', '.xml', '.json', '.yaml', '.yml',
+    '.csv', '.m', '.py', '.tex', '.ini', '.cfg'
+}
+search_pattern = re.compile(
+    r'10000|ground.?truth.?imap|ground.?truth.?color|background|crop|weed|'
+    r'ignore|unlabel|non.?class|annotation|label.?map|class.?code',
+    re.IGNORECASE,
+)
+exact_code_pattern = re.compile(r'(?<!\d)10000(?!\d)|GroundTruth[_ -]?(?:iMap|color)', re.IGNORECASE)
+
+def sha256_file(path):
+    digest = hashlib.sha256()
+    with path.open('rb') as stream:
+        for block in iter(lambda: stream.read(1024 * 1024), b''):
+            digest.update(block)
+    return digest.hexdigest()
+
+def emit(message=''):
+    print(message, flush=True)
+    log.write(message + '\n')
+
+text_files = sorted(
+    path for path in WM_ROOT.rglob('*')
+    if path.is_file() and path.suffix.lower() in text_extensions
+    and path.stat().st_size <= 4 * 1024 * 1024
+)
+exact_hits = 0
+files_with_hits = 0
+with AUDIT_LOG.open('w', encoding='utf-8', buffering=1) as log:
+    emit('WeedMap annotation documentation/source audit')
+    emit(f'Root: {WM_ROOT}')
+    emit('Scope: text files only; no PNG/TIFF/mask pixels opened.')
+    emit(f'Text files scanned: {len(text_files)} (max 4 MiB each)')
+    for path in text_files:
+        try:
+            lines = path.read_text(encoding='utf-8-sig', errors='replace').splitlines()
+        except OSError as error:
+            emit(f'SKIP {path.relative_to(WM_ROOT)}: {error}')
+            continue
+        matches = [(index, line.strip()) for index, line in enumerate(lines, start=1)
+                   if search_pattern.search(line)]
+        exact_matches = [(index, line) for index, line in matches
+                         if exact_code_pattern.search(line)]
+        if not matches:
+            continue
+        files_with_hits += 1
+        exact_hits += len(exact_matches)
+        relative = path.relative_to(WM_ROOT)
+        emit(f'\nFILE {relative} sha256={sha256_file(path)}')
+        selected = exact_matches if exact_matches else matches[:5]
+        if exact_matches:
+            context_lines = set()
+            for index, _ in exact_matches:
+                context_lines.update(range(max(1, index - 2), min(len(lines), index + 2) + 1))
+            selected = [(index, lines[index - 1].strip()) for index in sorted(context_lines)]
+        else:
+            selected = matches[:5]
+        for index, line in selected[:20]:
+            emit(f'  L{index}: {line[:500]}')
+    emit('\nAUDIT RESULT: PENDING')
+    emit('Only mark semantics verified if an official release document or author source explicitly defines code 10000 and the class/ignore policy.')
+    emit(f'Files with relevant text: {files_with_hits}; exact code/name hits: {exact_hits}')
+    emit(f'Saved audit: {AUDIT_LOG}')
+print('Saved audit:', AUDIT_LOG, flush=True)
+```
+
+Review the printed excerpts and cite the exact release document/source path and line/page in the preflight JSON. If the archive only repeats the RGB rendering or does not define `10000`, keep `label_semantics` **PENDING**, ask the dataset maintainers or obtain an authoritative annotation specification, and do not build a three-class WeedMap evaluator yet.
 
 ### Cell K8.1 — Profile L0, OccCond-g, MCSD-g, PS (600×600)
 
@@ -227,14 +313,14 @@ for row in cost_rows:
     print(row, flush=True)
 ```
 
-This profiling cell may take several minutes due to 50 warmups + 300 synchronized timings per method. It profiles forward inference only using the same model path/measurement convention; it does not train or evaluate test. The FLOP counter omits elementwise operations such as Sinkhorn normalization, while measured latency includes them. Exp07 has no OccCond-g profile, so no compute comparison involving OccCond-g is complete until K8.1 has run and measured values have been added to the report. Include four JSON files and logs; do not estimate missing values.
+K8.1 completed on Tesla T4 with batch 1, FP32, input 600×600, 50 warmup iterations, and 300 synchronized timed runs. These are forward-only profiles, not training measurements. The FLOP counter omits elementwise operations such as Sinkhorn normalization, while latency includes them. All four saved outputs are in `doc/exp123.ipynb`.
 
-| Model     |   Parameters (M) |   Counted GFLOPs |            GMACs | Median latency (ms) [p10, p90] | Peak memory (MB) |
-| --------- | ---------------: | ---------------: | ---------------: | -----------------------------: | ---------------: |
-| L0        |     PENDING K8.1 |     PENDING K8.1 |     PENDING K8.1 |                   PENDING K8.1 |     PENDING K8.1 |
-| PS        |     PENDING K8.1 |     PENDING K8.1 |     PENDING K8.1 |                   PENDING K8.1 |     PENDING K8.1 |
-| OccCond-g | **NOT PROFILED** | **NOT PROFILED** | **NOT PROFILED** |               **NOT PROFILED** | **NOT PROFILED** |
-| MCSD-g    |     PENDING K8.1 |     PENDING K8.1 |     PENDING K8.1 |                   PENDING K8.1 |     PENDING K8.1 |
+| Model     | Parameters (M) | Counted GFLOPs |    GMACs | Median latency (ms) [p10, p90] | Peak memory (MB) |
+| --------- | -------------: | -------------: | -------: | -----------------------------: | ---------------: |
+| L0        |       3.455619 |      13.268002 | 6.634001 |        14.225 [14.162, 14.308] |          145.366 |
+| PS        |       3.461811 |      13.544482 | 6.772241 |        14.470 [14.335, 14.591] |          145.390 |
+| OccCond-g |       3.462614 |      14.097442 | 7.048721 |        15.799 [15.714, 15.899] |          145.396 |
+| MCSD-g    |       3.462614 |      14.097442 | 7.048721 |        17.833 [17.693, 17.982] |          145.396 |
 
 ### Cell K8.2 — Lock the WeedsGalore test manifest
 
@@ -294,7 +380,8 @@ with open(preflight_path) as f:
 assert weedmap_preflight['manual_review_decision'] == 'GO', (
     'WeedMap is not authorized: finish archive, radiometry, labels, split, and leakage review')
 required_preflight_fields = ('dataset_identity', 'verified_input_transform', 'verified_class_map',
-                            'verified_grouping', 'source_test_split_citation')
+                            'verified_label_semantics', 'verified_grouping',
+                            'source_test_split_citation')
 missing_preflight = [key for key in required_preflight_fields
                      if not weedmap_preflight.get(key)]
 assert not missing_preflight, f'Incomplete reviewed WeedMap preflight fields: {missing_preflight}'
@@ -327,7 +414,8 @@ manifest = {
         'primary_endpoint': 'WeedRecall',
         'primary_contrast': ['OccCondg', 'L0'],
                 'secondary_metrics': ['mIoU', 'IoU_bg', 'IoU_crop', 'IoU_weed', 'PrecisionWeed',
-                                                            'instance_recall50_if_official_ids_verified'],
+                                    'secondary_metrics': ['mIoU', 'IoU_bg', 'IoU_crop', 'IoU_weed', 'PrecisionWeed',
+                                                  'instance_recall50_if_official_ids_verified'],
         'secondary_contrasts': [['MCSDg', 'L0'], ['MCSDg', 'OccCondg']],
         'bootstrap': {'replicates': 10000, 'seed': 0, 'paired_seed_resampling': True,
                   'spatial_cluster': 'orthomosaic_or_flight_then_tile'},
