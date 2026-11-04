@@ -172,10 +172,13 @@ def test_occupancy_conditioned_subcell():
     changed = occupancy_conditioned_subcell(log_q, placed_scores).exp()
     assert changed[0, 2, 0, 0, 0] > p[0, 2, 0, 0, 0]
     assert not torch.allclose(changed.mean(2), log_q.exp(), atol=1e-4)
-    weights = torch.linspace(-1.0, 1.0, 16).view(1, 1, 16, 1, 1)
-    (changed * weights).sum().backward()
-    assert torch.isfinite(log_q.grad).all() and log_q.grad.abs().sum() > 0
+    weights = torch.linspace(-1.0, 1.0, 16).view(1, 16, 1, 1)
+    loss = (changed[:, 2] * weights).sum()
+    loss.backward()
+    assert torch.isfinite(log_q.grad).all()
+    assert log_q.grad.abs().sum() > 1e-8
     assert torch.isfinite(placed_scores.grad).all()
+    assert placed_scores.grad.abs().sum() > 1e-8
 
 
 def test_pixel_shuffle_layout_and_gradient():
