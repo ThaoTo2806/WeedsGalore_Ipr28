@@ -1,16 +1,16 @@
 # Exp08 — External-domain validation and one-time test lock
 
-> **Status (2026-11-04): NOT READY TO OPEN TEST.** K8.0 preflight and K8.1 profiling have saved outputs in `doc/exp123.ipynb`; no WeedMap inference or model predictions have been run, and no WeedsGalore test result has been opened. Four annotation frames show a consistent stored-code/render-color structure, but official semantics for code `10000` remain **PENDING**. Exp08 is frozen external-domain validation, **not** method development. No fine-tuning, calibration, threshold selection, architecture changes, or hyperparameter search on WeedMap.
+> **Status (2026-11-05): NOT READY TO OPEN TEST.** K8.0 preflight and K8.1 profiling outputs are saved in `doc/exp123.ipynb`; no WeedMap inference/model predictions or WeedsGalore test evaluation have been run. The official ETH Zurich release document now resolves the annotation codes, but radiometric compatibility and the mask-validity discrepancy remain unresolved. Exp08 is frozen external-domain validation, **not** method development. No fine-tuning, calibration, threshold selection, architecture changes, or hyperparameter search on WeedMap.
 
 ## Readiness verdict
 
-| Requirement                                                 | Current evidence                                                                                                                                                                              | Status / action before test                                                                                                                                                                                |
-| ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Novelty of both decoder directions                          | Initial Google/Scholar web snippets and cited papers; no full-text systematic review or Scopus/Web of Science query log                                                                       | **INCOMPLETE.** Treat novelty as a narrow hypothesis; finish and archive the review before any “novel/first” claim.                                                                                        |
-| WeedMap five-band data, labels, metadata, and test identity | K8.0 confirms the expected RedEdge channel/mask and annotation file structure. Four frames show `iMap` codes 0/2/10000 with black/red/green render colors; code 1 was absent in those frames. | **STRUCTURE PASS; SEMANTICS PENDING.** This does not define code 10000, prove code 1 means crop, verify radiometry/co-registration, or establish split independence.                                       |
-| Second-dataset experiment type                              | The three existing WeedsGalore-trained checkpoints are evaluated without target training or adaptation                                                                                        | **DECIDED: external-domain, zero-shot confirmation.** It is not a WeedMap method-development experiment. Any later WeedMap training/tuning would require a new protocol and a separate untouched test set. |
-| OccCond-g compute cost                                      | K8.1 output saved in `doc/exp123.ipynb`: four forward profiles, Tesla T4, FP32, batch 1, 600×600, 50 warmup/300 timed runs                                                                    | **DONE.** Values are transcribed in the cost table below. FLOP counter omits elementwise work.                                                                                                             |
-| One-time WeedsGalore test lock                              | K8.2/K8.3 provide a preliminary lock and live logging; WeedMap label semantics and radiometry remain unresolved, and K8.3 only runs the WeedsGalore test                                      | **BLOCKED ON WEEDMAP.** Keep WeedsGalore test closed until full preflight, a dedicated evaluator with tests, and an immutable manifest are ready.                                                          |
+| Requirement                                                 | Current evidence                                                                                                                                                                        | Status / action before test                                                                                                                                                                                                                          |
+| ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Novelty of both decoder directions                          | Initial Google/Scholar web snippets and cited papers; no full-text systematic review or Scopus/Web of Science query log                                                                 | **INCOMPLETE.** Treat novelty as a narrow hypothesis; finish and archive the review before any “novel/first” claim.                                                                                                                                  |
+| WeedMap five-band data, labels, metadata, and test identity | Archive structure and channel IDs are present. Official release PDF, p. 2, defines `iMap`: 0 background, 1 crop, 2 weed, 10000 non-class (ignore). Four inspected frames had no code 1. | **ANNOTATION SEMANTICS VERIFIED; INPUT/VALIDITY PARTIAL.** Crop absence in four frames is not proof of absence across all of 003. Mask polarity conflicts with the inspected mask/signal relation; radiometry and co-registration remain unverified. |
+| Second-dataset experiment type                              | The three existing WeedsGalore-trained checkpoints are evaluated without target training or adaptation                                                                                  | **DECIDED: external-domain, zero-shot confirmation.** It is not a WeedMap method-development experiment. Any later WeedMap training/tuning would require a new protocol and a separate untouched test set.                                           |
+| OccCond-g compute cost                                      | K8.1 output saved in `doc/exp123.ipynb`: four forward profiles, Tesla T4, FP32, batch 1, 600×600, 50 warmup/300 timed runs                                                              | **DONE.** Values are transcribed in the cost table below. FLOP counter omits elementwise work.                                                                                                                                                       |
+| One-time WeedsGalore test lock                              | K8.2/K8.3 provide a preliminary lock and live logging; official label codes are resolved, but mask validity, radiometry, class support, and a WeedMap evaluator remain open             | **BLOCKED ON WEEDMAP.** Keep WeedsGalore test closed until full preflight, a dedicated evaluator with tests, and an immutable manifest are ready.                                                                                                    |
 
 ### Model identity and scope
 
@@ -24,7 +24,9 @@ Freeze **OccCond-g as the primary method candidate** because it had the stronger
 
 Use the official **WeedMap RedEdge-M dataset 003** only as a candidate second-dataset external evaluation. WeedMap covers sugar-beet fields in Switzerland/Germany, unlike WeedsGalore maize fields. Do not substitute Sequoia set 005: it does not match the five-channel input contract. The ETHZ ASL page confirms the broad availability of RedEdge/Sequoia imagery, tiles/orthomosaics, reflectance TIFFs, and background/crop/weed annotations, but the exact downloaded 003 files and compatibility are not verified here. Before inference, record the exact original-paper passage/table/page identifying 003 as test, release DOI/version, metadata for all five aligned bands and radiometry, label codes/instances, license, and tile/site grouping. If any gate fails, stop and do not silently substitute another set.
 
-**Latest preflight interpretation:** the observed per-frame mapping is structurally consistent (`iMap 0` renders black, `2` red, and `10000` green in the checked frames), but this is not semantic documentation. Do not treat `10000` as Crop or Ignore, and do not treat absent code `1` as proof of a class definition. DataCite lists this release as in-copyright with non-commercial use permitted; confirm the exact reuse terms before redistribution of data or derived artifacts.
+**Official annotation semantics (verified from ETH Zurich Research Collection release document, p. 2):** `GroundTruth_iMap` code `0=Background`, `1=Crop`, `2=Weed`, `10000=Non-class`. Treat `10000` as ignore and exclude it from the confusion matrix; do not infer semantics from the RGB render color. The release describes iMap as grayscale 16-bit and the color render as black/green/red for Background/Crop/Weed. Citation/source: [ETH Zurich WeedMap release PDF](https://www.research-collection.ethz.ch/server/api/core/bitstreams/3ae97814-1570-4760-95b8-a9a3eac21975/content), p. 2; dataset DOI `10.3929/ethz-c-000788571`.
+
+**Latest preflight interpretation:** the authoritative indexed-map table takes precedence over the inconsistent render observed for code `10000`: its meaning is Non-class/ignore. Code `1` was absent from the four inspected frames, but this does not establish that Crop is absent from all of dataset 003. The release document says white mask pixels are valid, while the inspected mask/signal relationship appeared opposite (`0` over signal and `255` over padding); do not choose a mask polarity from appearance alone. Resolve that discrepancy from source docs/code before evaluation. The dataset DOI metadata states “In Copyright - Non-Commercial Use Permitted”; confirm applicable reuse terms before redistributing data or derived artifacts.
 
 **External-domain claim boundary:** this tests frozen models on WeedMap 003 without adaptation. It supports transfer evidence only for the inspected WeedMap test collection, not generalization to all crops/sites. If radiometric alignment requires fitting statistics on WeedMap, or if set 003 is not an independent testing partition, stop before inference and preregister a different experiment. The current repository evaluator only instantiates `WeedsGaloreDataset`; passing a WeedMap path to `src/evaluate_ccmc.py` does not evaluate WeedMap. A separate loader/evaluator and tests for band order, label mapping, tile alignment, nodata, and metric aggregation are prerequisites.
 
@@ -50,9 +52,9 @@ Searches actually screened: `"subpixel mapping" deep learning remote sensing fra
 
 ### Dataset identity and input gate
 
-1. Select the official RedEdge-M testing partition **003** only. Save the downloaded archive name, DOI/version, archive SHA-256, license, dataset index, flight/site metadata, and the original source paper’s statement that 003 is a test partition.
+1. Select the official RedEdge-M testing partition **003** only. Save the downloaded archive name, DOI/version, archive SHA-256, license, dataset index, flight/site metadata, and the original source paper’s statement that 003 is a test partition. The archive listing identifies this as `Tiles/RedEdge/003.zip`; do not identify index 003 by substring matches against frame filenames.
 2. Verify five co-registered bands and channel mapping by names and metadata. Model order is exactly `R, G, B, NIR, RE`; map camera-native files by labels, never by directory ordering. Confirm units, bit depth, reflectance calibration, clipping/scale, image shape, nodata handling, and tile-to-label alignment.
-3. Verify semantic mapping to `background=0, crop=1, weed=2`, ignored labels, and whether an official weed instance map exists. Save unique class codes/names and counts as a data-integrity artifact only; do not use test frequencies to select thresholds or methods.
+3. Use the official indexed-map semantics `background=0, crop=1, weed=2, non-class=10000`; map `10000` to ignore and exclude it from the confusion matrix. Keep the official RGB color rendering separate from indexed codes. Verify the mask valid-pixel polarity against the release definition before using it. Any archive-wide class-presence check is data-integrity-only, not a model/threshold selection step. If no valid Crop pixels are annotated in the official 003 evaluation area, report only the preregistered Weed-only metrics (`WeedRecall`, `WeedPrecision`, `IoU_weed`) and explicitly omit three-class `mIoU`, Crop IoU, and claims of full three-class segmentation validation. Do not treat absence in the four inspected frames as proof about all of 003.
 4. Check for same-orthomosaic/overlapping tiles and official split leakage. If 003 is a held-out test subset from a documented flight/site, use its existing split. Keep tile groups intact in any uncertainty analysis.
 5. Do not compute WeedMap normalization quantiles, class weights, or thresholds from its test images/labels. Use only a fixed documented transform compatible with the source model. If the source and WeedMap radiometry cannot be aligned without target-fitted statistics, stop: the external test is not ready.
 
@@ -62,7 +64,7 @@ Searches actually screened: `"subpixel mapping" deep learning remote sensing fra
 - Checkpoints: five fixed seeds (0–4) per method, selected by WeedsGalore validation only. Freeze SHA-256 for all 15 `best_val.pth` files before reading WeedMap predictions.
 - No WeedMap training/fine-tuning/BN adaptation, pseudo-labeling, calibration, or checkpoint selection.
 - All three methods use identical WeedMap tiles, channel mapping, radiometric transform, and output dimensions.
-- Primary endpoint/contrast: pixel-level `WeedRecall`, OccCond-g − L0, aggregated over the complete official test partition. This matches the validation-based method objective without assuming WeedMap instance IDs or a transferable “small weed” pixel bin. Secondary outcomes: `IoU_weed`, `mIoU`, per-class IoU, Weed pixel precision, confusion matrix, and official-instance recall@IoU 0.5 only if instance IDs are present and validated. Secondary contrasts: MCSD-g − L0 and MCSD-g − OccCond-g. Do not reuse WeedsGalore `[45,147]` pixel-size bins because WeedMap GSD/crop differ. Do not claim comparable `SmallWeedRecall` unless a physical-area threshold is preregistered from source-domain information and WeedMap instance labels are verified.
+- Primary endpoint/contrast: pixel-level `WeedRecall`, OccCond-g − L0, over valid annotated pixels, with `10000` excluded as ignore and mask polarity applied only after it is source-verified. Secondary weed outcomes: `WeedPrecision` and `IoU_weed`; official-instance recall@IoU 0.5 only if instance IDs are present and validated. If valid Crop (`iMap=1`) pixels are present in the official evaluation area, also report per-class IoU, Crop IoU, and three-class mIoU. If valid Crop is absent, do not report three-class mIoU/Crop IoU as full three-class results; report the weed-only metrics and state the annotation-coverage limitation. Secondary contrasts: MCSD-g − L0 and MCSD-g − OccCond-g. Do not reuse WeedsGalore `[45,147]` pixel-size bins or claim `SmallWeedRecall` without a preregistered physical-area threshold and validated instances.
 - Report point estimates and 95% paired hierarchical bootstrap CI (seed, then spatial group/tile). Cluster at orthomosaic/flight when multiple independent units exist. If set 003 is only one flight/orthomosaic, state that intervals quantify within-collection tile variability and do not estimate between-site uncertainty. The bootstrap seed, replicate count, resampling order, and cluster identifiers must be frozen in the manifest.
 - Dataset-level external evaluation is descriptive/confirmatory of frozen transfer, not a new method-development gate. Report all three methods, even if a method loses.
 
@@ -74,9 +76,9 @@ The Kaggle test cell below creates a `test_started` marker **before** its first 
 
 ## Kaggle cells
 
-Run in order only after committing/pushing the source and review decisions. The cells below stream subprocess stdout to the Kaggle notebook output and simultaneously save it to `results/exp08/logs/`. The `run_live` helper's `print(..., flush=True)` is intentional so progress appears in Kaggle output while each process is running. K8.0 is inventory only; the WeedMap evaluation cell is not implemented because the repository has no WeedMap loader/evaluator. Do not run any test cell until that implementation and its tests are reviewed and the manifest is locked.
+Run the inventory/documentation/range-review cells in order after the dataset is available. Cells that launch subprocesses stream stdout to the Kaggle notebook output and save it under `results/exp08/logs/`. K8.0 writes only the regenerable inventory. K8.0b and K8.0c do not run inference or read labels. K8.1 is already complete and must not be rerun just to refresh this protocol. K8.2/K8.3 remain blocked until the WeedMap evaluator has passed synthetic tests and its source, mask, radiometry, and statistical-protocol evidence artifacts pass the hash checks.
 
-### Cell K8.0 — WeedMap RedEdge-M 003 preflight (no inference)
+### Cell K8.0 — WeedMap RedEdge-M 003 inventory (no inference)
 
 ```python
 import glob, hashlib, json, os, pathlib, sys
@@ -89,9 +91,15 @@ EXP = 'exp08'
 OUT = f'results/{EXP}'
 os.makedirs(f'{OUT}/logs', exist_ok=True)
 
-# Set this to the mounted archive's extracted root; do not guess a Sequoia directory.
-WM_ROOT = '/kaggle/input/weedmap-2018'
-assert os.path.isdir(WM_ROOT), f'WeedMap root not found: {WM_ROOT}'
+WM_CANDIDATES = ['/kaggle/working/weedmap-2018'] + glob.glob(
+    '/kaggle/input/**/weedmap-2018', recursive=True)
+WM_ROOT = next((path for path in WM_CANDIDATES if os.path.isdir(path)), None)
+assert WM_ROOT, f'WeedMap root not found: {WM_CANDIDATES}'
+WM_ROOT = pathlib.Path(WM_ROOT)
+INDEX_ROOT = WM_ROOT / 'Tiles' / 'RedEdge' / '003'
+INDEX_ARCHIVE = WM_ROOT / 'Tiles' / 'RedEdge' / '003.zip'
+assert INDEX_ROOT.is_dir(), f'Extracted RedEdge index 003 not found: {INDEX_ROOT}'
+assert INDEX_ARCHIVE.is_file(), f'RedEdge index 003 archive not found: {INDEX_ARCHIVE}'
 
 def sha256_file(path):
     digest = hashlib.sha256()
@@ -100,24 +108,22 @@ def sha256_file(path):
             digest.update(block)
     return digest.hexdigest()
 
-all_files = [p for p in pathlib.Path(WM_ROOT).rglob('*') if p.is_file()]
+all_files = [p for p in INDEX_ROOT.rglob('*') if p.is_file()]
 print('Mounted root:', WM_ROOT)
+print('Dataset index root:', INDEX_ROOT)
+print('Index 003 archive sha256:', sha256_file(INDEX_ARCHIVE))
 print('File count:', len(all_files))
 print('Extension counts:', Counter(p.suffix.lower() for p in all_files))
-print('Directories containing 003 or RedEdge:')
-for path in sorted({p.parent for p in all_files if '003' in str(p) or 'rededge' in str(p).lower()}):
-    print(' ', path)
-print('Candidate image/label files:')
-for path in all_files:
-    low = str(path).lower()
-    if ('003' in low and any(token in low for token in ('groundtruth', 'imap', 'rededge'))):
-        print(path)
+print('Index 003 subdirectories:')
+for path in sorted(p for p in INDEX_ROOT.rglob('*') if p.is_dir()):
+    print(' ', path.relative_to(INDEX_ROOT))
 
 metadata_files = [p for p in all_files if p.suffix.lower() in ('.txt', '.md', '.xml', '.json', '.csv', '.yaml', '.yml')]
 for path in metadata_files[:80]:
     print('METADATA', path, 'sha256=', sha256_file(path))
 
-label_candidates = [p for p in all_files if '003' in str(p) and 'groundtruth' in p.name.lower()]
+label_candidates = [p for p in all_files if 'groundtruth' in p.name.lower()
+                    and p.suffix.lower() == '.png']
 assert label_candidates, 'No GroundTruth file under dataset 003; inspect archive layout before proceeding'
 label_samples = []
 for path in label_candidates[:10]:
@@ -130,52 +136,83 @@ for path in label_candidates[:10]:
                               'format': label_image.format,
                               'info_keys': sorted(label_image.info.keys())})
 
-rededge_candidates = [p for p in all_files if '003' in str(p) and 'rededge' in str(p).lower()]
-assert rededge_candidates, 'Dataset 003 RedEdge files not found; do not substitute Sequoia'
-print('RedEdge-M candidate count:', len(rededge_candidates))
-archive_candidates = [p for p in all_files if p.suffix.lower() in ('.zip', '.tar', '.gz')
-                      and ('003' in p.name or 'weedmap' in p.name.lower())]
-archive_hashes = {str(path): sha256_file(path) for path in archive_candidates}
-preflight = {
+tile_root = INDEX_ROOT / '003' / 'tile'
+assert tile_root.is_dir(), f'Index 003 tile root not found: {tile_root}'
+channel_dirs = [tile_root / band for band in ('R', 'G', 'B', 'NIR', 'RE')]
+missing_channels = [str(path) for path in channel_dirs if not path.is_dir()]
+assert not missing_channels, f'Missing required RedEdge channels: {missing_channels}'
+rededge_candidates = [path for channel in channel_dirs for path in channel.glob('*.png')]
+print('Index 003 per-band tile counts:', {path.name: len(list(path.glob('*.png')))
+                                        for path in channel_dirs})
+archive_hashes = {str(INDEX_ARCHIVE): sha256_file(INDEX_ARCHIVE)}
+inventory = {
     'source_page': 'https://projects.asl.ethz.ch/datasets/weedmap-2018/',
     'paper_doi': '10.3390/rs10091423',
-    'dataset_root': WM_ROOT,
+    'dataset_doi': '10.3929/ethz-c-000788571',
+    'dataset_root': str(WM_ROOT),
+    'dataset_index_root': str(INDEX_ROOT),
     'file_count': len(all_files),
     'dataset_003_rededge_candidate_count': len(rededge_candidates),
     'rededge_sample_paths': [str(path) for path in rededge_candidates[:100]],
     'label_samples': label_samples,
     'metadata_files': [str(path) for path in metadata_files],
     'archive_hashes': archive_hashes,
-    'manual_review_decision': 'PENDING',
-    'manual_review_fields': ['official partition 003 verified from source docs',
-                             'five co-registered RedEdge-M bands and order verified',
-                             'radiometric scale fixed without test-fitted statistics',
-                             'label mapping/license/instance availability verified',
-                             'tile/orthomosaic grouping and leakage reviewed'],
-    'preflight_note': 'No inference performed. Change decision to GO only after reviewing all fields.',
+    'dataset_identity': {
+        'dataset_index': '003',
+        'sensor': 'MicaSense RedEdge-M',
+        'tile_archive': str(INDEX_ARCHIVE),
+        'tile_archive_sha256': sha256_file(INDEX_ARCHIVE),
+    },
+    'mask_validity_policy': 'PENDING: release says white is valid; inspected mask/signal relation appeared opposite',
+    'verified_class_map': {'0': 'background', '1': 'crop', '2': 'weed', '10000': 'ignore'},
+    'verified_label_semantics': {
+        'verified': True,
+        'codes': {'0': 'background', '1': 'crop', '2': 'weed', '10000': 'non-class_ignore'},
+        'source': 'ETH Zurich Research Collection WeedMap release PDF, page 2',
+        'source_url': 'https://www.research-collection.ethz.ch/server/api/core/bitstreams/3ae97814-1570-4760-95b8-a9a3eac21975/content',
+    },
+    'verified_mask_validity': None,
+    'verified_class_support': None,
+    'verified_input_transform': None,
+    'inventory_status': 'STRUCTURE_ONLY_NOT_AUTHORIZATION',
+    'source_test_split_citation': None,
+    'verified_grouping': None,
+    'manual_review_fields': ['official partition 003 and source citation',
+                             'five co-registered RedEdge-M bands and channel order',
+                             'radiometric calibration/PNG encoding and fixed source-compatible transform',
+                             'mask validity polarity resolved against release',
+                             'indexed semantics verified; class support and instance availability documented',
+                             'license/reuse conditions and tile/orthomosaic grouping reviewed'],
+    'preflight_note': 'Inventory only. Copy to a separate reviewed preflight artifact; do not authorize from this file.',
 }
-with open(f'{OUT}/weedmap_003_preflight.json', 'w') as f:
-    json.dump(preflight, f, indent=2)
-print('Saved:', f'{OUT}/weedmap_003_preflight.json')
-print('Archive inspection only. Do not evaluate model predictions or tune from these labels.')
+inventory_path = f'{OUT}/weedmap_003_inventory.json'
+with open(inventory_path, 'w') as f:
+    json.dump(inventory, f, indent=2)
+print('Saved inventory:', inventory_path)
+print('Existing reviewed preflight was not modified.')
+print('Inventory only. Do not evaluate model predictions or tune from these labels.')
 ```
 
-K8.0 chỉ inventory/kiểm tra cấu trúc; không đủ để xác nhận radiometric compatibility. Trong cell cũ, điều kiện `'003' in str(path)` có thể bắt nhầm index khác nếu tên frame chứa chuỗi `003` (ví dụ `frame0030`); không dùng riêng danh sách path đó làm bằng chứng index 003. Lưu console output, xác minh index từ thành phần thư mục đúng, và dùng K8.0b để rà tài liệu/mã nguồn dạng text. Trước khi đặt `manual_review_decision` thành `GO`, bổ sung bằng chứng cho `dataset_identity`, `verified_input_transform`, `verified_class_map`, `verified_label_semantics`, `verified_grouping`, và `source_test_split_citation`; K8.2 sẽ từ chối nếu thiếu trường nào. Không chạy thêm pixel statistics theo nhãn test. Nếu radiometry/co-registration không thể xác minh từ tài liệu nguồn, dừng trước inference.
+K8.0 chỉ tạo lại `results/exp08/weedmap_003_inventory.json`; nó không ghi vào `weedmap_003_preflight.json`. Sau review, tạo/cập nhật riêng file preflight từ inventory và gắn evidence/hash cho `dataset_identity`, test-split citation, `verified_class_support`, `verified_mask_validity`, `verified_input_transform`, `verified_grouping`, evaluator acceptance và protocol freeze. Chỉ đổi `manual_review_decision` sang `GO` khi tất cả gate đạt. K8.2 sẽ từ chối nếu thiếu bất kỳ evidence nào. Không chạy pixel statistics nhằm chọn model/threshold; kiểm tra class support chỉ là integrity check và phải báo cáo mọi kết quả.
 
 ### Cell K8.0b — Read WeedMap annotation documentation/source only (no label pixels)
 
-Run this after K8.0. It reads only text files bundled with the mounted release (README/docs, XML/JSON metadata, and MATLAB/Python source); it does not open PNG/TIFF masks or count any labels. It prints each matching excerpt to Kaggle output and saves the same audit transcript. A missing definition is a **PENDING** result, not evidence that 10000 means Ignore or Crop.
+Run this after K8.0 if you need to repeat the archive search in Kaggle. The previous cell scanned only already-extracted files and therefore returned zero when documentation was inside the per-index ZIP. This version scans text files in the extracted root and text members of `Tiles/RedEdge/003.zip`; it never opens PNG/TIFF entries. The authoritative code table is already recorded from the release PDF, so an empty archive-text search does not undo that verification.
 
 ```python
 import hashlib
 import os
 import pathlib
 import re
+import glob
+import zipfile
 
-WM_ROOT = pathlib.Path('/kaggle/input/weedmap-2018')
+root_candidates = [pathlib.Path('/kaggle/working/weedmap-2018')]
+root_candidates += [pathlib.Path(path) for path in glob.glob('/kaggle/input/**/weedmap-2018', recursive=True)]
+WM_ROOT = next((path for path in root_candidates if path.is_dir()), None)
 AUDIT_LOG = pathlib.Path('results/exp08/logs/weedmap_annotation_docs_audit.log')
 AUDIT_LOG.parent.mkdir(parents=True, exist_ok=True)
-assert WM_ROOT.is_dir(), f'WeedMap root not found: {WM_ROOT}'
+assert WM_ROOT is not None, f'WeedMap root not found in candidates: {root_candidates}'
 
 text_extensions = {
     '.txt', '.md', '.rst', '.html', '.htm', '.xml', '.json', '.yaml', '.yml',
@@ -204,6 +241,10 @@ text_files = sorted(
     if path.is_file() and path.suffix.lower() in text_extensions
     and path.stat().st_size <= 4 * 1024 * 1024
 )
+zip_candidates = sorted({
+    path for path in [WM_ROOT / 'Tiles' / 'RedEdge' / '003.zip'] + list(WM_ROOT.rglob('003.zip'))
+    if path.is_file() and 'rededge' in str(path).lower()
+})
 exact_hits = 0
 files_with_hits = 0
 with AUDIT_LOG.open('w', encoding='utf-8', buffering=1) as log:
@@ -211,12 +252,32 @@ with AUDIT_LOG.open('w', encoding='utf-8', buffering=1) as log:
     emit(f'Root: {WM_ROOT}')
     emit('Scope: text files only; no PNG/TIFF/mask pixels opened.')
     emit(f'Text files scanned: {len(text_files)} (max 4 MiB each)')
+    sources = []
     for path in text_files:
         try:
-            lines = path.read_text(encoding='utf-8-sig', errors='replace').splitlines()
+            sources.append((str(path.relative_to(WM_ROOT)), path.read_text(
+                encoding='utf-8-sig', errors='replace').splitlines(), sha256_file(path)))
         except OSError as error:
             emit(f'SKIP {path.relative_to(WM_ROOT)}: {error}')
-            continue
+    for archive in zip_candidates:
+        emit(f'ZIP {archive.relative_to(WM_ROOT)} sha256={sha256_file(archive)}')
+        try:
+            with zipfile.ZipFile(archive) as bundle:
+                members = [item for item in bundle.infolist()
+                           if pathlib.PurePosixPath(item.filename).suffix.lower() in text_extensions
+                           and 0 < item.file_size <= 4 * 1024 * 1024]
+                emit(f'  text members eligible: {len(members)}')
+                for item in members:
+                    with bundle.open(item) as stream:
+                        content = stream.read(4 * 1024 * 1024 + 1)
+                    if len(content) > 4 * 1024 * 1024:
+                        continue
+                    lines = content.decode('utf-8-sig', errors='replace').splitlines()
+                    sources.append((f'{archive.relative_to(WM_ROOT)}::{item.filename}', lines,
+                                    hashlib.sha256(content).hexdigest()))
+        except (OSError, zipfile.BadZipFile) as error:
+            emit(f'  ZIP READ ERROR: {error}')
+    for source_name, lines, source_hash in sources:
         matches = [(index, line.strip()) for index, line in enumerate(lines, start=1)
                    if search_pattern.search(line)]
         exact_matches = [(index, line) for index, line in matches
@@ -225,8 +286,7 @@ with AUDIT_LOG.open('w', encoding='utf-8', buffering=1) as log:
             continue
         files_with_hits += 1
         exact_hits += len(exact_matches)
-        relative = path.relative_to(WM_ROOT)
-        emit(f'\nFILE {relative} sha256={sha256_file(path)}')
+        emit(f'\nTEXT SOURCE {source_name} sha256={source_hash}')
         selected = exact_matches if exact_matches else matches[:5]
         if exact_matches:
             context_lines = set()
@@ -237,14 +297,103 @@ with AUDIT_LOG.open('w', encoding='utf-8', buffering=1) as log:
             selected = matches[:5]
         for index, line in selected[:20]:
             emit(f'  L{index}: {line[:500]}')
-    emit('\nAUDIT RESULT: PENDING')
-    emit('Only mark semantics verified if an official release document or author source explicitly defines code 10000 and the class/ignore policy.')
+    emit('\nARCHIVE TEXT SEARCH: COMPLETE; this is supplementary and does not determine label semantics.')
+    emit('Official semantics remain those in the cited ETH Zurich release PDF, page 2.')
     emit(f'Files with relevant text: {files_with_hits}; exact code/name hits: {exact_hits}')
     emit(f'Saved audit: {AUDIT_LOG}')
 print('Saved audit:', AUDIT_LOG, flush=True)
 ```
 
-Review the printed excerpts and cite the exact release document/source path and line/page in the preflight JSON. If the archive only repeats the RGB rendering or does not define `10000`, keep `label_semantics` **PENDING**, ask the dataset maintainers or obtain an authoritative annotation specification, and do not build a three-class WeedMap evaluator yet.
+Review any additional archive excerpts and add their paths/hashes to the preflight for provenance. The class-code mapping itself is verified by the official release PDF; do not infer mask polarity or radiometry from the annotation color map. Three-class metric availability remains conditional on valid Crop support in the official evaluation area.
+
+### Cell K8.0c — Input encoding/range inspection (imagery only; no transform fitting)
+
+This compares PNG mode/dtype/range as loaded by the current WeedsGalore `plt.imread` pipeline against one corresponding WeedMap 003 tile per band. The WeedMap sample is predeclared as `frame0020`, selected from the prior imagery inventory because all five bands contain signal; it is not selected using labels or model output. Quantiles below describe this one image only, not a radiometric calibration or normalization estimate. The cell does not read labels/masks or fit/choose normalization statistics.
+
+```python
+import glob
+import os
+from pathlib import Path
+
+import matplotlib.image as mpimg
+import numpy as np
+from PIL import Image
+
+PROJECT = Path('/kaggle/working/WeedsGalore_Ipr28')
+os.chdir(PROJECT)
+AUDIT_LOG = Path('results/exp08/logs/radiometry_encoding_audit.log')
+AUDIT_LOG.parent.mkdir(parents=True, exist_ok=True)
+WM_CANDIDATES = [Path('/kaggle/working/weedmap-2018')]
+WM_CANDIDATES += [Path(path) for path in glob.glob('/kaggle/input/**/weedmap-2018', recursive=True)]
+WM_ROOT = next((path for path in WM_CANDIDATES if path.is_dir()), None)
+assert WM_ROOT is not None, f'Cannot find WeedMap root: {WM_CANDIDATES}'
+WG_CANDIDATES = sorted(glob.glob('/kaggle/input/**/2023-05-25/images', recursive=True))
+if WG_CANDIDATES:
+    WG_ROOT = Path(WG_CANDIDATES[0]).parent.parent
+elif Path('/kaggle/working/weedsgalore-dataset/2023-05-25/images').is_dir():
+    WG_ROOT = Path('/kaggle/working/weedsgalore-dataset')
+else:
+    raise FileNotFoundError('Cannot find WeedsGalore images under Kaggle input/working')
+
+WM_TILE_ROOT = WM_ROOT / 'Tiles' / 'RedEdge' / '003' / '003' / 'tile'
+assert WM_TILE_ROOT.is_dir(), f'WeedMap tile root missing: {WM_TILE_ROOT}'
+bands = ('R', 'G', 'B', 'NIR', 'RE')
+wg_files = sorted((WG_ROOT / '2023-05-25' / 'images').glob('*_R.png'))
+assert wg_files, f'No WeedsGalore sample images under {WG_ROOT}'
+wg_stem = wg_files[0].name[:-len('_R.png')]
+wm_stem = 'frame0020'
+assert (WM_TILE_ROOT / 'R' / f'{wm_stem}.png').is_file(), (
+    f'Predeclared WeedMap radiometry sample is missing: {wm_stem}')
+
+def report_image(domain, band, path):
+    with Image.open(path) as image:
+        raw = np.asarray(image)
+        mode = image.mode
+        size = image.size
+    if domain == 'WeedMap-003-RedEdge':
+        assert size == (480, 360), f'Unexpected predeclared frame size: {path} {size}'
+        assert int(raw.max()) > 0, f'Predeclared frame is blank in {band}: {path}'
+    loaded = mpimg.imread(path)
+    finite = loaded[np.isfinite(loaded)]
+    quantiles = np.percentile(finite, [0, 1, 50, 99, 100])
+    record = {
+        'domain': domain,
+        'band': band,
+        'path': str(path),
+        'png_mode': mode,
+        'raw_dtype': str(raw.dtype),
+        'raw_shape': list(raw.shape),
+        'size_wh': list(size),
+        'raw_min_max': [int(raw.min()), int(raw.max())],
+        'plt_imread_dtype': str(loaded.dtype),
+        'plt_imread_min_p01_p50_p99_max': [float(v) for v in quantiles],
+    }
+    print(record, flush=True)
+    audit.write(str(record) + '\n')
+
+with AUDIT_LOG.open('w', encoding='utf-8', buffering=1) as audit:
+    print('WeedsGalore root:', WG_ROOT, '| sample:', wg_stem, flush=True)
+    print('WeedMap root:', WM_TILE_ROOT, '| sample:', wm_stem, flush=True)
+    audit.write(f'WeedsGalore root: {WG_ROOT} | sample: {wg_stem}\n')
+    audit.write(f'WeedMap root: {WM_TILE_ROOT} | sample: {wm_stem}\n')
+    for band in bands:
+        wg_path = WG_ROOT / '2023-05-25' / 'images' / f'{wg_stem}_{band}.png'
+        wm_path = WM_TILE_ROOT / band / f'{wm_stem}.png'
+        assert wg_path.is_file(), f'Missing WeedsGalore {band}: {wg_path}'
+        assert wm_path.is_file(), f'Missing WeedMap {band}: {wm_path}'
+        with Image.open(wm_path) as image:
+            assert image.size == (480, 360), f'Unexpected WeedMap frame0020 size for {band}: {image.size}'
+        report_image('WeedsGalore', band, wg_path)
+        report_image('WeedMap-003-RedEdge', band, wm_path)
+    print('No labels/masks were opened. Do not use these summaries to fit or tune a transform.', flush=True)
+    print('Radiometric compatibility remains PENDING until source calibration/encoding documentation is verified.', flush=True)
+    audit.write('No labels/masks were opened. No transform fitted. Radiometry remains PENDING.\n')
+print('Saved audit:', AUDIT_LOG, flush=True)
+```
+
+The source loader in `src/datasets/weedsgalore/weedsgalore.py` calls `plt.imread` on each PNG and stacks `R,G,B,NIR,RE`; `src/train.py` converts batches to the device without an explicit `/255`, standardization, or per-band normalization. Thus the effective numeric scale depends on the stored PNG bit depth and `plt.imread` behavior. Matching numeric ranges after `plt.imread` is necessary but not sufficient: the WeedMap PNGs may be display-stretched/quantized rather than calibrated reflectance. Do not authorize inference until the release/source documents establish the tile PNG radiometry or supply a fixed transform to align it with the WeedsGalore training inputs.
+
+**Radiometry gate:** the WeedMap landing page distinguishes per-channel tile PNGs from orthomosaic reflectance TIFFs. The paper's statement that channels are aligned/calibrated across the map does not, by itself, specify the numerical encoding of each exported tile PNG or show that it matches WeedsGalore's PNG input scale. Before inference, identify the tile PNG export/reflectance conversion rule from the release materials, or document a deterministic mapping from the calibrated reflectance product to the checkpoint's source-domain numeric scale. Do not estimate per-band normalization from WeedMap test tiles. If the release only provides display-stretched PNGs without a documented invertible/fixed mapping, stop the zero-shot evaluation rather than claiming radiometric transfer.
 
 ### Cell K8.1 — Profile L0, OccCond-g, MCSD-g, PS (600×600)
 
@@ -371,6 +520,15 @@ for model in specs:
         with open(path) as f:
             config = json.load(f)
         assert config['split_hash'] == '675667edf3f35f16', f'Split mismatch: {path}'
+        flags = config['flags']
+        assert int(flags['seed']) == seed, f'Seed/config mismatch: {path}'
+        assert int(flags['in_channels']) == 5 and int(flags['num_classes']) == 3, (
+            f'Input/class config mismatch: {path}')
+        assert bool(flags['use_multiscale_fusion']) is True, f'Decoder config mismatch: {path}'
+        expected_head = {'L0': 'bilinear', 'OccCondg': 'occ_conditioned', 'MCSDg': 'mcsd'}[model]
+        assert flags['head'] == expected_head, f'Method/head mismatch: {path}'
+        assert bool(flags['ccmc']) is (model == 'L0'), f'Encoder path mismatch: {path}'
+        assert bool(flags['spectral_guide']) is (model != 'L0'), f'Spectral guide mismatch: {path}'
         run_configs[model][str(seed)] = {'path': path, 'sha256': sha256_file(path)}
 
 preflight_path = f'{OUT}/weedmap_003_preflight.json'
@@ -380,21 +538,113 @@ with open(preflight_path) as f:
 assert weedmap_preflight['manual_review_decision'] == 'GO', (
     'WeedMap is not authorized: finish archive, radiometry, labels, split, and leakage review')
 required_preflight_fields = ('dataset_identity', 'verified_input_transform', 'verified_class_map',
-                            'verified_label_semantics', 'verified_grouping',
+                            'verified_label_semantics', 'verified_mask_validity',
+                            'verified_class_support', 'verified_grouping',
                             'source_test_split_citation')
 missing_preflight = [key for key in required_preflight_fields
                      if not weedmap_preflight.get(key)]
 assert not missing_preflight, f'Incomplete reviewed WeedMap preflight fields: {missing_preflight}'
+assert weedmap_preflight['verified_label_semantics'].get('verified') is True, (
+    'Official WeedMap indexed-label semantics have not been verified')
+assert weedmap_preflight['verified_mask_validity'].get('verified') is True, (
+    'WeedMap mask-validity convention is unresolved')
+assert weedmap_preflight['verified_input_transform'].get('fixed_without_target_fitting') is True, (
+    'WeedMap radiometric transform is not source-compatible and fixed')
+assert weedmap_preflight['verified_class_support'].get('status') in ('crop_present', 'crop_absent'), (
+    'Record whether valid Crop labels are present before selecting the metric branch')
+weedmap_class_support = weedmap_preflight['verified_class_support']['status']
+weedmap_metrics = ['WeedRecall', 'WeedPrecision', 'IoU_weed']
+if weedmap_class_support == 'crop_present':
+    weedmap_metrics.extend(['IoU_bg', 'IoU_crop', 'mIoU'])
+
+evidence_path = f'{OUT}/weedmap_evaluator_acceptance.json'
+assert os.path.isfile(evidence_path), 'WeedMap evaluator acceptance evidence is missing'
+with open(evidence_path) as f:
+    evaluator_evidence = json.load(f)
+assert evaluator_evidence.get('status') == 'PASS', 'WeedMap evaluator is not accepted'
+evaluator_path = evaluator_evidence.get('evaluator_path')
+test_report_path = evaluator_evidence.get('test_report_path')
+assert evaluator_path and os.path.isfile(evaluator_path), 'Accepted evaluator source is missing'
+assert test_report_path and os.path.isfile(test_report_path), 'Evaluator test report is missing'
+assert sha256_file(evaluator_path) == evaluator_evidence.get('evaluator_sha256'), (
+    'Evaluator source hash does not match acceptance report')
+assert sha256_file(test_report_path) == evaluator_evidence.get('test_report_sha256'), (
+    'Evaluator test report hash does not match acceptance report')
+assert evaluator_evidence.get('tests_passed', 0) > 0 and evaluator_evidence.get('tests_failed', 1) == 0, (
+    'Evaluator acceptance requires passing synthetic tests and zero failures')
+assert evaluator_evidence.get('mask_policy_evidence'), 'Mask policy source/audit evidence is missing'
+mask_evidence_path = evaluator_evidence.get('mask_policy_evidence_path')
+radiometry_evidence_path = evaluator_evidence.get('radiometry_evidence_path')
+assert mask_evidence_path and os.path.isfile(mask_evidence_path), 'Mask-policy evidence artifact is missing'
+assert radiometry_evidence_path and os.path.isfile(radiometry_evidence_path), (
+    'Radiometry evidence artifact is missing')
+assert sha256_file(mask_evidence_path) == evaluator_evidence.get('mask_policy_evidence_sha256'), (
+    'Mask-policy evidence hash does not match acceptance report')
+assert sha256_file(radiometry_evidence_path) == evaluator_evidence.get('radiometry_evidence_sha256'), (
+    'Radiometry evidence hash does not match acceptance report')
+assert evaluator_evidence.get('synthetic_checks', {}).get('ignore_10000_excluded') is True
+assert evaluator_evidence.get('synthetic_checks', {}).get('crop_absence_branch') is True
+assert evaluator_evidence.get('synthetic_checks', {}).get('mask_validity') is True
+assert evaluator_evidence.get('synthetic_checks', {}).get('fixed_band_order') is True
+assert evaluator_evidence.get('radiometry_evidence'), 'Fixed transform provenance is missing'
+assert evaluator_evidence.get('statistical_protocol_frozen') is True, (
+    'WeedMap metric/bootstrap protocol is not frozen')
+protocol_path = evaluator_evidence.get('statistical_protocol_path')
+assert protocol_path and os.path.isfile(protocol_path), 'Frozen statistical protocol artifact is missing'
+assert sha256_file(protocol_path) == evaluator_evidence.get('statistical_protocol_sha256'), (
+    'Statistical protocol hash does not match acceptance report')
+
+assert set(checkpoints) == {'L0', 'OccCondg', 'MCSDg'}
+assert all(set(seeds) == {str(seed) for seed in range(5)} for seeds in checkpoints.values()), (
+    'Expected exactly seeds 0-4 for each of the three methods')
+assert set(run_configs) == set(checkpoints)
+assert all(set(seeds) == {str(seed) for seed in range(5)} for seeds in run_configs.values()), (
+    'Expected one source run config for every locked checkpoint')
+
+source_files = (
+    'src/nets/mcsd.py', 'src/nets/segformer.py', 'src/ccmc_common.py',
+    'src/ccmc_metrics.py', 'src/evaluate_ccmc.py', 'src/scripts/compare_runs.py',
+    'src/train.py', 'src/scripts/make_instance_bins.py',
+    'src/datasets/weedsgalore/weedsgalore.py',
+    evaluator_path,
+)
+source_hashes = {}
+for path in source_files:
+    assert os.path.isfile(path), f'Missing locked source file: {path}'
+    source_hashes[path] = sha256_file(path)
+
+bins_path = 'results/instance_bins.json'
+assert os.path.isfile(bins_path), f'Missing instance bins: {bins_path}'
+with open(bins_path) as f:
+    bins_data = json.load(f)
+assert bins_data['edges'] == [45.0, 147.0], f'Unexpected instance-bin edges: {bins_data["edges"]}'
 
 manifest = {
     'protocol': 'one-time WeedsGalore test evaluation; frozen external-method comparison set',
     'commit': actual_commit,
+    'source_commit': actual_commit,
+    'source_files': source_hashes,
+    'evaluator_acceptance': {
+        'path': evidence_path,
+        'sha256': sha256_file(evidence_path),
+        'test_report_path': test_report_path,
+        'test_report_sha256': sha256_file(test_report_path),
+        'mask_evidence_path': mask_evidence_path,
+        'mask_evidence_sha256': sha256_file(mask_evidence_path),
+        'radiometry_evidence_path': radiometry_evidence_path,
+        'radiometry_evidence_sha256': sha256_file(radiometry_evidence_path),
+        'statistical_protocol_path': protocol_path,
+        'statistical_protocol_sha256': sha256_file(protocol_path),
+    },
     'split_hash': '675667edf3f35f16',
     'checkpoint_selection': 'best_val only; selected on validation before test lock',
     'methods': specs,
     'checkpoints': checkpoints,
     'run_configs': run_configs,
     'compute_profiles': profiles,
+    'instance_bins': {'path': 'results/instance_bins.json',
+                      'sha256': sha256_file('results/instance_bins.json'),
+                      'edges': [45.0, 147.0]},
     'evaluation': {
         'split': 'test', 'input_channels': ['R', 'G', 'B', 'NIR', 'RE'],
         'boundary_px': 3, 'instance_bins': [45.0, 147.0],
@@ -411,15 +661,25 @@ manifest = {
         'preflight_path': preflight_path,
         'preflight_sha256': sha256_file(preflight_path),
         'sensor_channels': ['R', 'G', 'B', 'NIR', 'RE'],
+        'label_semantics': weedmap_preflight['verified_label_semantics'],
+        'mask_validity': weedmap_preflight['verified_mask_validity'],
+        'class_support': weedmap_preflight['verified_class_support'],
+        'input_transform': weedmap_preflight['verified_input_transform'],
+        'metrics': weedmap_metrics,
         'primary_endpoint': 'WeedRecall',
         'primary_contrast': ['OccCondg', 'L0'],
-                'secondary_metrics': ['mIoU', 'IoU_bg', 'IoU_crop', 'IoU_weed', 'PrecisionWeed',
-                                    'secondary_metrics': ['mIoU', 'IoU_bg', 'IoU_crop', 'IoU_weed', 'PrecisionWeed',
-                                                  'instance_recall50_if_official_ids_verified'],
+        'secondary_metrics_common': ['WeedPrecision', 'IoU_weed'],
+        'secondary_metrics_if_crop_present': ['mIoU', 'IoU_bg', 'IoU_crop'],
+        'secondary_metrics_if_crop_absent': ['WeedRecall', 'WeedPrecision', 'IoU_weed'],
+        'instance_metric': 'recall50_only_if_official_instance_ids_verified',
+        'ignore_code': 10000,
+        'mask_policy_status': 'PENDING; resolve documented white-valid rule against observed mask/signal relation',
         'secondary_contrasts': [['MCSDg', 'L0'], ['MCSDg', 'OccCondg']],
         'bootstrap': {'replicates': 10000, 'seed': 0, 'paired_seed_resampling': True,
                   'spatial_cluster': 'orthomosaic_or_flight_then_tile'},
-        'evaluator_status': 'NOT_IMPLEMENTED; do not infer from this manifest alone',
+        'evaluator_status': 'PASS',
+        'evaluator_acceptance_path': evidence_path,
+        'evaluator_acceptance_sha256': sha256_file(evidence_path),
         'required_preflight': 'channel alignment, reflectance scale, labels, official split, and archive hash verified before inference',
     },
 }
@@ -431,27 +691,26 @@ print('LOCKED:', lock_path, flush=True)
 print(json.dumps(manifest, indent=2), flush=True)
 ```
 
-Preserve the manifest checksum (K8.3 records it in the start marker). Run K8.2 and K8.3 on the same pushed source commit; do not create a follow-up commit between them, since that would invalidate the locked commit check. Replace `EXPECTED_COMMIT` with the finalized pushed source commit before K8.2. If the manifest itself must be committed, change the integrity check to verify the locked source-file hashes rather than comparing HEAD to the pre-manifest commit.
+Commit/push the finalized source first and set `EXPECTED_COMMIT` to that source commit for K8.2. K8.2 records `source_commit` and hashes of the files that affect evaluation. Then commit/push the generated manifest as a separate commit. K8.3 requires the source commit to be an ancestor of current HEAD and verifies every locked source-file hash; it does not incorrectly require HEAD to equal the earlier source commit. The start marker records both current HEAD (the manifest commit) and the immutable manifest hash.
 
 ### Cell K8.3 — One-time WeedsGalore test (only after manifest is committed)
 
-This is a single release operation across 15 frozen checkpoints, not 15 model-selection trials. It releases only the WeedsGalore test; the WeedMap evaluator is not implemented. A marker is written **before** the first test process. If interrupted or failed after the marker, preserve outputs/logs and record the deviation; do not silently rerun.
+This is the single release operation across 15 frozen checkpoints, not 15 model-selection trials. It releases the WeedsGalore test only. K8.2 additionally requires independently implemented and synthetically tested WeedMap evaluator acceptance before it can create the combined final manifest. All environment, data, checkpoint, CLI, manifest, and evaluator-acceptance checks run before the one-time marker. If any check fails, no marker is written and no test process starts. Once the marker is written, interruption/failure consumes the one-time run; preserve the evidence and do not silently rerun.
 
 ```python
-import hashlib, json, os, subprocess, sys
+import glob, hashlib, json, os, subprocess, sys
+from pathlib import Path
 
 OUT = 'results/exp08'
 LOGS = f'{OUT}/logs'
 manifest_path = f'{OUT}/test_lock_manifest.json'
 marker_path = f'{OUT}/test_started.json'
 os.makedirs(LOGS, exist_ok=True)
-assert os.path.isfile(manifest_path)
+assert os.path.isfile(manifest_path), 'Committed test manifest is missing'
 assert not os.path.exists(marker_path), 'One-time test marker exists; rerun is prohibited'
 
 with open(manifest_path) as f:
     manifest = json.load(f)
-actual_commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
-assert actual_commit == manifest['commit'], 'Code commit differs from locked manifest'
 
 def sha256_file(path):
     digest = hashlib.sha256()
@@ -459,6 +718,104 @@ def sha256_file(path):
         for block in iter(lambda: stream.read(1024 * 1024), b''):
             digest.update(block)
     return digest.hexdigest()
+
+manifest_commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
+source_commit = manifest['source_commit']
+subprocess.run(['git', 'merge-base', '--is-ancestor', source_commit, manifest_commit], check=True)
+subprocess.run(['git', 'ls-files', '--error-unmatch', manifest_path], check=True,
+               stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+committed_manifest = subprocess.check_output(
+    ['git', 'show', f'HEAD:{manifest_path}'], stderr=subprocess.STDOUT)
+assert hashlib.sha256(committed_manifest).hexdigest() == sha256_file(manifest_path), (
+    'Working manifest differs from the committed manifest')
+for path, expected_hash in manifest['source_files'].items():
+    assert os.path.isfile(path), f'Locked source file missing: {path}'
+    assert sha256_file(path) == expected_hash, f'Locked source changed: {path}'
+
+DS_CANDIDATES = sorted(glob.glob('/kaggle/input/**/2023-05-25/semantics', recursive=True))
+if DS_CANDIDATES:
+    DS = str(Path(DS_CANDIDATES[0]).parent.parent)
+elif Path('/kaggle/working/weedsgalore-dataset/2023-05-25/semantics').is_dir():
+    DS = '/kaggle/working/weedsgalore-dataset'
+else:
+    raise FileNotFoundError('WeedsGalore dataset not found before test marker')
+assert os.path.isdir(DS), f'Invalid WeedsGalore dataset path: {DS}'
+
+split_dir = Path('src/datasets/weedsgalore/splits')
+split_digest = hashlib.sha256()
+for split_name in ('train.txt', 'val.txt', 'test.txt'):
+    split_path = split_dir / split_name
+    assert split_path.is_file(), f'Split file missing: {split_path}'
+    split_digest.update(split_path.read_bytes())
+assert split_digest.hexdigest()[:16] == manifest['split_hash'], 'WeedsGalore split hash changed'
+test_ids = [line.strip() for line in (split_dir / 'test.txt').read_text().splitlines() if line.strip()]
+assert test_ids, 'WeedsGalore test split is empty'
+missing_test_images = []
+for image_id in test_ids:
+    image_dir = Path(DS) / image_id[:10] / 'images'
+    for band in manifest['evaluation']['input_channels']:
+        path = image_dir / f'{image_id}_{band}.png'
+        if not path.is_file():
+            missing_test_images.append(str(path))
+assert not missing_test_images, f'Missing test image inputs (first 20): {missing_test_images[:20]}'
+
+bins = manifest['instance_bins']
+assert os.path.isfile(bins['path']), f'Instance-bin file missing: {bins["path"]}'
+assert sha256_file(bins['path']) == bins['sha256'], 'Instance-bin artifact changed'
+with open(bins['path']) as f:
+    bins_data = json.load(f)
+assert bins_data['edges'] == bins['edges'] == [45.0, 147.0], 'Instance-bin edges changed'
+
+assert set(manifest['checkpoints']) == {'L0', 'OccCondg', 'MCSDg'}
+for model, seeds in manifest['checkpoints'].items():
+    assert set(seeds) == {str(seed) for seed in range(5)}, f'Expected seeds 0-4: {model}'
+    assert set(manifest['run_configs'][model]) == {str(seed) for seed in range(5)}
+    for seed, item in seeds.items():
+        assert os.path.isfile(item['path']), f'Checkpoint missing: {model} seed {seed}'
+        assert sha256_file(item['path']) == item['sha256'], f'Checkpoint changed: {model} seed {seed}'
+        run_config = manifest['run_configs'][model][seed]
+        assert os.path.isfile(run_config['path']), f'Run config missing: {model} seed {seed}'
+        assert sha256_file(run_config['path']) == run_config['sha256'], (
+            f'Run config changed: {model} seed {seed}')
+
+for name, item in manifest['compute_profiles'].items():
+    assert os.path.isfile(item['path']), f'Compute profile missing: {name}'
+    assert sha256_file(item['path']) == item['sha256'], f'Compute profile changed: {name}'
+
+preflight = manifest['weedmap_protocol']
+assert os.path.isfile(preflight['preflight_path']), 'Reviewed WeedMap preflight missing'
+assert sha256_file(preflight['preflight_path']) == preflight['preflight_sha256'], (
+    'WeedMap preflight changed after lock')
+acceptance = manifest['evaluator_acceptance']
+with open(acceptance['path']) as f:
+    acceptance_report = json.load(f)
+assert acceptance_report.get('status') == 'PASS', 'WeedMap evaluator acceptance is no longer PASS'
+assert manifest['weedmap_protocol']['evaluator_status'] == 'PASS'
+for key in ('path', 'test_report_path', 'mask_evidence_path', 'radiometry_evidence_path'):
+    assert os.path.isfile(acceptance[key]), f'Evaluator evidence missing: {acceptance[key]}'
+for path_key, hash_key in (('path', 'sha256'), ('test_report_path', 'test_report_sha256'),
+                           ('mask_evidence_path', 'mask_evidence_sha256'),
+                           ('radiometry_evidence_path', 'radiometry_evidence_sha256'),
+                           ('statistical_protocol_path', 'statistical_protocol_sha256')):
+    assert sha256_file(acceptance[path_key]) == acceptance[hash_key], (
+        f'Evaluator acceptance evidence changed: {acceptance[path_key]}')
+
+def check_cli(args, log_path):
+    result = subprocess.run(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+    with open(log_path, 'w', encoding='utf-8') as log_file:
+        log_file.write(result.stdout)
+    print(result.stdout, end='', flush=True)
+    if result.returncode != 0:
+        raise subprocess.CalledProcessError(result.returncode, args, output=result.stdout)
+    return result.stdout
+
+evaluate_help = check_cli([sys.executable, 'src/evaluate_ccmc.py', '--helpshort'],
+                          f'{LOGS}/precheck_evaluate_cli.log')
+assert all(flag in evaluate_help for flag in ('confirm_test_locked', 'dataset_path', 'split', 'ckpt'))
+compare_help = check_cli([sys.executable, 'src/scripts/compare_runs.py', '--helpshort'],
+                         f'{LOGS}/precheck_compare_cli.log')
+assert all(flag in compare_help for flag in ('--a', '--b', '--cluster', '--metrics', '--out'))
+assert not any(Path(OUT).glob('*_test_per_image.csv')), 'Test outputs already exist; do not start a duplicate run'
 
 def run_live(args, log_path):
     print('\n$', ' '.join(args), flush=True)
@@ -472,22 +829,10 @@ def run_live(args, log_path):
     if code != 0:
         raise subprocess.CalledProcessError(code, args)
 
-for model, seeds in manifest['checkpoints'].items():
-    for seed, item in seeds.items():
-        assert sha256_file(item['path']) == item['sha256'], f'Checkpoint changed: {model} seed {seed}'
-        run_config = manifest['run_configs'][model][seed]
-        assert sha256_file(run_config['path']) == run_config['sha256'], (
-            f'Run config changed: {model} seed {seed}')
-
-for name, item in manifest['compute_profiles'].items():
-    assert sha256_file(item['path']) == item['sha256'], f'Compute profile changed: {name}'
-
-preflight = manifest['weedmap_protocol']
-assert sha256_file(preflight['preflight_path']) == preflight['preflight_sha256'], (
-    'WeedMap preflight changed after lock')
-
+# All setup checks are complete; from this point an interrupted/erroring test consumes the lock.
 with open(marker_path, 'x') as f:
-    json.dump({'started': True, 'commit': actual_commit,
+    json.dump({'started': True, 'source_commit': source_commit,
+               'manifest_commit': manifest_commit,
                'manifest_sha256': sha256_file(manifest_path)}, f, indent=2)
 
 arch_by_model = manifest['methods']
