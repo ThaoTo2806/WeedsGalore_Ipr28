@@ -1,0 +1,12 @@
+WeedMap 003 class-support/mask integrity audit; no model inference.
+Counts are reported separately for mask==0 and mask==255; neither is presumed valid.
+Frames aligned: 204 / 204
+iMap modes: {'L': 111, 'I;16': 93}
+Mask patterns by frame: {(255,): 102, (0, 255): 57, (0,): 45}
+All iMap class counts: {'0': 34239045, '1': 0, '2': 343926, '10000': 668229}
+Counts if mask==0 is valid: {'0': 12000413, '1': 0, '2': 343799, '10000': 668227}
+Counts if mask==255 is valid: {'0': 22238632, '1': 0, '2': 127, '10000': 2}
+Crop code 1 present anywhere: False
+No mask polarity selected; no model inference performed.
+Saved report: results/exp08/weedmap_003_class_support_integrity.json
+Saved log: results/exp08/logs/class_support_mask_integrity.log

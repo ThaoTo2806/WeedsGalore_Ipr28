@@ -1,0 +1,29 @@
+{
+  "status": "SYNTHETIC_CORE_PASS",
+  "authorization": "NOT_AUTHORIZED_FOR_WEEDMAP_INFERENCE_OR_K8_2_K8_3",
+  "timestamp_utc": "2026-11-05T03:46:22.673441+00:00",
+  "git_commit": "cb804fd6e4024405c5538239d71029b2eeabe430",
+  "command": [
+    "/usr/bin/python3",
+    "-m",
+    "pytest",
+    "-q",
+    "-ra",
+    "tests/test_weedmap_evaluation.py"
+  ],
+  "pytest_exit_code": 0,
+  "source_file": "src/weedmap_evaluation.py",
+  "source_sha256": "cc5b1ba7e9c53327a922a4b6cfb9ddafd461d2a69d539c3e39e9f9c505fff901",
+  "test_file": "tests/test_weedmap_evaluation.py",
+  "test_sha256": "38131ce89ffcf86efc8ff1bfcf1ab7980ebed90984bfcd64e72e18a6bc201ee8",
+  "log_file": "results/exp08/logs/weedmap_synthetic_core_tests.log",
+  "log_sha256": "5de6801217fb559ffdfab6ae4f4b5f6ff3f26bdb5e0a0fdcc568ab652244a71f",
+  "scope": "Synthetic loader, band order, mask-code handling, labels, confusion and aggregation only",
+  "not_verified": [
+    "radiometry",
+    "official mask polarity",
+    "official test split",
+    "spatial grouping",
+    "checkpoint inference integration"
+  ]
+}
