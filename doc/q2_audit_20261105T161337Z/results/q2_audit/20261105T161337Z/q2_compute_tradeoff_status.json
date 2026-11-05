@@ -1,0 +1,9 @@
+{
+  "status": "PASS_PROFILE_INVENTORY",
+  "profile_count": 6,
+  "matched_group_count": 6,
+  "matched_group": "((1, 5, 600, 600), 'Tesla T4', 'fp32', 1)",
+  "plot_status": "CREATED_FROM_MATCHED_PROFILE_GROUP",
+  "source_note": "Saved profile artifacts only; this cell does not run or re-time a model.",
+  "test_data_accessed_by_this_cell": false
+}

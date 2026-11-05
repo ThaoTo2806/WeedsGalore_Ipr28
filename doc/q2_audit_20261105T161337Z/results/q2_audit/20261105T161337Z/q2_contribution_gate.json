@@ -1,0 +1,23 @@
+{
+  "protocol": "Q2 one-day validation/synthetic evidence closeout",
+  "run_id": "20261105T161337Z",
+  "git_head": "5605a9978216bd0eecf1879de741d336f7d0afb4",
+  "evaluation_split": "validation artifacts and synthetic tensors only",
+  "test_data_accessed_by_cells_in_this_readme": false,
+  "A0_source_audit": "SOURCE_CAPTURED_MANUAL_REVIEW_REQUIRED",
+  "A0_manual_review_required": true,
+  "A1_synthetic_operator_tests": "PASS",
+  "A2_paired_validation_recompute": "PARTIAL_CONFIG_PROVENANCE",
+  "A3_occupancy_analysis": "PASS_DESCRIPTIVE_BINS",
+  "A4_compute_profiles": "PASS_PROFILE_INVENTORY",
+  "A5_new_upsampler_baseline": "NOT_RUN_DEADLINE_AND_PREREGISTRATION_GATE",
+  "A6_factorial_ablation": "NOT_RUN",
+  "K8.3_WeedsGalore_test": "BLOCKED_ABORTED_RERUN_UNAUTHORIZED",
+  "WeedMap": "NOT_AUTHORIZED",
+  "paper_claim_boundary": [
+    "Do not claim first, SOTA, external-domain validation, or held-out gains for new models.",
+    "Treat all Exp00-07 performance evidence as validation evidence.",
+    "Describe finite Sinkhorn as approximate marginal matching, not exact conservation.",
+    "Do not infer causality from occupancy/marginal associations."
+  ]
+}
