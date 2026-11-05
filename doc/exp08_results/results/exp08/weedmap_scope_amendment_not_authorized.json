@@ -1,0 +1,35 @@
+{
+  "kind": "PROTOCOL_AMENDMENT",
+  "generated_at_utc": "2026-11-05T14:30:53.781308+00:00",
+  "weedmap_status": "NOT_AUTHORIZED",
+  "scope": "WeedsGalore-only one-time test; WeedMap excluded from current evaluation",
+  "reasons": [
+    "Mask validity/polarity is unresolved.",
+    "Radiometric compatibility and a fixed source-compatible transform are unresolved.",
+    "WeedMap evaluator end-to-end acceptance is not approved."
+  ],
+  "preserved_audits": [
+    "results/exp08/weedmap_mask_signal_contingency.json",
+    "results/exp08/weedmap_radiometry_provenance_gap.json",
+    "results/exp08/checkpoint_source_presence_audit.json"
+  ],
+  "retained_protocol": {
+    "methods": [
+      "L0",
+      "OccCondg",
+      "MCSDg"
+    ],
+    "seeds": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "selection": "validation-selected checkpoints only",
+    "no_test_based_selection": true
+  },
+  "test_data_opened": false,
+  "inference_run": false,
+  "authorization": "WEEDSGALORE_ONLY; WEEDMAP_NOT_AUTHORIZED"
+}

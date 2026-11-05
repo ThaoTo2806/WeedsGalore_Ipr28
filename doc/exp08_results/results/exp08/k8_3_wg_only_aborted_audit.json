@@ -1,0 +1,14 @@
+{
+  "status": "ABORTED_AFTER_MARKER_BEFORE_COMPLETED_EVALUATION",
+  "audited_at_utc": "2026-11-05T14:41:45.197062+00:00",
+  "marker": "results/exp08/test_started.json",
+  "marker_content": {
+    "started": true,
+    "manifest_sha256": "d4cc9c3072c72175eadf9119f7df82d2e8feca082ba10bdc6517976e198790dd"
+  },
+  "evaluation_log_count": 0,
+  "per_image_count": 0,
+  "summary_count": 0,
+  "inference_completion_verified": false,
+  "rerun_authorized": false
+}

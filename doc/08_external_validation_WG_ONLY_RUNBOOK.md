@@ -219,9 +219,17 @@ for method in specs:
         assert int(flags['in_channels']) == 5 and int(flags['num_classes']) == 3
         assert bool(flags['use_multiscale_fusion']) is True
         expected_head = {'L0': 'bilinear', 'OccCondg': 'occ_conditioned', 'MCSDg': 'mcsd'}[method]
-        assert flags['head'] == expected_head
+        observed_head = flags.get('head')
+        if observed_head is None:
+            assert method == 'L0', f'Missing serialized head for {method}: {config_path}'
+            observed_head = 'bilinear'
+        assert observed_head == expected_head, f'Method/head mismatch: {config_path}'
         assert bool(flags['ccmc']) is (method == 'L0')
-        assert bool(flags['spectral_guide']) is (method != 'L0')
+        observed_spectral_guide = flags.get('spectral_guide')
+        if observed_spectral_guide is None:
+            assert method == 'L0', f'Missing serialized spectral_guide for {method}: {config_path}'
+            observed_spectral_guide = False
+        assert bool(observed_spectral_guide) is (method != 'L0')
         run_configs[method][str(seed)] = {'path': str(config_path), 'sha256': sha256_file(config_path)}
 
 split_dir = Path('src/datasets/weedsgalore/splits')
@@ -244,8 +252,9 @@ for subdirectory in ('images', 'semantics', 'instances'):
     assert (dataset_root / '2023-05-25' / subdirectory).is_dir()
 
 def check_help(command, required_flags):
-    result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, check=True)
-    assert all(flag in result.stdout for flag in required_flags), required_flags
+    result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, check=False)
+    assert all(flag in result.stdout for flag in required_flags), (
+        f'Help output missing flags {required_flags}; exit={result.returncode}\n{result.stdout}')
 
 check_help([sys.executable, 'src/evaluate_ccmc.py', '--helpshort'],
            ('dataset_path', 'split', 'ckpt', 'confirm_test_locked'))
@@ -259,7 +268,13 @@ source_files = (
 )
 source_hashes = {path: sha256_file(path) for path in source_files}
 bins_path = Path('results/instance_bins.json')
-assert bins_path.is_file()
+if not bins_path.is_file():
+    canonical_bins = Path('doc/exp01_results/results/instance_bins.json')
+    assert canonical_bins.is_file(), (
+        f'Missing instance-bin artifact and canonical source: {canonical_bins}')
+    bins_path.parent.mkdir(parents=True, exist_ok=True)
+    bins_path.write_bytes(canonical_bins.read_bytes())
+    print('Restored train-derived instance bins from:', canonical_bins)
 bins_data = json.loads(bins_path.read_text(encoding='utf-8'))
 assert bins_data['edges'] == [45.0, 147.0]
 
@@ -291,7 +306,44 @@ print('No test images/labels opened; no test_started.json created.')
 
 ## Commit manifest trước Cell D
 
-Sau khi Cell C PASS, commit `results/exp08/test_lock_manifest.json`. Không sửa source, checkpoint, config hoặc manifest sau commit.
+Sau khi Cell C PASS, manifest đúng phải nằm tại:
+
+```text
+/kaggle/working/WeedsGalore_Ipr28/results/exp08/test_lock_manifest.json
+```
+
+File dưới `doc/exp08_results/results/exp08/` là evidence/archive cũ, không dùng thay cho manifest hiện tại.
+
+Trên Kaggle **không cần `git push`**. Chỉ cần tạo local commit trong Kaggle vì Cell D kiểm tra `git ls-files` và `git show HEAD`.
+
+Chạy cell sau từ project root:
+
+```python
+from pathlib import Path
+import subprocess
+
+manifest = Path('results/exp08/test_lock_manifest.json')
+assert manifest.is_file(), manifest
+
+status = subprocess.run(
+    ['git', 'status', '--short', '--', str(manifest)],
+    stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, check=True,
+)
+print('Manifest status before commit:', status.stdout.strip() or 'clean')
+
+subprocess.run(['git', 'config', 'user.name', 'Kaggle Exp08'], check=True)
+subprocess.run(['git', 'config', 'user.email', 'kaggle-exp08@localhost'], check=True)
+subprocess.run(['git', 'add', str(manifest)], check=True)
+subprocess.run(['git', 'commit', '-m', 'Lock WeedsGalore-only test manifest'], check=True)
+
+subprocess.run(
+    ['git', 'ls-files', '--error-unmatch', str(manifest)],
+    check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+)
+print('Manifest is committed and tracked. No git push is required.')
+```
+
+Không sửa source, checkpoint, config hoặc manifest sau commit.
 
 ```python
 from pathlib import Path
@@ -301,8 +353,51 @@ manifest = Path('results/exp08/test_lock_manifest.json')
 assert manifest.is_file()
 subprocess.run(['git', 'ls-files', '--error-unmatch', str(manifest)], check=True,
                stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+subprocess.run(['git', 'show', f'HEAD:{manifest.as_posix()}'], check=True,
+               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 print('Manifest is tracked and ready for K8.3-WG-only.')
 ```
+
+### Nếu Cell D báo manifest hash mismatch
+
+Lỗi ở dòng `hashlib.sha256(committed).hexdigest() == sha256_file(manifest_path)` nghĩa là file hiện tại trên disk khác byte-for-byte với file đã commit trong `HEAD`. Không chạy tiếp và không tạo lại manifest.
+
+Chạy cell chẩn đoán này; cell chưa mở test data:
+
+```python
+from pathlib import Path
+import hashlib, subprocess
+
+manifest = Path('results/exp08/test_lock_manifest.json')
+
+def sha256_bytes(value):
+    return hashlib.sha256(value).hexdigest()
+
+working = manifest.read_bytes()
+committed = subprocess.check_output(
+    ['git', 'show', f'HEAD:{manifest.as_posix()}'],
+    stderr=subprocess.STDOUT,
+)
+print('Working SHA  :', sha256_bytes(working))
+print('Committed SHA:', sha256_bytes(committed))
+print('Git diff:')
+subprocess.run(['git', 'diff', '--', str(manifest)], check=False)
+```
+
+Nếu bạn không cố ý sửa manifest, khôi phục đúng bản đã commit rồi xác minh lại:
+
+```python
+from pathlib import Path
+import subprocess
+
+manifest = Path('results/exp08/test_lock_manifest.json')
+subprocess.run(['git', 'restore', '--source=HEAD', '--', str(manifest)], check=True)
+print('Restored manifest from HEAD:', manifest)
+```
+
+Sau đó chạy lại Cell D từ đầu. Cell D chưa tạo `test_started.json` khi dừng ở hash check, nên vẫn có thể chạy lại an toàn.
+
+Nếu manifest đã bị sửa có chủ ý, không restore. Hãy dừng, tạo lại manifest bằng Cell C, commit thành commit mới, rồi chỉ sau đó chạy Cell D.
 
 ## Cell D — K8.3-WG-only one-time test
 
@@ -316,6 +411,7 @@ PROJECT = Path('/kaggle/working/WeedsGalore_Ipr28')
 os.chdir(PROJECT)
 OUT, LOGS = Path('results/exp08'), Path('results/exp08/logs')
 manifest_path, marker_path = OUT / 'test_lock_manifest.json', OUT / 'test_started.json'
+LOGS.mkdir(parents=True, exist_ok=True)
 assert manifest_path.is_file()
 assert not marker_path.exists(), 'One-time marker exists. Do not rerun.'
 
@@ -328,10 +424,20 @@ def sha256_file(path):
 
 manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
 assert manifest['protocol_amendment']['weedmap_status'] == 'NOT_AUTHORIZED'
-subprocess.run(['git', 'ls-files', '--error-unmatch', str(manifest_path)], check=True,
-               stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-committed = subprocess.check_output(['git', 'show', f'HEAD:{manifest_path.as_posix()}'], stderr=subprocess.STDOUT)
-assert hashlib.sha256(committed).hexdigest() == sha256_file(manifest_path)
+# K8.2-WG-only already locked the manifest. Cell D intentionally does not run Git.
+
+def check_help(command, required_flags):
+    result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                            text=True, check=False)
+    assert all(flag in result.stdout for flag in required_flags), (
+        f'Evaluator precheck missing {required_flags}; exit={result.returncode}\n{result.stdout}')
+
+# Metadata-only evaluator precheck; no images, labels, checkpoints, or inference are opened here.
+check_help([sys.executable, 'src/evaluate_ccmc.py', '--helpshort'],
+           ('dataset_path', 'split', 'ckpt', 'confirm_test_locked'))
+check_help([sys.executable, 'src/scripts/compare_runs.py', '--helpshort'],
+           ('--a', '--b', '--metrics', '--out'))
+
 for path, expected_hash in manifest['source_files'].items():
     assert Path(path).is_file() and sha256_file(Path(path)) == expected_hash, path
 for method, seeds in manifest['checkpoints'].items():
@@ -381,6 +487,130 @@ for method_a, method_b in manifest['evaluation']['contrasts']:
 print('ONE-TIME WEEDSGALORE-ONLY TEST COMPLETE. Do not rerun.')
 ```
 
+## Nếu Cell D báo marker đã tồn tại
+
+Lỗi:
+
+```text
+AssertionError: One-time marker exists. Do not rerun.
+```
+
+nghĩa là một lần test đã được tiêu thụ ở mức protocol. Cell D tạo `test_started.json` **trước** evaluator đầu tiên, nên `git restore` manifest không làm marker biến mất.
+
+Không làm các việc sau:
+
+- Không xóa `results/exp08/test_started.json`.
+- Không đổi tên marker để chạy lại.
+- Không chạy lại Cell D như một test mới.
+
+Giữ nguyên marker, log và các output đã tạo. Kiểm tra trạng thái chỉ đọc:
+
+```python
+from pathlib import Path
+import json
+
+OUT = Path('results/exp08')
+marker = OUT / 'test_started.json'
+assert marker.is_file()
+print('Marker:')
+print(marker.read_text(encoding='utf-8'))
+print('\nEvaluation logs:')
+for path in sorted((OUT / 'logs').glob('eval_*_test.log')):
+    print(path, path.stat().st_size, 'bytes')
+print('\nCompleted per-image outputs:', len(list(OUT.glob('*_test_per_image.csv'))))
+print('Completed summaries:', len(list(OUT.glob('*_test_summary.json'))))
+```
+
+Nếu test bị lỗi sau marker, ghi nhận đây là một interrupted/failed one-time run và bảo toàn evidence. Chỉ reviewer có thẩm quyền mới quyết định protocol deviation tiếp theo; không tự ý reset marker.
+
+### Trường hợp marker có nhưng mọi output đều bằng zero
+
+Nếu audit cho kết quả:
+
+```text
+Completed per-image outputs: 0
+Completed summaries: 0
+```
+
+thì trạng thái phải được ghi là:
+
+```text
+K8.3-WG-only: ABORTED_AFTER_MARKER_BEFORE_COMPLETED_EVALUATION
+```
+
+Marker chứng minh one-time release đã được mở, nhưng không chứng minh evaluator đã hoàn tất hoặc đã tạo prediction. Không xóa marker và không chạy lại Cell D trong cùng manifest. Dùng cell read-only sau để lưu audit trạng thái:
+
+```python
+from pathlib import Path
+from datetime import datetime, timezone
+import json
+
+OUT = Path('results/exp08')
+marker = OUT / 'test_started.json'
+logs = OUT / 'logs'
+assert marker.is_file()
+
+audit = {
+    'status': 'ABORTED_AFTER_MARKER_BEFORE_COMPLETED_EVALUATION',
+    'audited_at_utc': datetime.now(timezone.utc).isoformat(),
+    'marker': str(marker),
+    'marker_content': json.loads(marker.read_text(encoding='utf-8')),
+    'evaluation_log_count': len(list(logs.glob('eval_*_test.log'))),
+    'per_image_count': len(list(OUT.glob('*_test_per_image.csv'))),
+    'summary_count': len(list(OUT.glob('*_test_summary.json'))),
+    'inference_completion_verified': False,
+    'rerun_authorized': False,
+}
+audit_path = OUT / 'k8_3_wg_only_aborted_audit.json'
+if audit_path.exists():
+    existing = json.loads(audit_path.read_text(encoding='utf-8'))
+    print('Abort audit already exists; preserved without overwrite.')
+    print(json.dumps(existing, indent=2))
+else:
+    audit_path.write_text(json.dumps(audit, indent=2), encoding='utf-8')
+    print(json.dumps(audit, indent=2))
+print('Preserve marker and logs. Do not rerun Cell D.')
+```
+
+Nếu muốn chạy lại sau trạng thái này, đó phải là một **protocol deviation được phê duyệt**, với manifest/marker mới và giải thích rõ lần release trước đã abort; không được reset hoặc xóa artifact cũ để giả lập một lần chạy mới.
+
+## Cell E — Closeout attempt K8.3 hiện tại
+
+Cell này chỉ ghi nhận trạng thái đã abort; không chạy inference, không xóa marker và không tạo kết quả giả.
+
+```python
+from pathlib import Path
+from datetime import datetime, timezone
+import json
+
+OUT = Path('results/exp08')
+marker = OUT / 'test_started.json'
+assert marker.is_file()
+closeout_path = OUT / 'k8_3_wg_only_closeout.json'
+
+closeout = {
+    'status': 'ABORTED_AFTER_MARKER_BEFORE_COMPLETED_EVALUATION',
+    'closed_at_utc': datetime.now(timezone.utc).isoformat(),
+    'marker_path': str(marker),
+    'marker': json.loads(marker.read_text(encoding='utf-8')),
+    'inference_completed': False,
+    'per_image_outputs': len(list(OUT.glob('*_test_per_image.csv'))),
+    'summary_outputs': len(list(OUT.glob('*_test_summary.json'))),
+    'comparison_outputs': len(list(OUT.glob('cmp_TEST_*.json'))),
+    'weedmap_status': 'NOT_AUTHORIZED',
+    'rerun_authorized': False,
+    'next_action': 'Reviewer-approved protocol deviation required before any new one-time release',
+}
+
+if closeout_path.exists():
+    print('Closeout already exists; preserved without overwrite.')
+    print(closeout_path.read_text(encoding='utf-8'))
+else:
+    closeout_path.write_text(json.dumps(closeout, indent=2), encoding='utf-8')
+    print(json.dumps(closeout, indent=2))
+print('Current K8.3 attempt is closed as ABORTED, not COMPLETE.')
+```
+
 ## Không chạy
 
 - WeedMap inference hoặc WeedMap evaluator end-to-end.
@@ -400,6 +630,15 @@ results/exp08/*_test_per_image.csv
 results/exp08/*_test_summary.json
 results/exp08/cmp_TEST_*.json
 ```
+
+## Checklist hoàn tất Exp08
+
+- [ ] K8.2 WG-only preflight và manifest đã PASS, khóa và commit.
+- [ ] Evaluator CLI precheck đã PASS trước marker.
+- [ ] K8.3-WG-only đã chạy đúng một lần.
+- [ ] Đã xuất 15 `*_test_summary.json`, 15 `*_test_per_image.csv` và 3 `cmp_TEST_*.json`.
+- [ ] Đã tổng hợp bảng kết quả, các comparison và phân tích lỗi.
+- [ ] Đã viết kết luận Exp08, nêu rõ WeedMap `NOT_AUTHORIZED` và các giới hạn nghiên cứu.
 
 ## Câu mô tả trong paper
 

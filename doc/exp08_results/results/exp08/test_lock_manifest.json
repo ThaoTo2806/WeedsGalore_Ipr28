@@ -1,0 +1,224 @@
+{
+  "protocol": "one-time WeedsGalore test; WG-only frozen external-method comparison",
+  "generated_at_utc": "2026-11-05T14:19:36.022864+00:00",
+  "repository_head": "68c549751a8055714b29725abc9c539837638fb1",
+  "dataset_root": "/kaggle/input/datasets/thothanh28/weedsgalore-dataset/weedsgalore-dataset",
+  "source_files": {
+    "src/nets/mcsd.py": "ed2626dc6c992848ae9431764f31cf78a94a56c768d7694181cec7ab56a6163e",
+    "src/nets/segformer.py": "3a4d198a35d8da76058e2dfc0545280e57b2fb44a0fa2d605f5cd8e8c43f80bb",
+    "src/ccmc_common.py": "0f71043174056665d703305e7c949bd38726bed3e601068f255f4e5d6050fdf8",
+    "src/ccmc_metrics.py": "9324fe0a58b961754c7d1907400c28ca5373d483c35a3e6eda285197e329f0dd",
+    "src/evaluate_ccmc.py": "9e47a85e65e55fb00bc48e9653a66c9eae9b3398bb47535387272b21c6eb24b4",
+    "src/scripts/compare_runs.py": "1b392036e657358cf8f9231263b70e8a27da703c6c924aaabcfbd6cfd6ea58e9",
+    "src/train.py": "ef68720c8c2b626c52c47c9e4b6de92cbeb60bf1b5f70f5f27d8bab58a8ab3ac",
+    "src/scripts/make_instance_bins.py": "015b37df72b4ec0bf1c4e9a9c80a2bbf7a90668f10231a4e35cd6e41373ecc05",
+    "src/datasets/weedsgalore/weedsgalore.py": "1fd374a968d28f5f054f4f7405801af48a93e43d85535ba81817c8602f4615ac"
+  },
+  "protocol_amendment": {
+    "path": "/kaggle/working/WeedsGalore_Ipr28/results/exp08/weedmap_scope_amendment_not_authorized.json",
+    "sha256": "8b9e5f02b8a4b0dc08f77c70ffcf8f124f0f74a6ccac7fedc7ef0ccebed3c51f",
+    "weedmap_status": "NOT_AUTHORIZED"
+  },
+  "split_hash": "675667edf3f35f16",
+  "methods": {
+    "L0": "--ccmc=True --prior_mode=none --use_low_level_refine=False",
+    "OccCondg": "--ccmc=False --head=occ_conditioned --spectral_guide=True --mcsd_tau=1.0",
+    "MCSDg": "--ccmc=False --head=mcsd --spectral_guide=True --sinkhorn_iters=5 --mcsd_tau=1.0"
+  },
+  "checkpoints": {
+    "L0": {
+      "0": {
+        "path": "runs/L0_s0/best_val.pth",
+        "sha256": "e408cc6311fc156afed559267873a110df4f91d7779a6353a5d1bed90ee353ae"
+      },
+      "1": {
+        "path": "runs/L0_s1/best_val.pth",
+        "sha256": "b86f062c302811aba0418703457d59f569d6cb44df48f01010bb39767184e598"
+      },
+      "2": {
+        "path": "runs/L0_s2/best_val.pth",
+        "sha256": "ec5521526a3da854a3f885ad1124b85c0ce8a901772502f0e96d3566b574980a"
+      },
+      "3": {
+        "path": "runs/L0_s3/best_val.pth",
+        "sha256": "b7206137afed490a11d111cb9df4084baaff71fd7858a155af35af21b126beff"
+      },
+      "4": {
+        "path": "runs/L0_s4/best_val.pth",
+        "sha256": "0f88fe5d641323acbbd802e664ece0163ae7846527a94bb41aa9be3c40362047"
+      }
+    },
+    "OccCondg": {
+      "0": {
+        "path": "runs/OccCondg_s0/best_val.pth",
+        "sha256": "2607b8cb18cc74b3d170cc1d796ecd1ba1b44744c36a23fa46429bb4b0ac8ad0"
+      },
+      "1": {
+        "path": "runs/OccCondg_s1/best_val.pth",
+        "sha256": "6dd0ead2cf69f9d9ade9291527a6b06783da926af48fa05c22f070232dce6c6a"
+      },
+      "2": {
+        "path": "runs/OccCondg_s2/best_val.pth",
+        "sha256": "fb21d1ab337a36c9a0d5f20832f7711736a93a4e10fca5518fa9dde495fb8409"
+      },
+      "3": {
+        "path": "runs/OccCondg_s3/best_val.pth",
+        "sha256": "8f9a5712cecc7b01a3a645022e5dda0b9c25e752600b59d56a0bb7ff1397baf1"
+      },
+      "4": {
+        "path": "runs/OccCondg_s4/best_val.pth",
+        "sha256": "810744f246c17a0d6dc1d7a70c6e13fca1a0f0a258644f4698dbf70a00389642"
+      }
+    },
+    "MCSDg": {
+      "0": {
+        "path": "runs/MCSDg_s0/best_val.pth",
+        "sha256": "ff2c0f7d5b3b711c761bbea62740224c2350adb422990dc393040f6515313ba1"
+      },
+      "1": {
+        "path": "runs/MCSDg_s1/best_val.pth",
+        "sha256": "8f4baf60819fec101abea8d7b9291585a34a4223f2b7edd14a1a1715e5b636d1"
+      },
+      "2": {
+        "path": "runs/MCSDg_s2/best_val.pth",
+        "sha256": "89b3ca1ae700faf337fbc913cc3b894ca22785ed8c82cfeb02e0dc4451e39daf"
+      },
+      "3": {
+        "path": "runs/MCSDg_s3/best_val.pth",
+        "sha256": "a7681dd2803cbfc042f8b227d020fb80303035a0c9cc80abf6f020cc2ec5ad3d"
+      },
+      "4": {
+        "path": "runs/MCSDg_s4/best_val.pth",
+        "sha256": "b536ff2eedc67f7c1b2539a1b40219e14e746f801df98d528e086008ebd53499"
+      }
+    }
+  },
+  "run_configs": {
+    "L0": {
+      "0": {
+        "path": "runs/L0_s0/run_config.json",
+        "sha256": "6a4bab13e7978ef65aab14f4aa16de83c7e59bb6133416f180d942572be398d0"
+      },
+      "1": {
+        "path": "runs/L0_s1/run_config.json",
+        "sha256": "b003fb2c9782357efd522d56092b0372eccbfa3cb24de49ca8c70c7fe9610505"
+      },
+      "2": {
+        "path": "runs/L0_s2/run_config.json",
+        "sha256": "e9a3bd90bd157416deee0e430c134cba3309d3a9c9866ed9fb0b90f9f977236b"
+      },
+      "3": {
+        "path": "runs/L0_s3/run_config.json",
+        "sha256": "cc96022f793d5c718ccbd3367ecb4c31c37a521ebd9aa67dfabaa4a714fd3b6f"
+      },
+      "4": {
+        "path": "runs/L0_s4/run_config.json",
+        "sha256": "9a3391dfff31937d90a0b9e61147ab3c74ec6361b2f839a71a4b84ce6422fdd4"
+      }
+    },
+    "OccCondg": {
+      "0": {
+        "path": "runs/OccCondg_s0/run_config.json",
+        "sha256": "9d318cfa10d2de1755e3e1f83b290aa5b65779243fd4398795d4441fa1b1ecba"
+      },
+      "1": {
+        "path": "runs/OccCondg_s1/run_config.json",
+        "sha256": "9f7ba78dad52b8ff4e48b56a1e3177ef3ec5f3173ac36cc0486d4ba2667e80f3"
+      },
+      "2": {
+        "path": "runs/OccCondg_s2/run_config.json",
+        "sha256": "cd0e962d8479142bfc46c6211d3beeb33010355244b1b176ed6d294fdb242f11"
+      },
+      "3": {
+        "path": "runs/OccCondg_s3/run_config.json",
+        "sha256": "d0937d205f83359945376f0b11cc3643fff209d5bfddc3690e7b025d443fcbf1"
+      },
+      "4": {
+        "path": "runs/OccCondg_s4/run_config.json",
+        "sha256": "00ad3254a264acb3f4edc29bdd31d214f57deebd2daa29ea4d158bb8d7f66239"
+      }
+    },
+    "MCSDg": {
+      "0": {
+        "path": "runs/MCSDg_s0/run_config.json",
+        "sha256": "e84887f4b088d8c910e2ba603f6bcf491cd74629f11ed638fbadd8ae832274b7"
+      },
+      "1": {
+        "path": "runs/MCSDg_s1/run_config.json",
+        "sha256": "88a7f5bb2a210d65453809ac5eee264c5fa04bbf64d76dfcf11e01fd44439d3d"
+      },
+      "2": {
+        "path": "runs/MCSDg_s2/run_config.json",
+        "sha256": "36523c22d9ac4aa5df9024c122015f158a6e6e6d4a8f989d3fe1b04b873847f0"
+      },
+      "3": {
+        "path": "runs/MCSDg_s3/run_config.json",
+        "sha256": "c40903d6fde2ca2491ce5abe7fa7389fe30cfda07446cbf1422422951627d12c"
+      },
+      "4": {
+        "path": "runs/MCSDg_s4/run_config.json",
+        "sha256": "7fc63f8d8bafac4fd908d1010bb3d74f3461a524d93dfe07ae82d155bfef79de"
+      }
+    }
+  },
+  "instance_bins": {
+    "path": "results/instance_bins.json",
+    "sha256": "5c2663d6b4d468be992aed531a42da048028c52f5b650dc8680d725965674da6",
+    "edges": [
+      45.0,
+      147.0
+    ]
+  },
+  "evaluation": {
+    "split": "test",
+    "input_channels": [
+      "R",
+      "G",
+      "B",
+      "NIR",
+      "RE"
+    ],
+    "boundary_px": 3,
+    "primary": "SmallWeedRecall",
+    "co_primary": "cov_small",
+    "metrics": [
+      "mIoU",
+      "IoU_bg",
+      "IoU_crop",
+      "IoU_weed",
+      "BIoU_crop",
+      "BIoU_weed",
+      "SmallWeedRecall",
+      "recall30_small",
+      "cov_small",
+      "PrecisionWeed",
+      "CropToWeedRate"
+    ],
+    "contrasts": [
+      [
+        "OccCondg",
+        "L0"
+      ],
+      [
+        "MCSDg",
+        "L0"
+      ],
+      [
+        "MCSDg",
+        "OccCondg"
+      ]
+    ],
+    "bootstrap": {
+      "replicates": 10000,
+      "cluster": "image",
+      "paired_seed_resampling": true,
+      "seed": 0
+    },
+    "no_test_based_selection": true
+  },
+  "weedmap_protocol": {
+    "status": "NOT_AUTHORIZED",
+    "excluded_from_current_test": true,
+    "reason": "mask validity, radiometric compatibility, and evaluator acceptance unresolved"
+  }
+}

@@ -13,17 +13,17 @@
 | G3     | H2: learned Weed prior hơn learned Veg prior?                 | L3 − L2 ≥ +3 pp Small-Weed Recall, CI > 0, Crop không giảm quá 1 pp (Exp03) | PENDING                                                                                                                                                   | —                 |
 | G4     | Lợi ích có đến từ việc nối prior vào SR?                      | L3 > K1, K2, K3, K5, K6 (Exp04–05)                                          | PENDING                                                                                                                                                   | —                 |
 
-| Exp                                               | Trạng thái                                                                   | Ghi chú                                                                                     |
-| ------------------------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| 00 Code + setup                                   | DONE                                                                         | 44/44 unit test pass trên Kaggle (`transformers 4.45.2`, torch 2.11, T4, commit `ea354cd`)  |
-| 01 Baseline + chẩn đoán                           | DONE                                                                         | L0 s0/s1, LiteSent s0, D0, D2 (2 seed), profile. Diag-D1 NOT RUN (đúng kế hoạch). Xem mục 3 |
-| 02 Oracle C2/C3                                   | DONE nhưng **vô hiệu về khoa học**                                           | λ không học được; xem mục 4                                                                 |
-| 03 Oracle với λ hoạt động, 3 seed                 | DONE                                                                         | 13/13 run; xem mục 5                                                                        |
-| 04 Định vị nút thắt (decoder 1/2, nguồn chi tiết) | DONE                                                                         | 8/8 run; nút thắt = độ phân giải dự đoán; xem mục 6                                         |
-| 05 Phương pháp mới MCSD (3 seed)                  | DONE                                                                         | 9/9 run; **MCSD-g PASS trên val**; MCSD và H-mech INCONCLUSIVE; xem mục 7                   |
-| 06 Xác nhận seed 3–4, bảng 5 seed                 | DONE — xác nhận MCSD-g PASS; xem mục 8                                       | [06_confirm_5seeds.md](06_confirm_5seeds.md)                                                |
-| 07 Kiểm toán cơ chế MCSD                          | DONE — OccCond-g 5 seed; không xác nhận lợi ích mIoU của Sinkhorn; xem mục 9 | [07_mechanism_audit.md](07_mechanism_audit.md)                                              |
-| 08 Dataset thứ hai + khóa test                    | NOT RUN — giữ test khóa; cần quyết định claim và protocol dataset 2          | [07_mechanism_audit.md](07_mechanism_audit.md)                                              |
+| Exp                                               | Trạng thái                                                                                                                | Ghi chú                                                                                     |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| 00 Code + setup                                   | DONE                                                                                                                      | 44/44 unit test pass trên Kaggle (`transformers 4.45.2`, torch 2.11, T4, commit `ea354cd`)  |
+| 01 Baseline + chẩn đoán                           | DONE                                                                                                                      | L0 s0/s1, LiteSent s0, D0, D2 (2 seed), profile. Diag-D1 NOT RUN (đúng kế hoạch). Xem mục 3 |
+| 02 Oracle C2/C3                                   | DONE nhưng **vô hiệu về khoa học**                                                                                        | λ không học được; xem mục 4                                                                 |
+| 03 Oracle với λ hoạt động, 3 seed                 | DONE                                                                                                                      | 13/13 run; xem mục 5                                                                        |
+| 04 Định vị nút thắt (decoder 1/2, nguồn chi tiết) | DONE                                                                                                                      | 8/8 run; nút thắt = độ phân giải dự đoán; xem mục 6                                         |
+| 05 Phương pháp mới MCSD (3 seed)                  | DONE                                                                                                                      | 9/9 run; **MCSD-g PASS trên val**; MCSD và H-mech INCONCLUSIVE; xem mục 7                   |
+| 06 Xác nhận seed 3–4, bảng 5 seed                 | DONE — xác nhận MCSD-g PASS; xem mục 8                                                                                    | [06_confirm_5seeds.md](06_confirm_5seeds.md)                                                |
+| 07 Kiểm toán cơ chế MCSD                          | DONE — OccCond-g 5 seed; không xác nhận lợi ích mIoU của Sinkhorn; xem mục 9                                              | [07_mechanism_audit.md](07_mechanism_audit.md)                                              |
+| 08 Dataset thứ hai + khóa test                    | **PARTIAL / ABORTED** — K8.2 WG-only đã khóa; K8.3 attempt mở marker nhưng dừng trước evaluator; WeedMap `NOT_AUTHORIZED` | [08_external_validation_WG_ONLY_RUNBOOK.md](08_external_validation_WG_ONLY_RUNBOOK.md)      |
 
 ---
 
@@ -678,3 +678,54 @@ Next steps, still without inference:
 3. Configure a test environment with `numpy` and `pytest`, run only `tests/test_weedmap_evaluation.py`, and extend synthetic coverage for mask polarity, no-Crop metric branch, invalid codes, and confusion aggregation. Then implement a separate WeedMap loader/evaluator with fixed band order and an explicitly sourced radiometric transform; unit tests must not use WeedMap test labels to tune parameters.
 4. Create `weedmap_evaluator_acceptance.json` only from real passing test logs plus SHA-256 for evaluator, test report, mask-policy evidence, radiometry evidence, and frozen statistical protocol. K8.2 remains fail-closed until these artifacts and all 15 checkpoints/configs are present.
 5. Keep K8.1 as DONE. Keep K8.2 and K8.3 unrun; WeedsGalore test remains locked.
+
+## 11. Exp08 — K8.3 WG-only attempt closeout (05/11/2026)
+
+### 11.1 Review verdict
+
+**K8.2 WG-only: PASS. K8.3 attempt: CLOSED / ABORTED. K8.3 evaluation: NOT COMPLETE.**
+
+The protocol preflight and manifest lock completed successfully. The one-time WeedsGalore release then created its marker but produced no evaluator outputs. This is recorded as an interrupted/failed one-time attempt, not as a test PASS and not as a failed model result.
+
+| Component                    | Status             | Evidence / interpretation                                                                                                     |
+| ---------------------------- | ------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| 15 checkpoint/config SHA-256 | **PASS**           | Frozen provenance and restored run paths verified; no checkpoint contents changed                                             |
+| WeedMap scope                | **NOT_AUTHORIZED** | Mask polarity, radiometric compatibility and end-to-end evaluator acceptance unresolved                                       |
+| K8.2 WG-only preflight       | **PASS**           | Manifest created at `results/exp08/test_lock_manifest.json`; split/source/config checks passed                                |
+| Evaluator precheck           | **PASS**           | CLI help checks passed before the one-time marker                                                                             |
+| One-time marker              | **CREATED**        | `results/exp08/test_started.json` records manifest SHA-256 `d4cc9c3072c72175eadf9119f7df82d2e8feca082ba10bdc6517976e198790dd` |
+| Evaluation logs              | **0**              | No completed evaluator log was available                                                                                      |
+| Per-image outputs            | **0/15**           | No held-out predictions were completed                                                                                        |
+| Summary outputs              | **0/15**           | No test metrics were produced                                                                                                 |
+| Comparison outputs           | **0/3**            | No pairwise test comparison was produced                                                                                      |
+| Inference completion         | **UNVERIFIED**     | Do not infer completion from marker creation                                                                                  |
+| Rerun authorization          | **FALSE**          | No silent reset or rerun permitted                                                                                            |
+
+### 11.2 Preserved artifacts
+
+The following artifacts must remain unchanged:
+
+```text
+results/exp08/test_started.json
+results/exp08/test_lock_manifest.json
+results/exp08/weedmap_scope_amendment_not_authorized.json
+results/exp08/k8_3_wg_only_aborted_audit.json
+results/exp08/k8_3_wg_only_closeout.json
+results/exp08/logs/
+```
+
+The WeedMap evidence remains preflight-only. It must not be presented as external-domain model validation.
+
+### 11.3 Scientific interpretation
+
+This closeout supports the following claims only:
+
+- The validation-selected protocol, frozen artifacts and WG-only manifest were prepared and audited.
+- WeedMap external validation was transparently excluded under a declared amendment.
+- No WeedsGalore held-out test result was obtained in this attempt.
+
+This closeout does **not** support claims about WeedsGalore test mIoU, Small-Weed Recall, confidence intervals, method ranking, or final held-out generalization. The Exp08 empirical test component remains incomplete.
+
+### 11.4 Final decision for this session
+
+Stop Kaggle work at this state. Do not delete the marker, do not rerun Cell D, and do not describe the attempt as a completed test. Any future run requires an explicitly approved protocol deviation, a new immutable manifest/marker, and preservation of this aborted-attempt record.
