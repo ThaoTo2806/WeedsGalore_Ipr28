@@ -1,0 +1,95 @@
+{
+  "commit": "fa64bdbe992d990a84133a487e9780c7c784ac69",
+  "found": {
+    "L0_s0": {
+      "best_val.pth": [
+        "/kaggle/input/datasets/thothanh28/ccmc-ckpts/runs/L0_s0/best_val.pth"
+      ],
+      "run_config.json": []
+    },
+    "L0_s1": {
+      "best_val.pth": [
+        "/kaggle/input/datasets/thothanh28/ccmc-ckpts/runs/L0_s1/best_val.pth"
+      ],
+      "run_config.json": []
+    },
+    "L0_s2": {
+      "best_val.pth": [
+        "/kaggle/input/datasets/thothanh28/exp03-ckpts/runs/L0_s2/best_val.pth"
+      ],
+      "run_config.json": []
+    },
+    "L0_s3": {
+      "best_val.pth": [
+        "/kaggle/input/datasets/thothanh28/exp06-ckpts/runs/L0_s3/best_val.pth"
+      ],
+      "run_config.json": []
+    },
+    "L0_s4": {
+      "best_val.pth": [
+        "/kaggle/input/datasets/thothanh28/exp06-ckpts/runs/L0_s4/best_val.pth"
+      ],
+      "run_config.json": []
+    },
+    "OccCondg_s0": {
+      "best_val.pth": [
+        "/kaggle/input/datasets/phpadmin123/exp07-occcond-ckpts/runs/OccCondg_s0/best_val.pth"
+      ],
+      "run_config.json": []
+    },
+    "OccCondg_s1": {
+      "best_val.pth": [
+        "/kaggle/input/datasets/phpadmin123/exp07-occcond-ckpts/runs/OccCondg_s1/best_val.pth"
+      ],
+      "run_config.json": []
+    },
+    "OccCondg_s2": {
+      "best_val.pth": [
+        "/kaggle/input/datasets/phpadmin123/exp07-occcond-ckpts/runs/OccCondg_s2/best_val.pth"
+      ],
+      "run_config.json": []
+    },
+    "OccCondg_s3": {
+      "best_val.pth": [
+        "/kaggle/input/datasets/phpadmin123/exp07-occcond-ckpts/runs/OccCondg_s3/best_val.pth"
+      ],
+      "run_config.json": []
+    },
+    "OccCondg_s4": {
+      "best_val.pth": [
+        "/kaggle/input/datasets/phpadmin123/exp07-occcond-ckpts/runs/OccCondg_s4/best_val.pth"
+      ],
+      "run_config.json": []
+    },
+    "MCSDg_s0": {
+      "best_val.pth": [
+        "/kaggle/input/datasets/thothanh28/exp05-ckpts/runs/MCSDg_s0/best_val.pth"
+      ],
+      "run_config.json": []
+    },
+    "MCSDg_s1": {
+      "best_val.pth": [
+        "/kaggle/input/datasets/thothanh28/exp05-ckpts/runs/MCSDg_s1/best_val.pth"
+      ],
+      "run_config.json": []
+    },
+    "MCSDg_s2": {
+      "best_val.pth": [
+        "/kaggle/input/datasets/thothanh28/exp05-ckpts/runs/MCSDg_s2/best_val.pth"
+      ],
+      "run_config.json": []
+    },
+    "MCSDg_s3": {
+      "best_val.pth": [
+        "/kaggle/input/datasets/thothanh28/exp06-ckpts/runs/MCSDg_s3/best_val.pth"
+      ],
+      "run_config.json": []
+    },
+    "MCSDg_s4": {
+      "best_val.pth": [
+        "/kaggle/input/datasets/thothanh28/exp06-ckpts/runs/MCSDg_s4/best_val.pth"
+      ],
+      "run_config.json": []
+    }
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "status": "MODEL_CONSTRUCTION_SOURCE_AUDIT",
+  "commit": "fa64bdbe992d990a84133a487e9780c7c784ac69",
+  "test_authorization": false,
+  "files": {
+    "src/evaluate_ccmc.py": [],
+    "src/train.py": [
+      {
+        "kind": "FunctionDef",
+        "name": "measure_model_stats",
+        "line": 183,
+        "source": "def measure_model_stats(model, device, in_channels, input_size=(512, 512)):\n    \"\"\"Measure model parameters, FLOPs, and inference time\"\"\"\n    # Count parameters\n    total_params, trainable_params, non_trainable_params = count_parameters(model)\n    print(f\"\\n{'='*60}\")\n    print(f\"MODEL STATISTICS\")\n    print(f\"{'='*60}\")\n    print(f\"Total Parameters: {total_params:,}\")\n    print(f\"Trainable Parameters: {trainable_params:,}\")\n    print(f\"Non-trainable Parameters: {non_trainable_params:,}\")\n   \n    # Measure FLOPs\n    if THOP_AVAILABLE:\n        try:\n            dummy_input = torch.randn(1, in_channels, input_size[0], input_size[1]).to(device)\n            flops, params = profile(model, inputs=(dummy_input,), verbose=False)\n            print(f\"FLOPs (forward pass): {flops:,.0f} (~{flops/1e9:.2f}G)\")\n            print(f\"FLOPs per pixel: {flops / (input_size[0] * input_size[1]):,.0f}\")\n        except Exception as e:"
+      },
+      {
+        "kind": "Call",
+        "name": "MCSDSegFormer",
+        "line": 265,
+        "source": "    # Network\n    if FLAGS.head != 'bilinear':\n        if FLAGS.ccmc or FLAGS.use_low_level_refine:\n            raise SystemExit('--head=mcsd/pixelshuffle needs --ccmc=False --use_low_level_refine=False')\n        net = MCSDSegFormer(num_classes=FLAGS.num_classes, in_channels=FLAGS.in_channels,\n                            use_multiscale_fusion=FLAGS.use_multiscale_fusion, head=FLAGS.head,\n                            sinkhorn_iters=FLAGS.sinkhorn_iters, tau=FLAGS.mcsd_tau,\n                            spectral_guide=FLAGS.spectral_guide)\n    elif FLAGS.ccmc:\n        net = CCMCSegFormer(num_classes=FLAGS.num_classes, in_channels=FLAGS.in_channels,\n                            use_low_level_refine=FLAGS.use_low_level_refine,\n                            use_multiscale_fusion=FLAGS.use_multiscale_fusion,"
+      },
+      {
+        "kind": "Call",
+        "name": "net.load_state_dict",
+        "line": 359,
+        "source": "    start_epoch, best_epoch = 0, -1\n    last_path = f'{FLAGS.out_dir}/last.pth'\n    if FLAGS.resume and os.path.exists(last_path):\n        state = torch.load(last_path, map_location=device, weights_only=False)\n        net.load_state_dict(state['model'])\n        optimizer.load_state_dict(state['optimizer'])\n        data_generator.set_state(state['data_generator'])\n        torch.set_rng_state(state['torch_rng'])\n        if torch.cuda.is_available() and state.get('cuda_rng') is not None:"
+      },
+      {
+        "kind": "Call",
+        "name": "optimizer.load_state_dict",
+        "line": 360,
+        "source": "    last_path = f'{FLAGS.out_dir}/last.pth'\n    if FLAGS.resume and os.path.exists(last_path):\n        state = torch.load(last_path, map_location=device, weights_only=False)\n        net.load_state_dict(state['model'])\n        optimizer.load_state_dict(state['optimizer'])\n        data_generator.set_state(state['data_generator'])\n        torch.set_rng_state(state['torch_rng'])\n        if torch.cuda.is_available() and state.get('cuda_rng') is not None:\n            torch.cuda.set_rng_state_all(state['cuda_rng'])"
+      },
+      {
+        "kind": "Call",
+        "name": "CCMCSegFormer",
+        "line": 270,
+        "source": "                            use_multiscale_fusion=FLAGS.use_multiscale_fusion, head=FLAGS.head,\n                            sinkhorn_iters=FLAGS.sinkhorn_iters, tau=FLAGS.mcsd_tau,\n                            spectral_guide=FLAGS.spectral_guide)\n    elif FLAGS.ccmc:\n        net = CCMCSegFormer(num_classes=FLAGS.num_classes, in_channels=FLAGS.in_channels,\n                            use_low_level_refine=FLAGS.use_low_level_refine,\n                            use_multiscale_fusion=FLAGS.use_multiscale_fusion,\n                            prior_mode=FLAGS.prior_mode, injection=FLAGS.injection,\n                            prior_perturb=FLAGS.prior_perturb,\n                            stages=[int(s) for s in FLAGS.ccmc_stages], eps=FLAGS.ccmc_eps,\n                            lam_init=FLAGS.lam_init, learn_lambda=FLAGS.learn_lambda)\n    elif FLAGS.unet:\n        net = UNet(in_channels=FLAGS.in_channels, num_classes=FLAGS.num_classes)\n    elif FLAGS.segformer:\n        net = SegFormer5Band(num_classes=FLAGS.num_classes,"
+      },
+      {
+        "kind": "Call",
+        "name": "SegFormer5Band",
+        "line": 280,
+        "source": "                            lam_init=FLAGS.lam_init, learn_lambda=FLAGS.learn_lambda)\n    elif FLAGS.unet:\n        net = UNet(in_channels=FLAGS.in_channels, num_classes=FLAGS.num_classes)\n    elif FLAGS.segformer:\n        net = SegFormer5Band(num_classes=FLAGS.num_classes,\n                             pretrained_backbone=FLAGS.pretrained_backbone,\n                             in_channels=FLAGS.in_channels,\n                             use_low_level_refine=FLAGS.use_low_level_refine,\n                             use_multiscale_fusion=FLAGS.use_multiscale_fusion,\n                             llr_source=FLAGS.llr_source)\n    elif FLAGS.dlv3p_do:\n        net = deeplabv3plus_resnet50_do(num_classes=FLAGS.num_classes, pretrained_backbone=FLAGS.pretrained_backbone)  # probabilistic DeepLabv3+\n    elif FLAGS.use_attention:\n        net = deeplabv3plus_resnet50_attn(num_classes=FLAGS.num_classes, pretrained_backbone=FLAGS.pretrained_backbone)  # DeepLabv3+ (CBAM currently disabled, see _deeplab.py)"
+      }
+    ],
+    "src/nets/mcsd.py": [
+      {
+        "kind": "ClassDef",
+        "name": "MCSDSegFormer",
+        "line": 63,
+        "source": "class MCSDSegFormer(SegFormer5Band):\n    \"\"\"SegFormer-B0 5-band (L0 encoder + multi-scale decoder) with a sub-cell prediction head.\n\n    forward(x)                  -> per-pixel log-probabilities (B, C, H, W) for sub-cell heads,\n                                   usable as logits by CE/Dice; logits for 'bilinear'.\n    forward(x, return_aux=True) -> (output, {'occ_logits': (B, C, h, w)})\n    \"\"\"\n\n    def __init__(self, num_classes=3, in_channels=5, use_multiscale_fusion=True,\n                 head='mcsd', sinkhorn_iters=5, tau=1.0, spectral_guide=False, decoder_dim=128):\n        super().__init__(num_classes=num_classes, decoder_dim=decoder_dim, pretrained_backbone=True,\n                         in_channels=in_channels, use_low_level_refine=False,\n                         use_multiscale_fusion=use_multiscale_fusion)\n        if head not in HEADS:\n            raise ValueError(f'head must be one of {HEADS}')\n        self.head = head\n        self.num_classes = num_classes\n        self.sinkhorn_iters = sinkhorn_iters\n        self.tau = tau"
+      }
+    ],
+    "src/nets/segformer.py": [
+      {
+        "kind": "ClassDef",
+        "name": "SegFormer5Band",
+        "line": 191,
+        "source": "class SegFormer5Band(nn.Module):\n  def __init__(self, num_classes=3, decoder_dim=128, pretrained_backbone=False,\n               low_level_channels=48, in_channels=5, use_low_level_refine=True,\n               use_multiscale_fusion=True, encoder=None, llr_source='raw'):\n    super(SegFormer5Band, self).__init__()\n    if encoder is not None:\n      self.encoder = encoder\n    else:\n      self.encoder = (PretrainedMiTEncoder(in_channels=in_channels)\n                      if pretrained_backbone else MiTEncoder(in_channels=in_channels))\n    self.linear1 = nn.Conv2d(32, decoder_dim, 1, bias=False)\n    self.use_multiscale_fusion = use_multiscale_fusion\n    if use_multiscale_fusion:\n      self.linear2 = nn.Conv2d(64, decoder_dim, 1, bias=False)\n      self.linear3 = nn.Conv2d(160, decoder_dim, 1, bias=False)\n      self.linear4 = nn.Conv2d(256, decoder_dim, 1, bias=False)\n      self.fuse = nn.Sequential(\n        nn.Conv2d(decoder_dim * 4, decoder_dim, 1, bias=False),\n        nn.BatchNorm2d(decoder_dim),"
+      },
+      {
+        "kind": "Call",
+        "name": "super(SegFormer5Band, self).__init__",
+        "line": 195,
+        "source": "class SegFormer5Band(nn.Module):\n  def __init__(self, num_classes=3, decoder_dim=128, pretrained_backbone=False,\n               low_level_channels=48, in_channels=5, use_low_level_refine=True,\n               use_multiscale_fusion=True, encoder=None, llr_source='raw'):\n    super(SegFormer5Band, self).__init__()\n    if encoder is not None:\n      self.encoder = encoder\n    else:\n      self.encoder = (PretrainedMiTEncoder(in_channels=in_channels)"
+      }
+    ]
+  }
+}

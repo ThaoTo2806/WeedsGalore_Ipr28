@@ -618,7 +618,7 @@ display(FileLink(str(backup)))
 Read-only gate: ghi nhận `HEAD` hiện tại của Kaggle clone, kiểm tra 15 source-selected checkpoint/config paths cùng SHA-256, hash metric source/test và ghi audit JSON. Cell không đọc test data hoặc execute model. Checkpoint file thiếu được báo là `MISSING`, không âm thầm thay thế; hãy restore trước final lock.
 
 ```python
-import hashlib, json, os, subprocess
+import glob, hashlib, json, os, subprocess, sys
 from pathlib import Path
 from datetime import datetime, timezone
 
@@ -939,18 +939,73 @@ print('Saved:', report_path)
 print('NO-GO: this cell never authorizes K8.2 or K8.3')
 ```
 
-### Cell K8.2 — Lock the WeedsGalore test manifest
+### Protocol amendment — WeedMap `NOT_AUTHORIZED`, WG-only test scope
+
+WeedMap is explicitly excluded from the current evaluation scope because mask validity and radiometric compatibility remain unresolved, and the WeedMap evaluator has not received end-to-end acceptance. The previous WeedMap audit artifacts are preserved and must not be overwritten. This is a declared protocol change, not an implicit gate bypass.
+
+The current one-time test therefore covers only the locked WeedsGalore test split. It keeps the validation-selected method set (L0, OccCond-g, MCSD-g), five seeds per method, the frozen checkpoint/config hashes, the predefined metrics, contrasts, and bootstrap protocol. No WeedMap image, label, or model inference is opened by the amendment or WG-only preflight.
+
+### Cell K8.1a — Freeze WeedMap `NOT_AUTHORIZED` amendment (no test data)
+
+```python
+import json
+from datetime import datetime, timezone
+from pathlib import Path
+
+PROJECT = Path('/kaggle/working/WeedsGalore_Ipr28')
+assert PROJECT.is_dir(), f'Missing project: {PROJECT}'
+import os
+os.chdir(PROJECT)
+OUT = PROJECT / 'results/exp08'
+OUT.mkdir(parents=True, exist_ok=True)
+amendment_path = OUT / 'weedmap_scope_amendment_not_authorized.json'
+assert not amendment_path.exists(), 'Do not overwrite an existing scope amendment'
+amendment = {
+    'kind': 'PROTOCOL_AMENDMENT',
+    'generated_at_utc': datetime.now(timezone.utc).isoformat(),
+    'weedmap_status': 'NOT_AUTHORIZED',
+    'scope': 'WeedsGalore-only one-time test; WeedMap excluded from current evaluation',
+    'reasons': [
+        'WeedMap mask validity/polarity is unresolved: release semantics conflict with observed mask/signal support.',
+        'WeedMap radiometric compatibility is unresolved: the fixed source-compatible PNG/reflectance transform is not documented.',
+        'WeedMap evaluator end-to-end acceptance is not approved; synthetic checks are not sufficient for external inference.',
+    ],
+    'preserved_prior_evidence': [
+        'results/exp08/weedmap_mask_signal_contingency.json',
+        'results/exp08/weedmap_radiometry_provenance_gap.json',
+        'results/exp08/checkpoint_source_presence_audit.json',
+    ],
+    'retained_weeds_galore_protocol': {
+        'methods': ['L0', 'OccCondg', 'MCSDg'],
+        'seeds': [0, 1, 2, 3, 4],
+        'selection': 'validation-selected checkpoints only',
+        'test_split': 'WeedsGalore test, opened once after manifest lock',
+        'no_test_based_selection': True,
+    },
+    'test_data_opened': False,
+    'inference_run': False,
+    'authorization': 'WEEDSGALORE_ONLY_PREflight_ALLOWED; WEEDMAP_NOT_AUTHORIZED',
+}
+amendment_path.write_text(json.dumps(amendment, indent=2), encoding='utf-8')
+print('Saved:', amendment_path)
+print('WeedMap status: NOT_AUTHORIZED')
+print('No WeedMap or WeedsGalore test images/labels were opened.')
+```
+
+### Cell K8.2-WG-only — Preflight and lock the WeedsGalore-only manifest
+
+This cell uses metadata, hashes, split files, source inspection and CLI help only. It does not open WeedsGalore test images/labels, does not run inference, and does not create `test_started.json`.
 
 Run this only after the method set, metrics, and exact checkpoint set are final. It does not read test labels or run test.
 
 ```python
 import hashlib, json, os, subprocess
+from datetime import datetime, timezone
+from pathlib import Path
 
 OUT = 'results/exp08'
 os.makedirs(OUT, exist_ok=True)
-EXPECTED_COMMIT = 'REPLACE_WITH_PUSHED_COMMIT'
-actual_commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
-assert actual_commit == EXPECTED_COMMIT, (actual_commit, EXPECTED_COMMIT)
+assert not os.path.exists(f'{OUT}/test_started.json'), 'Test marker exists; STOP before manifest lock'
 
 def sha256_file(path):
     digest = hashlib.sha256()
@@ -964,6 +1019,12 @@ specs = {
     'OccCondg': '--ccmc=False --head=occ_conditioned --spectral_guide=True --mcsd_tau=1.0',
     'MCSDg': '--ccmc=False --head=mcsd --spectral_guide=True --sinkhorn_iters=5 --mcsd_tau=1.0',
 }
+amendment_path = f'{OUT}/weedmap_scope_amendment_not_authorized.json'
+assert os.path.isfile(amendment_path), 'Run the WeedMap NOT_AUTHORIZED amendment first'
+with open(amendment_path) as f:
+    amendment = json.load(f)
+assert amendment['weedmap_status'] == 'NOT_AUTHORIZED'
+assert amendment['test_data_opened'] is False
 checkpoints = {}
 for model in specs:
     checkpoints[model] = {}
@@ -999,68 +1060,38 @@ for model in specs:
         assert bool(flags['spectral_guide']) is (model != 'L0'), f'Spectral guide mismatch: {path}'
         run_configs[model][str(seed)] = {'path': path, 'sha256': sha256_file(path)}
 
-preflight_path = f'{OUT}/weedmap_003_preflight.json'
-assert os.path.isfile(preflight_path), 'Run and review K8.0 before locking the manifest'
-with open(preflight_path) as f:
-    weedmap_preflight = json.load(f)
-assert weedmap_preflight['manual_review_decision'] == 'GO', (
-    'WeedMap is not authorized: finish archive, radiometry, labels, split, and leakage review')
-required_preflight_fields = ('dataset_identity', 'verified_input_transform', 'verified_class_map',
-                            'verified_label_semantics', 'verified_mask_validity',
-                            'verified_class_support', 'verified_grouping',
-                            'source_test_split_citation')
-missing_preflight = [key for key in required_preflight_fields
-                     if not weedmap_preflight.get(key)]
-assert not missing_preflight, f'Incomplete reviewed WeedMap preflight fields: {missing_preflight}'
-assert weedmap_preflight['verified_label_semantics'].get('verified') is True, (
-    'Official WeedMap indexed-label semantics have not been verified')
-assert weedmap_preflight['verified_mask_validity'].get('verified') is True, (
-    'WeedMap mask-validity convention is unresolved')
-assert weedmap_preflight['verified_input_transform'].get('fixed_without_target_fitting') is True, (
-    'WeedMap radiometric transform is not source-compatible and fixed')
-assert weedmap_preflight['verified_class_support'].get('status') in ('crop_present', 'crop_absent'), (
-    'Record whether valid Crop labels are present before selecting the metric branch')
-weedmap_class_support = weedmap_preflight['verified_class_support']['status']
-weedmap_metrics = ['WeedRecall', 'WeedPrecision', 'IoU_weed']
-if weedmap_class_support == 'crop_present':
-    weedmap_metrics.extend(['IoU_bg', 'IoU_crop', 'mIoU'])
+split_dir = Path('src/datasets/weedsgalore/splits')
+split_digest = hashlib.sha256()
+for split_name in ('train.txt', 'val.txt', 'test.txt'):
+    split_path = split_dir / split_name
+    assert split_path.is_file(), f'Missing split metadata: {split_path}'
+    split_digest.update(split_path.read_bytes())
+split_hash = split_digest.hexdigest()[:16]
+assert split_hash == '675667edf3f35f16', f'Unexpected WeedsGalore split hash: {split_hash}'
 
-evidence_path = f'{OUT}/weedmap_evaluator_acceptance.json'
-assert os.path.isfile(evidence_path), 'WeedMap evaluator acceptance evidence is missing'
-with open(evidence_path) as f:
-    evaluator_evidence = json.load(f)
-assert evaluator_evidence.get('status') == 'PASS', 'WeedMap evaluator is not accepted'
-evaluator_path = evaluator_evidence.get('evaluator_path')
-test_report_path = evaluator_evidence.get('test_report_path')
-assert evaluator_path and os.path.isfile(evaluator_path), 'Accepted evaluator source is missing'
-assert test_report_path and os.path.isfile(test_report_path), 'Evaluator test report is missing'
-assert sha256_file(evaluator_path) == evaluator_evidence.get('evaluator_sha256'), (
-    'Evaluator source hash does not match acceptance report')
-assert sha256_file(test_report_path) == evaluator_evidence.get('test_report_sha256'), (
-    'Evaluator test report hash does not match acceptance report')
-assert evaluator_evidence.get('tests_passed', 0) > 0 and evaluator_evidence.get('tests_failed', 1) == 0, (
-    'Evaluator acceptance requires passing synthetic tests and zero failures')
-assert evaluator_evidence.get('mask_policy_evidence'), 'Mask policy source/audit evidence is missing'
-mask_evidence_path = evaluator_evidence.get('mask_policy_evidence_path')
-radiometry_evidence_path = evaluator_evidence.get('radiometry_evidence_path')
-assert mask_evidence_path and os.path.isfile(mask_evidence_path), 'Mask-policy evidence artifact is missing'
-assert radiometry_evidence_path and os.path.isfile(radiometry_evidence_path), (
-    'Radiometry evidence artifact is missing')
-assert sha256_file(mask_evidence_path) == evaluator_evidence.get('mask_policy_evidence_sha256'), (
-    'Mask-policy evidence hash does not match acceptance report')
-assert sha256_file(radiometry_evidence_path) == evaluator_evidence.get('radiometry_evidence_sha256'), (
-    'Radiometry evidence hash does not match acceptance report')
-assert evaluator_evidence.get('synthetic_checks', {}).get('ignore_10000_excluded') is True
-assert evaluator_evidence.get('synthetic_checks', {}).get('crop_absence_branch') is True
-assert evaluator_evidence.get('synthetic_checks', {}).get('mask_validity') is True
-assert evaluator_evidence.get('synthetic_checks', {}).get('fixed_band_order') is True
-assert evaluator_evidence.get('radiometry_evidence'), 'Fixed transform provenance is missing'
-assert evaluator_evidence.get('statistical_protocol_frozen') is True, (
-    'WeedMap metric/bootstrap protocol is not frozen')
-protocol_path = evaluator_evidence.get('statistical_protocol_path')
-assert protocol_path and os.path.isfile(protocol_path), 'Frozen statistical protocol artifact is missing'
-assert sha256_file(protocol_path) == evaluator_evidence.get('statistical_protocol_sha256'), (
-    'Statistical protocol hash does not match acceptance report')
+dataset_candidates = sorted(
+    [Path(path).parent.parent for path in glob.glob(
+        '/kaggle/input/**/2023-05-25/semantics', recursive=True)]
+    + ([Path('/kaggle/working/weedsgalore-dataset')]
+       if Path('/kaggle/working/weedsgalore-dataset/2023-05-25/semantics').is_dir()
+       else [])
+)
+assert dataset_candidates, 'WeedsGalore dataset root not found'
+dataset_root = dataset_candidates[0]
+for subdirectory in ('images', 'semantics', 'instances'):
+    assert (dataset_root / '2023-05-25' / subdirectory).is_dir(), (
+        f'Missing dataset metadata directory: {dataset_root / "2023-05-25" / subdirectory}')
+
+def check_help(command, required_flags):
+    result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                            text=True, check=True)
+    assert all(flag in result.stdout for flag in required_flags), (
+        f'Missing CLI flags in {command[1]}: {required_flags}')
+
+check_help([sys.executable, 'src/evaluate_ccmc.py', '--helpshort'],
+           ('dataset_path', 'split', 'ckpt', 'confirm_test_locked'))
+check_help([sys.executable, 'src/scripts/compare_runs.py', '--helpshort'],
+           ('--a', '--b', '--metrics', '--out'))
 
 assert set(checkpoints) == {'L0', 'OccCondg', 'MCSDg'}
 assert all(set(seeds) == {str(seed) for seed in range(5)} for seeds in checkpoints.values()), (
@@ -1074,7 +1105,6 @@ source_files = (
     'src/ccmc_metrics.py', 'src/evaluate_ccmc.py', 'src/scripts/compare_runs.py',
     'src/train.py', 'src/scripts/make_instance_bins.py',
     'src/datasets/weedsgalore/weedsgalore.py',
-    evaluator_path,
 )
 source_hashes = {}
 for path in source_files:
@@ -1089,22 +1119,12 @@ assert bins_data['edges'] == [45.0, 147.0], f'Unexpected instance-bin edges: {bi
 
 manifest = {
     'protocol': 'one-time WeedsGalore test evaluation; frozen external-method comparison set',
-    'commit': actual_commit,
-    'source_commit': actual_commit,
+    'repository_head': subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip(),
+    'dataset_root': str(dataset_root),
     'source_files': source_hashes,
-    'evaluator_acceptance': {
-        'path': evidence_path,
-        'sha256': sha256_file(evidence_path),
-        'test_report_path': test_report_path,
-        'test_report_sha256': sha256_file(test_report_path),
-        'mask_evidence_path': mask_evidence_path,
-        'mask_evidence_sha256': sha256_file(mask_evidence_path),
-        'radiometry_evidence_path': radiometry_evidence_path,
-        'radiometry_evidence_sha256': sha256_file(radiometry_evidence_path),
-        'statistical_protocol_path': protocol_path,
-        'statistical_protocol_sha256': sha256_file(protocol_path),
-    },
-    'split_hash': '675667edf3f35f16',
+    'protocol_amendment': {'path': amendment_path, 'sha256': sha256_file(amendment_path),
+                           'weedmap_status': 'NOT_AUTHORIZED'},
+    'split_hash': split_hash,
     'checkpoint_selection': 'best_val only; selected on validation before test lock',
     'methods': specs,
     'checkpoints': checkpoints,
@@ -1123,33 +1143,8 @@ manifest = {
         'contrasts': [['OccCondg', 'L0'], ['MCSDg', 'L0'], ['MCSDg', 'OccCondg']],
         'no_test_based_selection': True,
     },
-    'weedmap_protocol': {
-        'role': 'zero-shot external-domain confirmation of frozen WeedsGalore checkpoints; not method development',
-        'dataset': 'WeedMap official RedEdge-M testing dataset 003',
-        'preflight_path': preflight_path,
-        'preflight_sha256': sha256_file(preflight_path),
-        'sensor_channels': ['R', 'G', 'B', 'NIR', 'RE'],
-        'label_semantics': weedmap_preflight['verified_label_semantics'],
-        'mask_validity': weedmap_preflight['verified_mask_validity'],
-        'class_support': weedmap_preflight['verified_class_support'],
-        'input_transform': weedmap_preflight['verified_input_transform'],
-        'metrics': weedmap_metrics,
-        'primary_endpoint': 'WeedRecall',
-        'primary_contrast': ['OccCondg', 'L0'],
-        'secondary_metrics_common': ['WeedPrecision', 'IoU_weed'],
-        'secondary_metrics_if_crop_present': ['mIoU', 'IoU_bg', 'IoU_crop'],
-        'secondary_metrics_if_crop_absent': ['WeedRecall', 'WeedPrecision', 'IoU_weed'],
-        'instance_metric': 'recall50_only_if_official_instance_ids_verified',
-        'ignore_code': 10000,
-        'mask_policy_status': 'PENDING; resolve documented white-valid rule against observed mask/signal relation',
-        'secondary_contrasts': [['MCSDg', 'L0'], ['MCSDg', 'OccCondg']],
-        'bootstrap': {'replicates': 10000, 'seed': 0, 'paired_seed_resampling': True,
-                  'spatial_cluster': 'orthomosaic_or_flight_then_tile'},
-        'evaluator_status': 'PASS',
-        'evaluator_acceptance_path': evidence_path,
-        'evaluator_acceptance_sha256': sha256_file(evidence_path),
-        'required_preflight': 'channel alignment, reflectance scale, labels, official split, and archive hash verified before inference',
-    },
+    'weedmap_protocol': {'status': 'NOT_AUTHORIZED', 'excluded_from_current_test': True,
+                         'reason': 'mask validity, radiometric compatibility, and evaluator acceptance are unresolved'},
 }
 lock_path = f'{OUT}/test_lock_manifest.json'
 assert not os.path.exists(lock_path), 'Manifest already exists; do not overwrite a locked manifest'
@@ -1159,11 +1154,110 @@ print('LOCKED:', lock_path, flush=True)
 print(json.dumps(manifest, indent=2), flush=True)
 ```
 
-Commit/push the finalized source first and set `EXPECTED_COMMIT` to that source commit for K8.2. K8.2 records `source_commit` and hashes of the files that affect evaluation. Then commit/push the generated manifest as a separate commit. K8.3 requires the source commit to be an ancestor of current HEAD and verifies every locked source-file hash; it does not incorrectly require HEAD to equal the earlier source commit. The start marker records both current HEAD (the manifest commit) and the immutable manifest hash.
+Commit/push the finalized source and then commit/push `results/exp08/test_lock_manifest.json` before K8.3. K8.3 verifies the committed manifest and every locked source/checkpoint/config hash. The start marker records the manifest commit and immutable manifest hash.
 
-### Cell K8.3 — One-time WeedsGalore test (only after manifest is committed)
+### Cell K8.3-WG-only — One-time WeedsGalore test (only after WG-only manifest is committed)
 
-This is the single release operation across 15 frozen checkpoints, not 15 model-selection trials. It releases the WeedsGalore test only. K8.2 additionally requires independently implemented and synthetically tested WeedMap evaluator acceptance before it can create the combined final manifest. All environment, data, checkpoint, CLI, manifest, and evaluator-acceptance checks run before the one-time marker. If any check fails, no marker is written and no test process starts. Once the marker is written, interruption/failure consumes the one-time run; preserve the evidence and do not silently rerun.
+This is the single release operation across 15 frozen WeedsGalore checkpoints. It does not evaluate WeedMap. All checks run before the one-time marker; once the marker is written, interruption/failure consumes the one-time run.
+
+```python
+import glob, hashlib, json, os, subprocess, sys
+from pathlib import Path
+
+OUT = Path('results/exp08')
+LOGS = OUT / 'logs'
+manifest_path = OUT / 'test_lock_manifest.json'
+marker_path = OUT / 'test_started.json'
+LOGS.mkdir(parents=True, exist_ok=True)
+assert manifest_path.is_file(), 'WG-only manifest is missing'
+assert not marker_path.exists(), 'One-time test marker exists; rerun is prohibited'
+
+def sha256_file(path):
+    digest = hashlib.sha256()
+    with path.open('rb') as stream:
+        for block in iter(lambda: stream.read(1024 * 1024), b''):
+            digest.update(block)
+    return digest.hexdigest()
+
+with manifest_path.open(encoding='utf-8') as stream:
+    manifest = json.load(stream)
+assert manifest['protocol_amendment']['weedmap_status'] == 'NOT_AUTHORIZED'
+assert subprocess.run(['git', 'ls-files', '--error-unmatch', str(manifest_path)],
+                      stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True).returncode == 0, (
+    'Commit the WG-only manifest before K8.3')
+committed_manifest = subprocess.check_output(
+    ['git', 'show', f'HEAD:{manifest_path.as_posix()}'], stderr=subprocess.STDOUT)
+assert hashlib.sha256(committed_manifest).hexdigest() == sha256_file(manifest_path), (
+    'Working manifest differs from the committed manifest')
+for path, expected_hash in manifest['source_files'].items():
+    assert Path(path).is_file() and sha256_file(Path(path)) == expected_hash, (
+        f'Locked source changed or missing: {path}')
+
+for model, seeds in manifest['checkpoints'].items():
+    for seed, item in seeds.items():
+        assert Path(item['path']).is_file() and sha256_file(Path(item['path'])) == item['sha256']
+        config = manifest['run_configs'][model][seed]
+        assert Path(config['path']).is_file() and sha256_file(Path(config['path'])) == config['sha256']
+
+DS_CANDIDATES = sorted(glob.glob('/kaggle/input/**/2023-05-25/semantics', recursive=True))
+if DS_CANDIDATES:
+    DS = str(Path(DS_CANDIDATES[0]).parent.parent)
+elif Path('/kaggle/working/weedsgalore-dataset/2023-05-25/semantics').is_dir():
+    DS = '/kaggle/working/weedsgalore-dataset'
+else:
+    raise FileNotFoundError('WeedsGalore dataset not found before test marker')
+
+split_dir = Path('src/datasets/weedsgalore/splits')
+split_digest = hashlib.sha256()
+for split_name in ('train.txt', 'val.txt', 'test.txt'):
+    split_digest.update((split_dir / split_name).read_bytes())
+assert split_digest.hexdigest()[:16] == manifest['split_hash']
+assert Path(manifest['instance_bins']['path']).is_file()
+assert sha256_file(Path(manifest['instance_bins']['path'])) == manifest['instance_bins']['sha256']
+assert not any(OUT.glob('*_test_per_image.csv')), 'Test outputs already exist'
+
+def run_live(args, log_path):
+    with log_path.open('w', encoding='utf-8', buffering=1) as log_file:
+        process = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                   text=True, bufsize=1)
+        for line in process.stdout:
+            print(line, end='', flush=True)
+            log_file.write(line)
+        code = process.wait()
+    if code != 0:
+        raise subprocess.CalledProcessError(code, args)
+
+with marker_path.open('x', encoding='utf-8') as stream:
+    json.dump({'started': True, 'manifest_sha256': sha256_file(manifest_path)}, stream, indent=2)
+
+for model, seeds in manifest['checkpoints'].items():
+    for seed, item in seeds.items():
+        name = f'{model}_s{seed}_test'
+        args = [sys.executable, 'src/evaluate_ccmc.py', f'--dataset_path={DS}',
+                '--split=test', '--confirm_test_locked=True', f'--ckpt={item["path"]}',
+                *manifest['methods'][model].split(), '--bins_json=results/instance_bins.json',
+                '--boundary_px=3', f'--run_name={name}', f'--out_prefix={OUT}/{name}']
+        run_live(args, LOGS / f'eval_{name}.log')
+        assert (OUT / f'{name}_per_image.csv').is_file()
+        assert (OUT / f'{name}_summary.json').is_file()
+
+for model_a, model_b in manifest['evaluation']['contrasts']:
+    files_a = ','.join(str(OUT / f'{model_a}_s{seed}_test_per_image.csv') for seed in range(5))
+    files_b = ','.join(str(OUT / f'{model_b}_s{seed}_test_per_image.csv') for seed in range(5))
+    comparison = OUT / f'cmp_TEST_{model_a}_vs_{model_b}.json'
+    args = [sys.executable, 'src/scripts/compare_runs.py', f'--a={files_a}', f'--b={files_b}',
+            f'--name_a={model_a}', f'--name_b={model_b}', '--gate=none', '--cluster=image',
+            '--seed_bootstrap=True', '--n_boot=10000',
+            '--metrics=' + ','.join(manifest['evaluation']['metrics']), f'--out={comparison}']
+    run_live(args, LOGS / f'cmp_TEST_{model_a}_vs_{model_b}.log')
+    assert comparison.is_file()
+
+print('ONE-TIME WEEDSGALORE-ONLY TEST COMPLETE. Do not rerun or select from test.')
+```
+
+### Archived Cell K8.3 — combined WeedMap/WeedsGalore test (DO NOT RUN)
+
+This legacy cell still requires the old combined WeedMap acceptance path. It is retained for audit history only. Do not execute it after the WG-only protocol amendment.
 
 ```python
 import glob, hashlib, json, os, subprocess, sys
@@ -1200,14 +1294,11 @@ for path, expected_hash in manifest['source_files'].items():
     assert os.path.isfile(path), f'Locked source file missing: {path}'
     assert sha256_file(path) == expected_hash, f'Locked source changed: {path}'
 
-DS_CANDIDATES = sorted(glob.glob('/kaggle/input/**/2023-05-25/semantics', recursive=True))
-if DS_CANDIDATES:
-    DS = str(Path(DS_CANDIDATES[0]).parent.parent)
-elif Path('/kaggle/working/weedsgalore-dataset/2023-05-25/semantics').is_dir():
-    DS = '/kaggle/working/weedsgalore-dataset'
-else:
-    raise FileNotFoundError('WeedsGalore dataset not found before test marker')
+DS = manifest['dataset_root']
 assert os.path.isdir(DS), f'Invalid WeedsGalore dataset path: {DS}'
+assert all((Path(DS) / '2023-05-25' / name).is_dir()
+           for name in ('images', 'semantics', 'instances')), (
+    f'Locked WeedsGalore dataset structure is incomplete: {DS}')
 
 split_dir = Path('src/datasets/weedsgalore/splits')
 split_digest = hashlib.sha256()

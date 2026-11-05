@@ -1,0 +1,135 @@
+{
+  "status": "CHECKPOINT_PROVENANCE_PASS",
+  "test_authorization": false,
+  "commit": "fa64bdbe992d990a84133a487e9780c7c784ac69",
+  "checkpoint_count": 15,
+  "runs": {
+    "L0_s0": {
+      "checkpoint_source": "/kaggle/input/datasets/thothanh28/ccmc-ckpts/runs/L0_s0/best_val.pth",
+      "checkpoint_sha256": "e408cc6311fc156afed559267873a110df4f91d7779a6353a5d1bed90ee353ae",
+      "config_source": "/kaggle/working/WeedsGalore_Ipr28/doc/exp01_results/results/exp01/runs_meta/L0_s0/run_config.json",
+      "config_sha256": "6a4bab13e7978ef65aab14f4aa16de83c7e59bb6133416f180d942572be398d0",
+      "legacy_L0_config": true,
+      "verified": true
+    },
+    "L0_s1": {
+      "checkpoint_source": "/kaggle/input/datasets/thothanh28/ccmc-ckpts/runs/L0_s1/best_val.pth",
+      "checkpoint_sha256": "b86f062c302811aba0418703457d59f569d6cb44df48f01010bb39767184e598",
+      "config_source": "/kaggle/working/WeedsGalore_Ipr28/doc/exp01_results/results/exp01/runs_meta/L0_s1/run_config.json",
+      "config_sha256": "b003fb2c9782357efd522d56092b0372eccbfa3cb24de49ca8c70c7fe9610505",
+      "legacy_L0_config": true,
+      "verified": true
+    },
+    "L0_s2": {
+      "checkpoint_source": "/kaggle/input/datasets/thothanh28/exp03-ckpts/runs/L0_s2/best_val.pth",
+      "checkpoint_sha256": "ec5521526a3da854a3f885ad1124b85c0ce8a901772502f0e96d3566b574980a",
+      "config_source": "/kaggle/working/WeedsGalore_Ipr28/doc/exp03_results/results/exp03/runs_meta/L0_s2/run_config.json",
+      "config_sha256": "e9a3bd90bd157416deee0e430c134cba3309d3a9c9866ed9fb0b90f9f977236b",
+      "legacy_L0_config": true,
+      "verified": true
+    },
+    "L0_s3": {
+      "checkpoint_source": "/kaggle/input/datasets/thothanh28/exp06-ckpts/runs/L0_s3/best_val.pth",
+      "checkpoint_sha256": "b7206137afed490a11d111cb9df4084baaff71fd7858a155af35af21b126beff",
+      "config_source": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/runs_meta/L0_s3/run_config.json",
+      "config_sha256": "cc96022f793d5c718ccbd3367ecb4c31c37a521ebd9aa67dfabaa4a714fd3b6f",
+      "legacy_L0_config": false,
+      "verified": true
+    },
+    "L0_s4": {
+      "checkpoint_source": "/kaggle/input/datasets/thothanh28/exp06-ckpts/runs/L0_s4/best_val.pth",
+      "checkpoint_sha256": "0f88fe5d641323acbbd802e664ece0163ae7846527a94bb41aa9be3c40362047",
+      "config_source": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/runs_meta/L0_s4/run_config.json",
+      "config_sha256": "9a3391dfff31937d90a0b9e61147ab3c74ec6361b2f839a71a4b84ce6422fdd4",
+      "legacy_L0_config": false,
+      "verified": true
+    },
+    "MCSDg_s0": {
+      "checkpoint_source": "/kaggle/input/datasets/thothanh28/exp05-ckpts/runs/MCSDg_s0/best_val.pth",
+      "checkpoint_sha256": "ff2c0f7d5b3b711c761bbea62740224c2350adb422990dc393040f6515313ba1",
+      "config_source": "/kaggle/working/WeedsGalore_Ipr28/doc/exp05_results/results/exp05/runs_meta/MCSDg_s0/run_config.json",
+      "config_sha256": "e84887f4b088d8c910e2ba603f6bcf491cd74629f11ed638fbadd8ae832274b7",
+      "legacy_L0_config": false,
+      "verified": true
+    },
+    "MCSDg_s1": {
+      "checkpoint_source": "/kaggle/input/datasets/thothanh28/exp05-ckpts/runs/MCSDg_s1/best_val.pth",
+      "checkpoint_sha256": "8f4baf60819fec101abea8d7b9291585a34a4223f2b7edd14a1a1715e5b636d1",
+      "config_source": "/kaggle/working/WeedsGalore_Ipr28/doc/exp05_results/results/exp05/runs_meta/MCSDg_s1/run_config.json",
+      "config_sha256": "88a7f5bb2a210d65453809ac5eee264c5fa04bbf64d76dfcf11e01fd44439d3d",
+      "legacy_L0_config": false,
+      "verified": true
+    },
+    "MCSDg_s2": {
+      "checkpoint_source": "/kaggle/input/datasets/thothanh28/exp05-ckpts/runs/MCSDg_s2/best_val.pth",
+      "checkpoint_sha256": "89b3ca1ae700faf337fbc913cc3b894ca22785ed8c82cfeb02e0dc4451e39daf",
+      "config_source": "/kaggle/working/WeedsGalore_Ipr28/doc/exp05_results/results/exp05/runs_meta/MCSDg_s2/run_config.json",
+      "config_sha256": "36523c22d9ac4aa5df9024c122015f158a6e6e6d4a8f989d3fe1b04b873847f0",
+      "legacy_L0_config": false,
+      "verified": true
+    },
+    "MCSDg_s3": {
+      "checkpoint_source": "/kaggle/input/datasets/thothanh28/exp06-ckpts/runs/MCSDg_s3/best_val.pth",
+      "checkpoint_sha256": "a7681dd2803cbfc042f8b227d020fb80303035a0c9cc80abf6f020cc2ec5ad3d",
+      "config_source": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/runs_meta/MCSDg_s3/run_config.json",
+      "config_sha256": "c40903d6fde2ca2491ce5abe7fa7389fe30cfda07446cbf1422422951627d12c",
+      "legacy_L0_config": false,
+      "verified": true
+    },
+    "MCSDg_s4": {
+      "checkpoint_source": "/kaggle/input/datasets/thothanh28/exp06-ckpts/runs/MCSDg_s4/best_val.pth",
+      "checkpoint_sha256": "b536ff2eedc67f7c1b2539a1b40219e14e746f801df98d528e086008ebd53499",
+      "config_source": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/runs_meta/MCSDg_s4/run_config.json",
+      "config_sha256": "7fc63f8d8bafac4fd908d1010bb3d74f3461a524d93dfe07ae82d155bfef79de",
+      "legacy_L0_config": false,
+      "verified": true
+    },
+    "OccCondg_s0": {
+      "checkpoint_source": "/kaggle/input/datasets/phpadmin123/exp07-occcond-ckpts/runs/OccCondg_s0/best_val.pth",
+      "checkpoint_sha256": "2607b8cb18cc74b3d170cc1d796ecd1ba1b44744c36a23fa46429bb4b0ac8ad0",
+      "config_source": "/kaggle/working/WeedsGalore_Ipr28/doc/exp07_results/results/exp07/runs_meta/OccCondg_s0/run_config.json",
+      "config_sha256": "9d318cfa10d2de1755e3e1f83b290aa5b65779243fd4398795d4441fa1b1ecba",
+      "legacy_L0_config": false,
+      "verified": true
+    },
+    "OccCondg_s1": {
+      "checkpoint_source": "/kaggle/input/datasets/phpadmin123/exp07-occcond-ckpts/runs/OccCondg_s1/best_val.pth",
+      "checkpoint_sha256": "6dd0ead2cf69f9d9ade9291527a6b06783da926af48fa05c22f070232dce6c6a",
+      "config_source": "/kaggle/working/WeedsGalore_Ipr28/doc/exp07_results/results/exp07/runs_meta/OccCondg_s1/run_config.json",
+      "config_sha256": "9f7ba78dad52b8ff4e48b56a1e3177ef3ec5f3173ac36cc0486d4ba2667e80f3",
+      "legacy_L0_config": false,
+      "verified": true
+    },
+    "OccCondg_s2": {
+      "checkpoint_source": "/kaggle/input/datasets/phpadmin123/exp07-occcond-ckpts/runs/OccCondg_s2/best_val.pth",
+      "checkpoint_sha256": "fb21d1ab337a36c9a0d5f20832f7711736a93a4e10fca5518fa9dde495fb8409",
+      "config_source": "/kaggle/working/WeedsGalore_Ipr28/doc/exp07_results/results/exp07/runs_meta/OccCondg_s2/run_config.json",
+      "config_sha256": "cd0e962d8479142bfc46c6211d3beeb33010355244b1b176ed6d294fdb242f11",
+      "legacy_L0_config": false,
+      "verified": true
+    },
+    "OccCondg_s3": {
+      "checkpoint_source": "/kaggle/input/datasets/phpadmin123/exp07-occcond-ckpts/runs/OccCondg_s3/best_val.pth",
+      "checkpoint_sha256": "8f9a5712cecc7b01a3a645022e5dda0b9c25e752600b59d56a0bb7ff1397baf1",
+      "config_source": "/kaggle/working/WeedsGalore_Ipr28/doc/exp07_results/results/exp07/runs_meta/OccCondg_s3/run_config.json",
+      "config_sha256": "d0937d205f83359945376f0b11cc3643fff209d5bfddc3690e7b025d443fcbf1",
+      "legacy_L0_config": false,
+      "verified": true
+    },
+    "OccCondg_s4": {
+      "checkpoint_source": "/kaggle/input/datasets/phpadmin123/exp07-occcond-ckpts/runs/OccCondg_s4/best_val.pth",
+      "checkpoint_sha256": "810744f246c17a0d6dc1d7a70c6e13fca1a0f0a258644f4698dbf70a00389642",
+      "config_source": "/kaggle/working/WeedsGalore_Ipr28/doc/exp07_results/results/exp07/runs_meta/OccCondg_s4/run_config.json",
+      "config_sha256": "00ad3254a264acb3f4edc29bdd31d214f57deebd2daa29ea4d158bb8d7f66239",
+      "legacy_L0_config": false,
+      "verified": true
+    }
+  },
+  "pending": [
+    "WeedMap mask validity",
+    "WeedMap radiometry",
+    "checkpoint synthetic forward integration",
+    "reviewed preflight and evaluator acceptance",
+    "immutable test manifest"
+  ]
+}

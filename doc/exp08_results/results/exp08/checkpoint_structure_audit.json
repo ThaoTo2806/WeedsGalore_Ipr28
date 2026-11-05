@@ -1,0 +1,1230 @@
+{
+  "status": "CHECKPOINT_STRUCTURE_PASS",
+  "commit": "fa64bdbe992d990a84133a487e9780c7c784ac69",
+  "test_authorization": false,
+  "runs": {
+    "L0_s0": {
+      "checkpoint_sha256": "e408cc6311fc156afed559267873a110df4f91d7779a6353a5d1bed90ee353ae",
+      "state_dict_key": "direct",
+      "state_tensor_count": 365,
+      "state_element_count": 3456289,
+      "first_tensor_shapes": {
+        "total_ops": [
+          1
+        ],
+        "total_params": [
+          1
+        ],
+        "encoder.total_ops": [
+          1
+        ],
+        "encoder.total_params": [
+          1
+        ],
+        "encoder.encoder.total_ops": [
+          1
+        ],
+        "encoder.encoder.total_params": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.total_ops": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.total_params": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.0.total_ops": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.0.total_params": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.0.proj.weight": [
+          32,
+          5,
+          7,
+          7
+        ],
+        "encoder.encoder.patch_embeddings.0.layer_norm.weight": [
+          32
+        ]
+      },
+      "top_level_keys": [
+        "total_ops",
+        "total_params",
+        "encoder.total_ops",
+        "encoder.total_params",
+        "encoder.encoder.total_ops",
+        "encoder.encoder.total_params",
+        "encoder.encoder.patch_embeddings.total_ops",
+        "encoder.encoder.patch_embeddings.total_params",
+        "encoder.encoder.patch_embeddings.0.total_ops",
+        "encoder.encoder.patch_embeddings.0.total_params",
+        "encoder.encoder.patch_embeddings.0.proj.weight",
+        "encoder.encoder.patch_embeddings.0.layer_norm.weight",
+        "encoder.encoder.patch_embeddings.0.layer_norm.bias",
+        "encoder.encoder.patch_embeddings.1.total_ops",
+        "encoder.encoder.patch_embeddings.1.total_params",
+        "encoder.encoder.patch_embeddings.1.proj.weight",
+        "encoder.encoder.patch_embeddings.1.proj.bias",
+        "encoder.encoder.patch_embeddings.1.layer_norm.weight",
+        "encoder.encoder.patch_embeddings.1.layer_norm.bias",
+        "encoder.encoder.patch_embeddings.2.total_ops",
+        "encoder.encoder.patch_embeddings.2.total_params",
+        "encoder.encoder.patch_embeddings.2.proj.weight",
+        "encoder.encoder.patch_embeddings.2.proj.bias",
+        "encoder.encoder.patch_embeddings.2.layer_norm.weight",
+        "encoder.encoder.patch_embeddings.2.layer_norm.bias",
+        "encoder.encoder.patch_embeddings.3.total_ops",
+        "encoder.encoder.patch_embeddings.3.total_params",
+        "encoder.encoder.patch_embeddings.3.proj.weight",
+        "encoder.encoder.patch_embeddings.3.proj.bias",
+        "encoder.encoder.patch_embeddings.3.layer_norm.weight"
+      ],
+      "nonfinite_tensor_count": 0,
+      "status": "PASS"
+    },
+    "L0_s1": {
+      "checkpoint_sha256": "b86f062c302811aba0418703457d59f569d6cb44df48f01010bb39767184e598",
+      "state_dict_key": "direct",
+      "state_tensor_count": 365,
+      "state_element_count": 3456289,
+      "first_tensor_shapes": {
+        "total_ops": [
+          1
+        ],
+        "total_params": [
+          1
+        ],
+        "encoder.total_ops": [
+          1
+        ],
+        "encoder.total_params": [
+          1
+        ],
+        "encoder.encoder.total_ops": [
+          1
+        ],
+        "encoder.encoder.total_params": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.total_ops": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.total_params": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.0.total_ops": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.0.total_params": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.0.proj.weight": [
+          32,
+          5,
+          7,
+          7
+        ],
+        "encoder.encoder.patch_embeddings.0.layer_norm.weight": [
+          32
+        ]
+      },
+      "top_level_keys": [
+        "total_ops",
+        "total_params",
+        "encoder.total_ops",
+        "encoder.total_params",
+        "encoder.encoder.total_ops",
+        "encoder.encoder.total_params",
+        "encoder.encoder.patch_embeddings.total_ops",
+        "encoder.encoder.patch_embeddings.total_params",
+        "encoder.encoder.patch_embeddings.0.total_ops",
+        "encoder.encoder.patch_embeddings.0.total_params",
+        "encoder.encoder.patch_embeddings.0.proj.weight",
+        "encoder.encoder.patch_embeddings.0.layer_norm.weight",
+        "encoder.encoder.patch_embeddings.0.layer_norm.bias",
+        "encoder.encoder.patch_embeddings.1.total_ops",
+        "encoder.encoder.patch_embeddings.1.total_params",
+        "encoder.encoder.patch_embeddings.1.proj.weight",
+        "encoder.encoder.patch_embeddings.1.proj.bias",
+        "encoder.encoder.patch_embeddings.1.layer_norm.weight",
+        "encoder.encoder.patch_embeddings.1.layer_norm.bias",
+        "encoder.encoder.patch_embeddings.2.total_ops",
+        "encoder.encoder.patch_embeddings.2.total_params",
+        "encoder.encoder.patch_embeddings.2.proj.weight",
+        "encoder.encoder.patch_embeddings.2.proj.bias",
+        "encoder.encoder.patch_embeddings.2.layer_norm.weight",
+        "encoder.encoder.patch_embeddings.2.layer_norm.bias",
+        "encoder.encoder.patch_embeddings.3.total_ops",
+        "encoder.encoder.patch_embeddings.3.total_params",
+        "encoder.encoder.patch_embeddings.3.proj.weight",
+        "encoder.encoder.patch_embeddings.3.proj.bias",
+        "encoder.encoder.patch_embeddings.3.layer_norm.weight"
+      ],
+      "nonfinite_tensor_count": 0,
+      "status": "PASS"
+    },
+    "L0_s2": {
+      "checkpoint_sha256": "ec5521526a3da854a3f885ad1124b85c0ce8a901772502f0e96d3566b574980a",
+      "state_dict_key": "direct",
+      "state_tensor_count": 365,
+      "state_element_count": 3456289,
+      "first_tensor_shapes": {
+        "total_ops": [
+          1
+        ],
+        "total_params": [
+          1
+        ],
+        "encoder.total_ops": [
+          1
+        ],
+        "encoder.total_params": [
+          1
+        ],
+        "encoder.encoder.total_ops": [
+          1
+        ],
+        "encoder.encoder.total_params": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.total_ops": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.total_params": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.0.total_ops": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.0.total_params": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.0.proj.weight": [
+          32,
+          5,
+          7,
+          7
+        ],
+        "encoder.encoder.patch_embeddings.0.layer_norm.weight": [
+          32
+        ]
+      },
+      "top_level_keys": [
+        "total_ops",
+        "total_params",
+        "encoder.total_ops",
+        "encoder.total_params",
+        "encoder.encoder.total_ops",
+        "encoder.encoder.total_params",
+        "encoder.encoder.patch_embeddings.total_ops",
+        "encoder.encoder.patch_embeddings.total_params",
+        "encoder.encoder.patch_embeddings.0.total_ops",
+        "encoder.encoder.patch_embeddings.0.total_params",
+        "encoder.encoder.patch_embeddings.0.proj.weight",
+        "encoder.encoder.patch_embeddings.0.layer_norm.weight",
+        "encoder.encoder.patch_embeddings.0.layer_norm.bias",
+        "encoder.encoder.patch_embeddings.1.total_ops",
+        "encoder.encoder.patch_embeddings.1.total_params",
+        "encoder.encoder.patch_embeddings.1.proj.weight",
+        "encoder.encoder.patch_embeddings.1.proj.bias",
+        "encoder.encoder.patch_embeddings.1.layer_norm.weight",
+        "encoder.encoder.patch_embeddings.1.layer_norm.bias",
+        "encoder.encoder.patch_embeddings.2.total_ops",
+        "encoder.encoder.patch_embeddings.2.total_params",
+        "encoder.encoder.patch_embeddings.2.proj.weight",
+        "encoder.encoder.patch_embeddings.2.proj.bias",
+        "encoder.encoder.patch_embeddings.2.layer_norm.weight",
+        "encoder.encoder.patch_embeddings.2.layer_norm.bias",
+        "encoder.encoder.patch_embeddings.3.total_ops",
+        "encoder.encoder.patch_embeddings.3.total_params",
+        "encoder.encoder.patch_embeddings.3.proj.weight",
+        "encoder.encoder.patch_embeddings.3.proj.bias",
+        "encoder.encoder.patch_embeddings.3.layer_norm.weight"
+      ],
+      "nonfinite_tensor_count": 0,
+      "status": "PASS"
+    },
+    "L0_s3": {
+      "checkpoint_sha256": "b7206137afed490a11d111cb9df4084baaff71fd7858a155af35af21b126beff",
+      "state_dict_key": "direct",
+      "state_tensor_count": 365,
+      "state_element_count": 3456289,
+      "first_tensor_shapes": {
+        "total_ops": [
+          1
+        ],
+        "total_params": [
+          1
+        ],
+        "encoder.total_ops": [
+          1
+        ],
+        "encoder.total_params": [
+          1
+        ],
+        "encoder.encoder.total_ops": [
+          1
+        ],
+        "encoder.encoder.total_params": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.total_ops": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.total_params": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.0.total_ops": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.0.total_params": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.0.proj.weight": [
+          32,
+          5,
+          7,
+          7
+        ],
+        "encoder.encoder.patch_embeddings.0.layer_norm.weight": [
+          32
+        ]
+      },
+      "top_level_keys": [
+        "total_ops",
+        "total_params",
+        "encoder.total_ops",
+        "encoder.total_params",
+        "encoder.encoder.total_ops",
+        "encoder.encoder.total_params",
+        "encoder.encoder.patch_embeddings.total_ops",
+        "encoder.encoder.patch_embeddings.total_params",
+        "encoder.encoder.patch_embeddings.0.total_ops",
+        "encoder.encoder.patch_embeddings.0.total_params",
+        "encoder.encoder.patch_embeddings.0.proj.weight",
+        "encoder.encoder.patch_embeddings.0.layer_norm.weight",
+        "encoder.encoder.patch_embeddings.0.layer_norm.bias",
+        "encoder.encoder.patch_embeddings.1.total_ops",
+        "encoder.encoder.patch_embeddings.1.total_params",
+        "encoder.encoder.patch_embeddings.1.proj.weight",
+        "encoder.encoder.patch_embeddings.1.proj.bias",
+        "encoder.encoder.patch_embeddings.1.layer_norm.weight",
+        "encoder.encoder.patch_embeddings.1.layer_norm.bias",
+        "encoder.encoder.patch_embeddings.2.total_ops",
+        "encoder.encoder.patch_embeddings.2.total_params",
+        "encoder.encoder.patch_embeddings.2.proj.weight",
+        "encoder.encoder.patch_embeddings.2.proj.bias",
+        "encoder.encoder.patch_embeddings.2.layer_norm.weight",
+        "encoder.encoder.patch_embeddings.2.layer_norm.bias",
+        "encoder.encoder.patch_embeddings.3.total_ops",
+        "encoder.encoder.patch_embeddings.3.total_params",
+        "encoder.encoder.patch_embeddings.3.proj.weight",
+        "encoder.encoder.patch_embeddings.3.proj.bias",
+        "encoder.encoder.patch_embeddings.3.layer_norm.weight"
+      ],
+      "nonfinite_tensor_count": 0,
+      "status": "PASS"
+    },
+    "L0_s4": {
+      "checkpoint_sha256": "0f88fe5d641323acbbd802e664ece0163ae7846527a94bb41aa9be3c40362047",
+      "state_dict_key": "direct",
+      "state_tensor_count": 365,
+      "state_element_count": 3456289,
+      "first_tensor_shapes": {
+        "total_ops": [
+          1
+        ],
+        "total_params": [
+          1
+        ],
+        "encoder.total_ops": [
+          1
+        ],
+        "encoder.total_params": [
+          1
+        ],
+        "encoder.encoder.total_ops": [
+          1
+        ],
+        "encoder.encoder.total_params": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.total_ops": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.total_params": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.0.total_ops": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.0.total_params": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.0.proj.weight": [
+          32,
+          5,
+          7,
+          7
+        ],
+        "encoder.encoder.patch_embeddings.0.layer_norm.weight": [
+          32
+        ]
+      },
+      "top_level_keys": [
+        "total_ops",
+        "total_params",
+        "encoder.total_ops",
+        "encoder.total_params",
+        "encoder.encoder.total_ops",
+        "encoder.encoder.total_params",
+        "encoder.encoder.patch_embeddings.total_ops",
+        "encoder.encoder.patch_embeddings.total_params",
+        "encoder.encoder.patch_embeddings.0.total_ops",
+        "encoder.encoder.patch_embeddings.0.total_params",
+        "encoder.encoder.patch_embeddings.0.proj.weight",
+        "encoder.encoder.patch_embeddings.0.layer_norm.weight",
+        "encoder.encoder.patch_embeddings.0.layer_norm.bias",
+        "encoder.encoder.patch_embeddings.1.total_ops",
+        "encoder.encoder.patch_embeddings.1.total_params",
+        "encoder.encoder.patch_embeddings.1.proj.weight",
+        "encoder.encoder.patch_embeddings.1.proj.bias",
+        "encoder.encoder.patch_embeddings.1.layer_norm.weight",
+        "encoder.encoder.patch_embeddings.1.layer_norm.bias",
+        "encoder.encoder.patch_embeddings.2.total_ops",
+        "encoder.encoder.patch_embeddings.2.total_params",
+        "encoder.encoder.patch_embeddings.2.proj.weight",
+        "encoder.encoder.patch_embeddings.2.proj.bias",
+        "encoder.encoder.patch_embeddings.2.layer_norm.weight",
+        "encoder.encoder.patch_embeddings.2.layer_norm.bias",
+        "encoder.encoder.patch_embeddings.3.total_ops",
+        "encoder.encoder.patch_embeddings.3.total_params",
+        "encoder.encoder.patch_embeddings.3.proj.weight",
+        "encoder.encoder.patch_embeddings.3.proj.bias",
+        "encoder.encoder.patch_embeddings.3.layer_norm.weight"
+      ],
+      "nonfinite_tensor_count": 0,
+      "status": "PASS"
+    },
+    "MCSDg_s0": {
+      "checkpoint_sha256": "ff2c0f7d5b3b711c761bbea62740224c2350adb422990dc393040f6515313ba1",
+      "state_dict_key": "direct",
+      "state_tensor_count": 375,
+      "state_element_count": 3463317,
+      "first_tensor_shapes": {
+        "total_ops": [
+          1
+        ],
+        "total_params": [
+          1
+        ],
+        "encoder.total_ops": [
+          1
+        ],
+        "encoder.total_params": [
+          1
+        ],
+        "encoder.encoder.total_ops": [
+          1
+        ],
+        "encoder.encoder.total_params": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.total_ops": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.total_params": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.0.total_ops": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.0.total_params": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.0.proj.weight": [
+          32,
+          5,
+          7,
+          7
+        ],
+        "encoder.encoder.patch_embeddings.0.layer_norm.weight": [
+          32
+        ]
+      },
+      "top_level_keys": [
+        "total_ops",
+        "total_params",
+        "encoder.total_ops",
+        "encoder.total_params",
+        "encoder.encoder.total_ops",
+        "encoder.encoder.total_params",
+        "encoder.encoder.patch_embeddings.total_ops",
+        "encoder.encoder.patch_embeddings.total_params",
+        "encoder.encoder.patch_embeddings.0.total_ops",
+        "encoder.encoder.patch_embeddings.0.total_params",
+        "encoder.encoder.patch_embeddings.0.proj.weight",
+        "encoder.encoder.patch_embeddings.0.layer_norm.weight",
+        "encoder.encoder.patch_embeddings.0.layer_norm.bias",
+        "encoder.encoder.patch_embeddings.1.total_ops",
+        "encoder.encoder.patch_embeddings.1.total_params",
+        "encoder.encoder.patch_embeddings.1.proj.weight",
+        "encoder.encoder.patch_embeddings.1.proj.bias",
+        "encoder.encoder.patch_embeddings.1.layer_norm.weight",
+        "encoder.encoder.patch_embeddings.1.layer_norm.bias",
+        "encoder.encoder.patch_embeddings.2.total_ops",
+        "encoder.encoder.patch_embeddings.2.total_params",
+        "encoder.encoder.patch_embeddings.2.proj.weight",
+        "encoder.encoder.patch_embeddings.2.proj.bias",
+        "encoder.encoder.patch_embeddings.2.layer_norm.weight",
+        "encoder.encoder.patch_embeddings.2.layer_norm.bias",
+        "encoder.encoder.patch_embeddings.3.total_ops",
+        "encoder.encoder.patch_embeddings.3.total_params",
+        "encoder.encoder.patch_embeddings.3.proj.weight",
+        "encoder.encoder.patch_embeddings.3.proj.bias",
+        "encoder.encoder.patch_embeddings.3.layer_norm.weight"
+      ],
+      "nonfinite_tensor_count": 0,
+      "status": "PASS"
+    },
+    "MCSDg_s1": {
+      "checkpoint_sha256": "8f4baf60819fec101abea8d7b9291585a34a4223f2b7edd14a1a1715e5b636d1",
+      "state_dict_key": "direct",
+      "state_tensor_count": 375,
+      "state_element_count": 3463317,
+      "first_tensor_shapes": {
+        "total_ops": [
+          1
+        ],
+        "total_params": [
+          1
+        ],
+        "encoder.total_ops": [
+          1
+        ],
+        "encoder.total_params": [
+          1
+        ],
+        "encoder.encoder.total_ops": [
+          1
+        ],
+        "encoder.encoder.total_params": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.total_ops": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.total_params": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.0.total_ops": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.0.total_params": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.0.proj.weight": [
+          32,
+          5,
+          7,
+          7
+        ],
+        "encoder.encoder.patch_embeddings.0.layer_norm.weight": [
+          32
+        ]
+      },
+      "top_level_keys": [
+        "total_ops",
+        "total_params",
+        "encoder.total_ops",
+        "encoder.total_params",
+        "encoder.encoder.total_ops",
+        "encoder.encoder.total_params",
+        "encoder.encoder.patch_embeddings.total_ops",
+        "encoder.encoder.patch_embeddings.total_params",
+        "encoder.encoder.patch_embeddings.0.total_ops",
+        "encoder.encoder.patch_embeddings.0.total_params",
+        "encoder.encoder.patch_embeddings.0.proj.weight",
+        "encoder.encoder.patch_embeddings.0.layer_norm.weight",
+        "encoder.encoder.patch_embeddings.0.layer_norm.bias",
+        "encoder.encoder.patch_embeddings.1.total_ops",
+        "encoder.encoder.patch_embeddings.1.total_params",
+        "encoder.encoder.patch_embeddings.1.proj.weight",
+        "encoder.encoder.patch_embeddings.1.proj.bias",
+        "encoder.encoder.patch_embeddings.1.layer_norm.weight",
+        "encoder.encoder.patch_embeddings.1.layer_norm.bias",
+        "encoder.encoder.patch_embeddings.2.total_ops",
+        "encoder.encoder.patch_embeddings.2.total_params",
+        "encoder.encoder.patch_embeddings.2.proj.weight",
+        "encoder.encoder.patch_embeddings.2.proj.bias",
+        "encoder.encoder.patch_embeddings.2.layer_norm.weight",
+        "encoder.encoder.patch_embeddings.2.layer_norm.bias",
+        "encoder.encoder.patch_embeddings.3.total_ops",
+        "encoder.encoder.patch_embeddings.3.total_params",
+        "encoder.encoder.patch_embeddings.3.proj.weight",
+        "encoder.encoder.patch_embeddings.3.proj.bias",
+        "encoder.encoder.patch_embeddings.3.layer_norm.weight"
+      ],
+      "nonfinite_tensor_count": 0,
+      "status": "PASS"
+    },
+    "MCSDg_s2": {
+      "checkpoint_sha256": "89b3ca1ae700faf337fbc913cc3b894ca22785ed8c82cfeb02e0dc4451e39daf",
+      "state_dict_key": "direct",
+      "state_tensor_count": 375,
+      "state_element_count": 3463317,
+      "first_tensor_shapes": {
+        "total_ops": [
+          1
+        ],
+        "total_params": [
+          1
+        ],
+        "encoder.total_ops": [
+          1
+        ],
+        "encoder.total_params": [
+          1
+        ],
+        "encoder.encoder.total_ops": [
+          1
+        ],
+        "encoder.encoder.total_params": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.total_ops": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.total_params": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.0.total_ops": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.0.total_params": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.0.proj.weight": [
+          32,
+          5,
+          7,
+          7
+        ],
+        "encoder.encoder.patch_embeddings.0.layer_norm.weight": [
+          32
+        ]
+      },
+      "top_level_keys": [
+        "total_ops",
+        "total_params",
+        "encoder.total_ops",
+        "encoder.total_params",
+        "encoder.encoder.total_ops",
+        "encoder.encoder.total_params",
+        "encoder.encoder.patch_embeddings.total_ops",
+        "encoder.encoder.patch_embeddings.total_params",
+        "encoder.encoder.patch_embeddings.0.total_ops",
+        "encoder.encoder.patch_embeddings.0.total_params",
+        "encoder.encoder.patch_embeddings.0.proj.weight",
+        "encoder.encoder.patch_embeddings.0.layer_norm.weight",
+        "encoder.encoder.patch_embeddings.0.layer_norm.bias",
+        "encoder.encoder.patch_embeddings.1.total_ops",
+        "encoder.encoder.patch_embeddings.1.total_params",
+        "encoder.encoder.patch_embeddings.1.proj.weight",
+        "encoder.encoder.patch_embeddings.1.proj.bias",
+        "encoder.encoder.patch_embeddings.1.layer_norm.weight",
+        "encoder.encoder.patch_embeddings.1.layer_norm.bias",
+        "encoder.encoder.patch_embeddings.2.total_ops",
+        "encoder.encoder.patch_embeddings.2.total_params",
+        "encoder.encoder.patch_embeddings.2.proj.weight",
+        "encoder.encoder.patch_embeddings.2.proj.bias",
+        "encoder.encoder.patch_embeddings.2.layer_norm.weight",
+        "encoder.encoder.patch_embeddings.2.layer_norm.bias",
+        "encoder.encoder.patch_embeddings.3.total_ops",
+        "encoder.encoder.patch_embeddings.3.total_params",
+        "encoder.encoder.patch_embeddings.3.proj.weight",
+        "encoder.encoder.patch_embeddings.3.proj.bias",
+        "encoder.encoder.patch_embeddings.3.layer_norm.weight"
+      ],
+      "nonfinite_tensor_count": 0,
+      "status": "PASS"
+    },
+    "MCSDg_s3": {
+      "checkpoint_sha256": "a7681dd2803cbfc042f8b227d020fb80303035a0c9cc80abf6f020cc2ec5ad3d",
+      "state_dict_key": "direct",
+      "state_tensor_count": 375,
+      "state_element_count": 3463317,
+      "first_tensor_shapes": {
+        "total_ops": [
+          1
+        ],
+        "total_params": [
+          1
+        ],
+        "encoder.total_ops": [
+          1
+        ],
+        "encoder.total_params": [
+          1
+        ],
+        "encoder.encoder.total_ops": [
+          1
+        ],
+        "encoder.encoder.total_params": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.total_ops": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.total_params": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.0.total_ops": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.0.total_params": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.0.proj.weight": [
+          32,
+          5,
+          7,
+          7
+        ],
+        "encoder.encoder.patch_embeddings.0.layer_norm.weight": [
+          32
+        ]
+      },
+      "top_level_keys": [
+        "total_ops",
+        "total_params",
+        "encoder.total_ops",
+        "encoder.total_params",
+        "encoder.encoder.total_ops",
+        "encoder.encoder.total_params",
+        "encoder.encoder.patch_embeddings.total_ops",
+        "encoder.encoder.patch_embeddings.total_params",
+        "encoder.encoder.patch_embeddings.0.total_ops",
+        "encoder.encoder.patch_embeddings.0.total_params",
+        "encoder.encoder.patch_embeddings.0.proj.weight",
+        "encoder.encoder.patch_embeddings.0.layer_norm.weight",
+        "encoder.encoder.patch_embeddings.0.layer_norm.bias",
+        "encoder.encoder.patch_embeddings.1.total_ops",
+        "encoder.encoder.patch_embeddings.1.total_params",
+        "encoder.encoder.patch_embeddings.1.proj.weight",
+        "encoder.encoder.patch_embeddings.1.proj.bias",
+        "encoder.encoder.patch_embeddings.1.layer_norm.weight",
+        "encoder.encoder.patch_embeddings.1.layer_norm.bias",
+        "encoder.encoder.patch_embeddings.2.total_ops",
+        "encoder.encoder.patch_embeddings.2.total_params",
+        "encoder.encoder.patch_embeddings.2.proj.weight",
+        "encoder.encoder.patch_embeddings.2.proj.bias",
+        "encoder.encoder.patch_embeddings.2.layer_norm.weight",
+        "encoder.encoder.patch_embeddings.2.layer_norm.bias",
+        "encoder.encoder.patch_embeddings.3.total_ops",
+        "encoder.encoder.patch_embeddings.3.total_params",
+        "encoder.encoder.patch_embeddings.3.proj.weight",
+        "encoder.encoder.patch_embeddings.3.proj.bias",
+        "encoder.encoder.patch_embeddings.3.layer_norm.weight"
+      ],
+      "nonfinite_tensor_count": 0,
+      "status": "PASS"
+    },
+    "MCSDg_s4": {
+      "checkpoint_sha256": "b536ff2eedc67f7c1b2539a1b40219e14e746f801df98d528e086008ebd53499",
+      "state_dict_key": "direct",
+      "state_tensor_count": 375,
+      "state_element_count": 3463317,
+      "first_tensor_shapes": {
+        "total_ops": [
+          1
+        ],
+        "total_params": [
+          1
+        ],
+        "encoder.total_ops": [
+          1
+        ],
+        "encoder.total_params": [
+          1
+        ],
+        "encoder.encoder.total_ops": [
+          1
+        ],
+        "encoder.encoder.total_params": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.total_ops": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.total_params": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.0.total_ops": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.0.total_params": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.0.proj.weight": [
+          32,
+          5,
+          7,
+          7
+        ],
+        "encoder.encoder.patch_embeddings.0.layer_norm.weight": [
+          32
+        ]
+      },
+      "top_level_keys": [
+        "total_ops",
+        "total_params",
+        "encoder.total_ops",
+        "encoder.total_params",
+        "encoder.encoder.total_ops",
+        "encoder.encoder.total_params",
+        "encoder.encoder.patch_embeddings.total_ops",
+        "encoder.encoder.patch_embeddings.total_params",
+        "encoder.encoder.patch_embeddings.0.total_ops",
+        "encoder.encoder.patch_embeddings.0.total_params",
+        "encoder.encoder.patch_embeddings.0.proj.weight",
+        "encoder.encoder.patch_embeddings.0.layer_norm.weight",
+        "encoder.encoder.patch_embeddings.0.layer_norm.bias",
+        "encoder.encoder.patch_embeddings.1.total_ops",
+        "encoder.encoder.patch_embeddings.1.total_params",
+        "encoder.encoder.patch_embeddings.1.proj.weight",
+        "encoder.encoder.patch_embeddings.1.proj.bias",
+        "encoder.encoder.patch_embeddings.1.layer_norm.weight",
+        "encoder.encoder.patch_embeddings.1.layer_norm.bias",
+        "encoder.encoder.patch_embeddings.2.total_ops",
+        "encoder.encoder.patch_embeddings.2.total_params",
+        "encoder.encoder.patch_embeddings.2.proj.weight",
+        "encoder.encoder.patch_embeddings.2.proj.bias",
+        "encoder.encoder.patch_embeddings.2.layer_norm.weight",
+        "encoder.encoder.patch_embeddings.2.layer_norm.bias",
+        "encoder.encoder.patch_embeddings.3.total_ops",
+        "encoder.encoder.patch_embeddings.3.total_params",
+        "encoder.encoder.patch_embeddings.3.proj.weight",
+        "encoder.encoder.patch_embeddings.3.proj.bias",
+        "encoder.encoder.patch_embeddings.3.layer_norm.weight"
+      ],
+      "nonfinite_tensor_count": 0,
+      "status": "PASS"
+    },
+    "OccCondg_s0": {
+      "checkpoint_sha256": "2607b8cb18cc74b3d170cc1d796ecd1ba1b44744c36a23fa46429bb4b0ac8ad0",
+      "state_dict_key": "direct",
+      "state_tensor_count": 375,
+      "state_element_count": 3463317,
+      "first_tensor_shapes": {
+        "total_ops": [
+          1
+        ],
+        "total_params": [
+          1
+        ],
+        "encoder.total_ops": [
+          1
+        ],
+        "encoder.total_params": [
+          1
+        ],
+        "encoder.encoder.total_ops": [
+          1
+        ],
+        "encoder.encoder.total_params": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.total_ops": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.total_params": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.0.total_ops": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.0.total_params": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.0.proj.weight": [
+          32,
+          5,
+          7,
+          7
+        ],
+        "encoder.encoder.patch_embeddings.0.layer_norm.weight": [
+          32
+        ]
+      },
+      "top_level_keys": [
+        "total_ops",
+        "total_params",
+        "encoder.total_ops",
+        "encoder.total_params",
+        "encoder.encoder.total_ops",
+        "encoder.encoder.total_params",
+        "encoder.encoder.patch_embeddings.total_ops",
+        "encoder.encoder.patch_embeddings.total_params",
+        "encoder.encoder.patch_embeddings.0.total_ops",
+        "encoder.encoder.patch_embeddings.0.total_params",
+        "encoder.encoder.patch_embeddings.0.proj.weight",
+        "encoder.encoder.patch_embeddings.0.layer_norm.weight",
+        "encoder.encoder.patch_embeddings.0.layer_norm.bias",
+        "encoder.encoder.patch_embeddings.1.total_ops",
+        "encoder.encoder.patch_embeddings.1.total_params",
+        "encoder.encoder.patch_embeddings.1.proj.weight",
+        "encoder.encoder.patch_embeddings.1.proj.bias",
+        "encoder.encoder.patch_embeddings.1.layer_norm.weight",
+        "encoder.encoder.patch_embeddings.1.layer_norm.bias",
+        "encoder.encoder.patch_embeddings.2.total_ops",
+        "encoder.encoder.patch_embeddings.2.total_params",
+        "encoder.encoder.patch_embeddings.2.proj.weight",
+        "encoder.encoder.patch_embeddings.2.proj.bias",
+        "encoder.encoder.patch_embeddings.2.layer_norm.weight",
+        "encoder.encoder.patch_embeddings.2.layer_norm.bias",
+        "encoder.encoder.patch_embeddings.3.total_ops",
+        "encoder.encoder.patch_embeddings.3.total_params",
+        "encoder.encoder.patch_embeddings.3.proj.weight",
+        "encoder.encoder.patch_embeddings.3.proj.bias",
+        "encoder.encoder.patch_embeddings.3.layer_norm.weight"
+      ],
+      "nonfinite_tensor_count": 0,
+      "status": "PASS"
+    },
+    "OccCondg_s1": {
+      "checkpoint_sha256": "6dd0ead2cf69f9d9ade9291527a6b06783da926af48fa05c22f070232dce6c6a",
+      "state_dict_key": "direct",
+      "state_tensor_count": 375,
+      "state_element_count": 3463317,
+      "first_tensor_shapes": {
+        "total_ops": [
+          1
+        ],
+        "total_params": [
+          1
+        ],
+        "encoder.total_ops": [
+          1
+        ],
+        "encoder.total_params": [
+          1
+        ],
+        "encoder.encoder.total_ops": [
+          1
+        ],
+        "encoder.encoder.total_params": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.total_ops": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.total_params": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.0.total_ops": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.0.total_params": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.0.proj.weight": [
+          32,
+          5,
+          7,
+          7
+        ],
+        "encoder.encoder.patch_embeddings.0.layer_norm.weight": [
+          32
+        ]
+      },
+      "top_level_keys": [
+        "total_ops",
+        "total_params",
+        "encoder.total_ops",
+        "encoder.total_params",
+        "encoder.encoder.total_ops",
+        "encoder.encoder.total_params",
+        "encoder.encoder.patch_embeddings.total_ops",
+        "encoder.encoder.patch_embeddings.total_params",
+        "encoder.encoder.patch_embeddings.0.total_ops",
+        "encoder.encoder.patch_embeddings.0.total_params",
+        "encoder.encoder.patch_embeddings.0.proj.weight",
+        "encoder.encoder.patch_embeddings.0.layer_norm.weight",
+        "encoder.encoder.patch_embeddings.0.layer_norm.bias",
+        "encoder.encoder.patch_embeddings.1.total_ops",
+        "encoder.encoder.patch_embeddings.1.total_params",
+        "encoder.encoder.patch_embeddings.1.proj.weight",
+        "encoder.encoder.patch_embeddings.1.proj.bias",
+        "encoder.encoder.patch_embeddings.1.layer_norm.weight",
+        "encoder.encoder.patch_embeddings.1.layer_norm.bias",
+        "encoder.encoder.patch_embeddings.2.total_ops",
+        "encoder.encoder.patch_embeddings.2.total_params",
+        "encoder.encoder.patch_embeddings.2.proj.weight",
+        "encoder.encoder.patch_embeddings.2.proj.bias",
+        "encoder.encoder.patch_embeddings.2.layer_norm.weight",
+        "encoder.encoder.patch_embeddings.2.layer_norm.bias",
+        "encoder.encoder.patch_embeddings.3.total_ops",
+        "encoder.encoder.patch_embeddings.3.total_params",
+        "encoder.encoder.patch_embeddings.3.proj.weight",
+        "encoder.encoder.patch_embeddings.3.proj.bias",
+        "encoder.encoder.patch_embeddings.3.layer_norm.weight"
+      ],
+      "nonfinite_tensor_count": 0,
+      "status": "PASS"
+    },
+    "OccCondg_s2": {
+      "checkpoint_sha256": "fb21d1ab337a36c9a0d5f20832f7711736a93a4e10fca5518fa9dde495fb8409",
+      "state_dict_key": "direct",
+      "state_tensor_count": 375,
+      "state_element_count": 3463317,
+      "first_tensor_shapes": {
+        "total_ops": [
+          1
+        ],
+        "total_params": [
+          1
+        ],
+        "encoder.total_ops": [
+          1
+        ],
+        "encoder.total_params": [
+          1
+        ],
+        "encoder.encoder.total_ops": [
+          1
+        ],
+        "encoder.encoder.total_params": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.total_ops": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.total_params": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.0.total_ops": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.0.total_params": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.0.proj.weight": [
+          32,
+          5,
+          7,
+          7
+        ],
+        "encoder.encoder.patch_embeddings.0.layer_norm.weight": [
+          32
+        ]
+      },
+      "top_level_keys": [
+        "total_ops",
+        "total_params",
+        "encoder.total_ops",
+        "encoder.total_params",
+        "encoder.encoder.total_ops",
+        "encoder.encoder.total_params",
+        "encoder.encoder.patch_embeddings.total_ops",
+        "encoder.encoder.patch_embeddings.total_params",
+        "encoder.encoder.patch_embeddings.0.total_ops",
+        "encoder.encoder.patch_embeddings.0.total_params",
+        "encoder.encoder.patch_embeddings.0.proj.weight",
+        "encoder.encoder.patch_embeddings.0.layer_norm.weight",
+        "encoder.encoder.patch_embeddings.0.layer_norm.bias",
+        "encoder.encoder.patch_embeddings.1.total_ops",
+        "encoder.encoder.patch_embeddings.1.total_params",
+        "encoder.encoder.patch_embeddings.1.proj.weight",
+        "encoder.encoder.patch_embeddings.1.proj.bias",
+        "encoder.encoder.patch_embeddings.1.layer_norm.weight",
+        "encoder.encoder.patch_embeddings.1.layer_norm.bias",
+        "encoder.encoder.patch_embeddings.2.total_ops",
+        "encoder.encoder.patch_embeddings.2.total_params",
+        "encoder.encoder.patch_embeddings.2.proj.weight",
+        "encoder.encoder.patch_embeddings.2.proj.bias",
+        "encoder.encoder.patch_embeddings.2.layer_norm.weight",
+        "encoder.encoder.patch_embeddings.2.layer_norm.bias",
+        "encoder.encoder.patch_embeddings.3.total_ops",
+        "encoder.encoder.patch_embeddings.3.total_params",
+        "encoder.encoder.patch_embeddings.3.proj.weight",
+        "encoder.encoder.patch_embeddings.3.proj.bias",
+        "encoder.encoder.patch_embeddings.3.layer_norm.weight"
+      ],
+      "nonfinite_tensor_count": 0,
+      "status": "PASS"
+    },
+    "OccCondg_s3": {
+      "checkpoint_sha256": "8f9a5712cecc7b01a3a645022e5dda0b9c25e752600b59d56a0bb7ff1397baf1",
+      "state_dict_key": "direct",
+      "state_tensor_count": 375,
+      "state_element_count": 3463317,
+      "first_tensor_shapes": {
+        "total_ops": [
+          1
+        ],
+        "total_params": [
+          1
+        ],
+        "encoder.total_ops": [
+          1
+        ],
+        "encoder.total_params": [
+          1
+        ],
+        "encoder.encoder.total_ops": [
+          1
+        ],
+        "encoder.encoder.total_params": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.total_ops": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.total_params": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.0.total_ops": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.0.total_params": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.0.proj.weight": [
+          32,
+          5,
+          7,
+          7
+        ],
+        "encoder.encoder.patch_embeddings.0.layer_norm.weight": [
+          32
+        ]
+      },
+      "top_level_keys": [
+        "total_ops",
+        "total_params",
+        "encoder.total_ops",
+        "encoder.total_params",
+        "encoder.encoder.total_ops",
+        "encoder.encoder.total_params",
+        "encoder.encoder.patch_embeddings.total_ops",
+        "encoder.encoder.patch_embeddings.total_params",
+        "encoder.encoder.patch_embeddings.0.total_ops",
+        "encoder.encoder.patch_embeddings.0.total_params",
+        "encoder.encoder.patch_embeddings.0.proj.weight",
+        "encoder.encoder.patch_embeddings.0.layer_norm.weight",
+        "encoder.encoder.patch_embeddings.0.layer_norm.bias",
+        "encoder.encoder.patch_embeddings.1.total_ops",
+        "encoder.encoder.patch_embeddings.1.total_params",
+        "encoder.encoder.patch_embeddings.1.proj.weight",
+        "encoder.encoder.patch_embeddings.1.proj.bias",
+        "encoder.encoder.patch_embeddings.1.layer_norm.weight",
+        "encoder.encoder.patch_embeddings.1.layer_norm.bias",
+        "encoder.encoder.patch_embeddings.2.total_ops",
+        "encoder.encoder.patch_embeddings.2.total_params",
+        "encoder.encoder.patch_embeddings.2.proj.weight",
+        "encoder.encoder.patch_embeddings.2.proj.bias",
+        "encoder.encoder.patch_embeddings.2.layer_norm.weight",
+        "encoder.encoder.patch_embeddings.2.layer_norm.bias",
+        "encoder.encoder.patch_embeddings.3.total_ops",
+        "encoder.encoder.patch_embeddings.3.total_params",
+        "encoder.encoder.patch_embeddings.3.proj.weight",
+        "encoder.encoder.patch_embeddings.3.proj.bias",
+        "encoder.encoder.patch_embeddings.3.layer_norm.weight"
+      ],
+      "nonfinite_tensor_count": 0,
+      "status": "PASS"
+    },
+    "OccCondg_s4": {
+      "checkpoint_sha256": "810744f246c17a0d6dc1d7a70c6e13fca1a0f0a258644f4698dbf70a00389642",
+      "state_dict_key": "direct",
+      "state_tensor_count": 375,
+      "state_element_count": 3463317,
+      "first_tensor_shapes": {
+        "total_ops": [
+          1
+        ],
+        "total_params": [
+          1
+        ],
+        "encoder.total_ops": [
+          1
+        ],
+        "encoder.total_params": [
+          1
+        ],
+        "encoder.encoder.total_ops": [
+          1
+        ],
+        "encoder.encoder.total_params": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.total_ops": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.total_params": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.0.total_ops": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.0.total_params": [
+          1
+        ],
+        "encoder.encoder.patch_embeddings.0.proj.weight": [
+          32,
+          5,
+          7,
+          7
+        ],
+        "encoder.encoder.patch_embeddings.0.layer_norm.weight": [
+          32
+        ]
+      },
+      "top_level_keys": [
+        "total_ops",
+        "total_params",
+        "encoder.total_ops",
+        "encoder.total_params",
+        "encoder.encoder.total_ops",
+        "encoder.encoder.total_params",
+        "encoder.encoder.patch_embeddings.total_ops",
+        "encoder.encoder.patch_embeddings.total_params",
+        "encoder.encoder.patch_embeddings.0.total_ops",
+        "encoder.encoder.patch_embeddings.0.total_params",
+        "encoder.encoder.patch_embeddings.0.proj.weight",
+        "encoder.encoder.patch_embeddings.0.layer_norm.weight",
+        "encoder.encoder.patch_embeddings.0.layer_norm.bias",
+        "encoder.encoder.patch_embeddings.1.total_ops",
+        "encoder.encoder.patch_embeddings.1.total_params",
+        "encoder.encoder.patch_embeddings.1.proj.weight",
+        "encoder.encoder.patch_embeddings.1.proj.bias",
+        "encoder.encoder.patch_embeddings.1.layer_norm.weight",
+        "encoder.encoder.patch_embeddings.1.layer_norm.bias",
+        "encoder.encoder.patch_embeddings.2.total_ops",
+        "encoder.encoder.patch_embeddings.2.total_params",
+        "encoder.encoder.patch_embeddings.2.proj.weight",
+        "encoder.encoder.patch_embeddings.2.proj.bias",
+        "encoder.encoder.patch_embeddings.2.layer_norm.weight",
+        "encoder.encoder.patch_embeddings.2.layer_norm.bias",
+        "encoder.encoder.patch_embeddings.3.total_ops",
+        "encoder.encoder.patch_embeddings.3.total_params",
+        "encoder.encoder.patch_embeddings.3.proj.weight",
+        "encoder.encoder.patch_embeddings.3.proj.bias",
+        "encoder.encoder.patch_embeddings.3.layer_norm.weight"
+      ],
+      "nonfinite_tensor_count": 0,
+      "status": "PASS"
+    }
+  },
+  "passed": 15,
+  "pending": [
+    "strict state_dict loading into matching model architecture",
+    "synthetic forward/output-size integration",
+    "WeedMap mask provenance",
+    "WeedMap radiometric compatibility",
+    "reviewed preflight and final protocol freeze"
+  ]
+}
