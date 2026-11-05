@@ -605,6 +605,177 @@ from IPython.display import FileLink, display
 display(FileLink(str(backup)))
 ```
 
+## Next Kaggle session after commit `fe3daf1` — evidence-only audit (2026-11-05)
+
+**Gate: NO-GO for K8.2/K8.3.** Previous session completed K8.0, K8.0d, K8.0e (`14 passed`) and K8.0f. There is no need to rerun profiles, synthetic tests or inference. If the new Kaggle session has no saved `results/exp08`, restore the archive first; do not overwrite reviewed preflight artifacts.
+
+**New literature evidence:** Sa et al. (2018), Table 1 explicitly calls RedEdge-M **003 = test**, 94 *effective tiles* of size 480×360 and GSD 0.99 cm/pixel. Table 2 associates the RedEdge-M acquisition with the Rheinbach, Germany campaign. Source: https://www.mdpi.com/2072-4292/10/9/1423 (Table 1/Table 2). The installed 003 archive has 204 padded tile slots, while an earlier nonzero-signal audit found 102 nonempty slots; **94 vs 102 remains a discrepancy to reconcile** using the paper's effective-tile definition. Test-partition citation is sourced; physical tile provenance and spatial resampling remain limited to one orthomosaic/flight.
+
+**Important:** PNG `uint8 / 255` and `uint16 / 65535` both generate `float32` on load but do NOT prove reflectance calibration or a fixed cross-dataset transform. The published calibration describes orthomosaics, not the exact 8-bit tile PNG export formula. The released white-valid mask description also conflicts with observed zero-mask signal support. Neither question is settled by these cells. **Never set `manual_review_decision=GO` from a passed command alone.**
+
+### Cell K8.0g — Verify pushed commit and checkpoint artifact presence (no test data access)
+
+Read-only gate: verifies the Kaggle clone is the intended pushed commit, checks 15 source-selected checkpoint/config paths and their SHA-256, hashes the metric source/test, and writes an audit JSON. It does not read test data or execute a model. Missing checkpoint files are reported as `MISSING`, not silently replaced; restore them before final lock.
+
+```python
+import hashlib, json, os, subprocess
+from pathlib import Path
+from datetime import datetime, timezone
+
+PROJECT = Path('/kaggle/working/WeedsGalore_Ipr28')
+EXPECTED_COMMIT = 'fe3daf1a91203b20d73aac960d08f2dbf96be872'
+assert PROJECT.is_dir(), f'Project not found: {PROJECT}'
+os.chdir(PROJECT)
+OUT = Path('results/exp08')
+OUT.mkdir(parents=True, exist_ok=True)
+
+def sha256(path):
+    digest = hashlib.sha256()
+    with Path(path).open('rb') as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b''):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+actual = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
+print('Kaggle HEAD:', actual)
+print('Expected   :', EXPECTED_COMMIT)
+assert actual == EXPECTED_COMMIT, 'Kaggle has the wrong commit; pull/clone the pushed source before continuing'
+assert not (OUT / 'test_started.json').exists(), 'A test marker exists: STOP and review previous run'
+
+paths = [Path(f'runs/{method}_s{seed}/{name}')
+         for method in ('L0', 'OccCondg', 'MCSDg')
+         for seed in range(5)
+         for name in ('best_val.pth', 'run_config.json')]
+paths += [Path('src/weedmap_evaluation.py'), Path('tests/test_weedmap_evaluation.py')]
+records = {str(p): {'exists': p.is_file(), 'size_bytes': p.stat().st_size if p.is_file() else None,
+                    'sha256': sha256(p) if p.is_file() else None} for p in paths}
+missing = [p for p, data in records.items() if not data['exists']]
+report = {'status': 'AUDIT_ONLY_NOT_TEST_AUTHORIZATION', 'utc': datetime.now(timezone.utc).isoformat(),
+          'git_commit': actual, 'expected_commit': EXPECTED_COMMIT, 'artifacts': records,
+          'missing': missing, 'checkpoint_pairs_expected': 15, 'test_data_opened': False}
+dest = OUT / 'checkpoint_source_presence_audit.json'
+dest.write_text(json.dumps(report, indent=2), encoding='utf-8')
+print('Expected checkpoint/config pairs: 15')
+print('Missing paths:', len(missing), missing[:20])
+print('Saved:', dest)
+print('No test data or checkpoint inference was opened.')
+```
+
+### Cell K8.0h — Mask vs spectral-signal contingency for every frame (no labels or inference)
+
+This checks the **observed** association between mask code and all-five-bands-zero. It does **not** decide which mask value is officially valid and does not use `GroundTruth_iMap`. Save both hypotheses for evidence; do not use the result to tune a model or choose a mask convention opportunistically.
+
+```python
+import json, os
+from collections import Counter
+from pathlib import Path
+import numpy as np
+from PIL import Image
+
+PROJECT = Path('/kaggle/working/WeedsGalore_Ipr28')
+os.chdir(PROJECT)
+ROOT = Path('/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003')
+assert ROOT.is_dir(), 'WeedMap 003 extracted directory missing'
+BANDS = ('R', 'G', 'B', 'NIR', 'RE')
+frames = sorted(p.stem for p in (ROOT / 'tile' / 'R').glob('frame*.png'))
+assert len(frames) == 204, f'Expected 204 frame slots, got {len(frames)}'
+counts = Counter()
+nonempty_frames = []
+for stem in frames:
+    signal = None
+    for band in BANDS:
+        with Image.open(ROOT / 'tile' / band / f'{stem}.png') as im:
+            band_array = np.asarray(im)
+        assert band_array.shape == (360, 480), (stem, band, band_array.shape)
+        current = band_array != 0
+        signal = current if signal is None else (signal | current)
+    with Image.open(ROOT / 'mask' / f'{stem}.png') as im:
+        mask = np.asarray(im)
+    assert mask.shape == signal.shape and np.isin(mask, (0, 255)).all()
+    if signal.any():
+        nonempty_frames.append(stem)
+    for m in (0, 255):
+        for s in (False, True):
+            counts[f'mask_{m}_signal_{int(s)}'] += int(((mask == m) & (signal == s)).sum())
+
+report = {'status': 'OBSERVATIONAL_ONLY_MASK_POLARITY_UNRESOLVED',
+          'frames_total': len(frames), 'frames_with_any_band_nonzero': len(nonempty_frames),
+          'contingency_counts': dict(counts), 'release_claim': 'white mask is valid (verify semantics and version)',
+          'mask_validity_decision': 'PENDING', 'label_pixels_opened': False,
+          'model_inference_run': False,
+          'paper_effective_tiles': 94,
+          'effective_tile_definition_reconciled': False}
+out = Path('results/exp08/weedmap_mask_signal_contingency.json')
+out.parent.mkdir(parents=True, exist_ok=True)
+out.write_text(json.dumps(report, indent=2), encoding='utf-8')
+print('Frame slots:', len(frames), 'nonzero-signal frames:', len(nonempty_frames))
+print('Mask/signal contingency:', dict(counts))
+print('Published 94 effective tiles vs observed nonzero count still requires reconciliation.')
+print('Mask polarity remains PENDING. Saved:', out)
+```
+
+### Cell K8.0i — PNG metadata / radiometry source gap report (no fit, no inference)
+
+Prints fixed samples' PNG bit depths, ancillary metadata keys and the availability of orthomosaic TIFF files. It does not derive a transform from test pixels; missing metadata is documented as a **blocker** rather than guessed.
+
+```python
+import json, os
+from pathlib import Path
+from PIL import Image
+
+PROJECT = Path('/kaggle/working/WeedsGalore_Ipr28')
+os.chdir(PROJECT)
+WM = Path('/kaggle/working/weedmap-2018')
+ROOT = WM / 'Tiles/RedEdge/003/003/tile'
+assert ROOT.is_dir()
+records = []
+for stem in ('frame0000', 'frame0020', 'frame0033'):
+    for band in ('R', 'G', 'B', 'NIR', 'RE'):
+        file = ROOT / band / f'{stem}.png'
+        assert file.is_file(), file
+        with Image.open(file) as image:
+            records.append({'sample': stem, 'band': band, 'png_mode': image.mode,
+                            'size_wh': list(image.size), 'info_keys': sorted(image.info),
+                            'file': str(file)})
+tiffs = sorted(str(p) for p in (WM / 'Orthomosaic').rglob('*')
+               if p.is_file() and p.suffix.lower() in ('.tif', '.tiff')) if (WM / 'Orthomosaic').is_dir() else []
+report = {
+  'status': 'RADIOMETRY_PENDING', 'samples': records,
+  'orthomosaic_tiff_count_found': len(tiffs), 'orthomosaic_tiff_examples': tiffs[:15],
+  'png_export_formula_verified': False, 'source_compatible_fixed_transform_verified': False,
+  'no_target_fitted_transform': True, 'model_inference_run': False,
+  'next_required_evidence': 'Publisher/author code or release documentation for 8-bit tile PNG encoding and fixed reflectance mapping'
+}
+out = Path('results/exp08/weedmap_radiometry_provenance_gap.json')
+out.parent.mkdir(parents=True, exist_ok=True)
+out.write_text(json.dumps(report, indent=2), encoding='utf-8')
+for row in records:
+    print(row['sample'], row['band'], row['png_mode'], row['size_wh'], row['info_keys'])
+print('Orthomosaic TIFF files found:', len(tiffs))
+print('Radiometry PENDING; saved:', out)
+```
+
+### Cell K8.0j — Back up the additional evidence bundle (no inference)
+
+```python
+from pathlib import Path
+from zipfile import ZIP_DEFLATED, ZipFile
+from IPython.display import FileLink, display
+
+PROJECT = Path('/kaggle/working/WeedsGalore_Ipr28')
+exp08 = PROJECT / 'results/exp08'
+assert exp08.is_dir()
+output = Path('/kaggle/working/exp08_evidence_after_fe3daf1.zip')
+with ZipFile(output, 'w', compression=ZIP_DEFLATED) as z:
+    for file in sorted(exp08.rglob('*')):
+        if file.is_file():
+            z.write(file, arcname=str(file.relative_to(PROJECT)))
+print('Backup:', output, '| MB:', round(output.stat().st_size / 1024**2, 2))
+display(FileLink(str(output)))
+```
+
+**STOP after K8.0j.** Deliver `checkpoint_source_presence_audit.json`, `weedmap_mask_signal_contingency.json`, `weedmap_radiometry_provenance_gap.json` and the ZIP. K8.2 expects a truly accepted evaluator, resolved mask/radiometry, spatial grouping, 15 frozen checkpoint/config pairs and an immutable preflight; the 14 synthetic unit tests are **not** an end-to-end model inference acceptance. K8.3 releases the untouched WeedsGalore test once; do not run it until all gates pass. If radiometric provenance cannot be resolved before deadline, write the honest limitation and report zero-shot WeedMap as NOT RUN rather than manufacturing validation evidence.
+
 ### Cell K8.1 — Profile L0, OccCond-g, MCSD-g, PS (600×600)
 
 ```python

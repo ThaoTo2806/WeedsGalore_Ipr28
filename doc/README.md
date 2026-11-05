@@ -31,7 +31,7 @@ flowchart LR
 | 05  | [05_mcsd.md](05_mcsd.md)                                       | Phương pháp mới             | MCSD, PS (đối chứng), MCSD-g × 3 seed                                                               | H-MCSD, H-mech, H-eff                          | DONE — MCSD-g PASS (val, 3 seed)                                                                                   |
 | 06  | [06_confirm_5seeds.md](06_confirm_5seeds.md)                   | Xác nhận                    | Seed 3–4, bảng 5 seed, ablation inference Sinkhorn                                                  | MCSD-g confirmation                            | DONE — PASS seed 3–4; 5-seed Small-Weed Recall +7,84 pp [4,46; 11,66]                                              |
 | 07  | [07_mechanism_audit.md](07_mechanism_audit.md)                 | Kiểm toán cơ chế            | OccCond-g 5 seed; marginal theo GT/predicted occupancy; precision, Crop→Weed, paired instance audit | Validation-only; không chọn cấu hình bằng test | DONE — OccCond-g recall/coverage cao hơn; MCSD-g marginal/precision/BIoU tốt hơn, không có mIoU gain rõ; xem mục 9 |
-| 08  | [07_mechanism_audit.md](07_mechanism_audit.md)                 | Dataset thứ hai + khóa test | WeedMap hoặc dataset đa phổ phù hợp; rà soát novelty; khóa protocol rồi test một lần                | Giao thức đăng ký trước                        | Chưa chạy; test vẫn khóa cho tới khi quyết định phương pháp và protocol                                            |
+| 08  | [08_external_validation.md](08_external_validation.md) | WeedMap 003 + test lock | Inventory, class audit, 14 synthetic tests; audit commit fe3daf1 trên Kaggle | K8.2/K8.3: NO-GO cho tới khi mask/radiometry/evaluator được chấp thuận | IN PROGRESS — kiểm toán đã chạy; chưa mở test |
 
 ## Ánh xạ cấu hình → cờ dòng lệnh (`src/train.py --ccmc=True`)
 
@@ -73,3 +73,15 @@ Siêu tham số chung (giữ nguyên cho mọi mô hình): Adam lr 3e-4, batch 8
 - C2/C3 dùng GT của chính ảnh đánh giá, nên **không** phải bằng chứng H2 hay upper bound. Mọi output của chúng có cờ `GT_LEAKAGE: true`.
 - Ghi trạng thái `DONE / PARTIAL / NOT RUN` cho từng mục; không chạy lại test để chọn mô hình.
 - Mỗi lần chạy cần push đúng commit lên GitHub trước; `run_config.json` ghi lại `git_commit`, `split_hash` và phiên bản thư viện.
+
+
+## Exp08 — Chạy tiếp trên Kaggle sau commit fe3daf1 (2026-11-05)
+
+Tài liệu chi tiết và code cell: [08_external_validation.md](08_external_validation.md) (bản cập nhật kèm theo). **Chỉ dùng Kaggle; không chạy local.** Các cell K8.0, K8.0d, K8.0e, K8.0f và K8.1 đã hoàn thành trước đó; không chạy lại nếu không có lý do kiểm toán.
+
+1. Pull/clone mã tại commit `fe3daf1a91203b20d73aac960d08f2dbf96be872`. Chạy K8.0g xác minh HEAD và tồn tại/hashes của 15 checkpoint/config.
+2. Chạy K8.0h để ghi bảng quan hệ mask/signal trên 204 frame (không đọc nhãn). Quan sát không thay thế tài liệu chính thức về mask polarity.
+3. Chạy K8.0i để lưu PNG metadata và khoảng trống chứng cứ radiometry (không fit transform).
+4. Chạy K8.0j, tải ZIP evidence về để review; **dừng trước K8.2/K8.3**.
+
+**Đã xác minh từ paper:** Sa et al. (2018) Table 1 xác nhận RedEdge-M 003 là `test`, 94 effective tiles, GSD 0.99 cm/pixel: https://www.mdpi.com/2072-4292/10/9/1423. Archive có 204 tile slots; cần giải thích 94 vs 102 observed signal tiles. Không có Crop=1 trong 204 iMaps, không thể báo ba-lớp mIoU trên external test. PNG 8-bit khác 16-bit và mask polarity vẫn PENDING. Không giả mạo `GO` để vượt gate.
