@@ -1,8 +1,8 @@
-# Exp08 — External-domain validation and one-time test lock
+# Exp08 — External-domain validation và one-time test lock
 
 > **Status (2026-11-05): NOT READY TO OPEN TEST.** K8.0/K8.0b/K8.0c/K8.1 outputs are saved in `doc/exp123.ipynb`; no WeedMap inference/model predictions or WeedsGalore test evaluation have been run. Official iMap codes are sourced. Across 204 aligned iMaps, code 1 is absent globally, but valid-area interpretation depends on the unresolved mask polarity. The 8-bit WeedMap tiles and 16-bit WeedsGalore inputs produce different one-image `plt.imread` ranges; physical radiometry compatibility is unverified. Synthetic loader/metric helpers and tests have been prepared; their actual Kaggle execution and an end-to-end checkpoint evaluator are not yet accepted. Exp08 remains frozen external-domain validation, **not** method development.
 
-## Readiness verdict
+## Kết luận readiness
 
 | Requirement                                                 | Current evidence                                                                                                                                                                                         | Status / action before test                                                                                                                                                                                                                   |
 | ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -12,17 +12,17 @@
 | OccCond-g compute cost                                      | K8.1 output saved in `doc/exp123.ipynb`: four forward profiles, Tesla T4, FP32, batch 1, 600×600, 50 warmup/300 timed runs                                                                               | **DONE.** Values are transcribed in the cost table below. FLOP counter omits elementwise work.                                                                                                                                                |
 | One-time WeedsGalore test lock                              | iMap semantics/class-support audit and pure metric core are documented; mask/radiometry and a data-loading evaluator remain unaccepted                                                                   | **NO-GO.** K8.2/K8.3 remain unrun until mask/radiometry are resolved, evaluator synthetic tests pass, and the immutable manifest/prechecks are complete.                                                                                      |
 
-### Model identity and scope
+### Model identity và scope
 
-The source implements one segmentation model per run, not an ensemble. `MCSDSegFormer` inherits the same pretrained MiT-B0 encoder and SegFormer multi-scale decoder as the L0 path; its RGB patch projection is expanded to five channels by retaining the RGB filters and initializing NIR/RE from their RGB-filter mean. OccCond-g/MCSD-g add occupancy and placement heads (and an optional small raw-band guide); they do not delete pretrained backbone layers. The method change is in the dense prediction head/coupling, not in combining several pretrained models. This is verified in `src/nets/segformer.py` and `src/nets/mcsd.py`.
+Source triển khai một segmentation model cho mỗi run, không phải ensemble. `MCSDSegFormer` kế thừa cùng pretrained MiT-B0 encoder và SegFormer multi-scale decoder như path L0; RGB patch projection được mở rộng thành năm channel bằng cách giữ RGB filters và khởi tạo NIR/RE từ trung bình RGB filters. OccCond-g/MCSD-g thêm occupancy và placement heads (cùng một raw-band guide tùy chọn); không xóa pretrained backbone layers. Thay đổi của method nằm ở dense prediction head/coupling, không phải việc ghép nhiều pretrained model. Điều này được xác minh trong `src/nets/segformer.py` và `src/nets/mcsd.py`.
 
 Method development and selection belong to the existing WeedsGalore train/validation experiments. Exp08's second dataset is only a frozen transfer check of L0, OccCond-g, and MCSD-g. Based on Exp07 validation, OccCond-g is the primary candidate for the stated small-weed recall/coverage objective; MCSD-g is the constrained-coupling comparator, and L0 is the reference. Report all three regardless of outcome. Do not use WeedMap to change this choice.
 
-## Decision and scope
+## Quyết định và scope
 
 Freeze **OccCond-g as the primary method candidate** because it had the stronger validation evidence for the stated small-weed objective: versus L0, Small-Weed Recall +10.55 [6.39; 14.84] pp and coverage +7.55 [2.97; 12.47] pp, with mIoU +0.88 [0.42; 1.54] pp. Keep **MCSD-g as the constrained-decoding comparator/ablation**, not as a second co-primary claim: Exp07 found similar mIoU versus OccCond-g but lower recall/coverage and higher marginal fidelity, Weed precision, and Boundary IoU. Freeze L0, OccCond-g, and MCSD-g as the complete comparison set with five existing validation-selected checkpoints per method. Do not select or alter any method using WeedMap or test data. This choice is based on the stated recall objective and Exp07 validation only; the full novelty review remains a prerequisite to opening test.
 
-Use the official **WeedMap RedEdge-M dataset 003** only as a candidate second-dataset external evaluation. WeedMap covers sugar-beet fields in Switzerland/Germany, unlike WeedsGalore maize fields. Do not substitute Sequoia set 005: it does not match the five-channel input contract. The ETHZ ASL page confirms the broad availability of RedEdge/Sequoia imagery, tiles/orthomosaics, reflectance TIFFs, and background/crop/weed annotations, but the exact downloaded 003 files and compatibility are not verified here. Before inference, record the exact original-paper passage/table/page identifying 003 as test, release DOI/version, metadata for all five aligned bands and radiometry, label codes/instances, license, and tile/site grouping. If any gate fails, stop and do not silently substitute another set.
+Chỉ dùng **WeedMap RedEdge-M dataset 003** chính thức như một candidate second-dataset external evaluation. WeedMap bao phủ các cánh đồng sugar-beet ở Switzerland/Germany, khác với maize fields của WeedsGalore. Không thay bằng Sequoia set 005 vì không khớp five-channel input contract. Trang ETHZ ASL xác nhận có RedEdge/Sequoia imagery, tiles/orthomosaics, reflectance TIFFs và background/crop/weed annotations, nhưng các file 003 đã tải và compatibility chưa được xác minh ở đây. Trước inference, ghi lại chính xác passage/table/page của original paper xác định 003 là test, release DOI/version, metadata của năm aligned bands và radiometry, label codes/instances, license và tile/site grouping. Nếu bất kỳ gate nào fail, dừng và không âm thầm thay dataset khác.
 
 **Official annotation semantics (verified from ETH Zurich Research Collection release document, p. 2):** `GroundTruth_iMap` code `0=Background`, `1=Crop`, `2=Weed`, `10000=Non-class`. Treat `10000` as ignore and exclude it from the confusion matrix; do not infer semantics from the RGB render color. The release describes iMap as grayscale 16-bit and the color render as black/green/red for Background/Crop/Weed. Citation/source: [ETH Zurich WeedMap release PDF](https://www.research-collection.ethz.ch/server/api/core/bitstreams/3ae97814-1570-4760-95b8-a9a3eac21975/content), p. 2; dataset DOI `10.3929/ethz-c-000788571`.
 
@@ -36,7 +36,7 @@ The class/mask audit is preserved in `doc/exp123.ipynb`; K8.0/K8.0b/K8.0c output
 
 ## Preliminary novelty review (2026-11-04)
 
-This is a traceable initial screen, not a completed Scopus/Web of Science review. Do not use “first” or “novel” claims yet.
+Đây là initial screen có thể truy vết, chưa phải Scopus/Web of Science review hoàn chỉnh. Chưa dùng claim “first” hoặc “novel”.
 
 | Work                                                                                                                                                                                                                               | Relation to the two decoder directions                                                                                    | Initial distinction/question to verify                                                                                                                                                                          |
 | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -54,7 +54,7 @@ Searches actually screened: `"subpixel mapping" deep learning remote sensing fra
 
 ## Locked WeedMap protocol
 
-### Dataset identity and input gate
+### Dataset identity và input gate
 
 1. Select the official RedEdge-M testing partition **003** only. Save the downloaded archive name, DOI/version, archive SHA-256, license, dataset index, flight/site metadata, and the original source paper’s statement that 003 is a test partition. The archive listing identifies this as `Tiles/RedEdge/003.zip`; do not identify index 003 by substring matches against frame filenames.
 2. Verify five co-registered bands and channel mapping by names and metadata. Model order is exactly `R, G, B, NIR, RE`; map camera-native files by labels, never by directory ordering. Confirm units, bit depth, reflectance calibration, clipping/scale, image shape, nodata handling, and tile-to-label alignment.
@@ -62,7 +62,7 @@ Searches actually screened: `"subpixel mapping" deep learning remote sensing fra
 4. Check for same-orthomosaic/overlapping tiles and official split leakage. If 003 is a held-out test subset from a documented flight/site, use its existing split. Keep tile groups intact in any uncertainty analysis.
 5. Do not compute WeedMap normalization quantiles, class weights, or thresholds from its test images/labels. Use only a fixed documented transform compatible with the source model. If the source and WeedMap radiometry cannot be aligned without target-fitted statistics, stop: the external test is not ready.
 
-### Methods, checkpoints, and comparisons
+### Methods, checkpoints và comparisons
 
 - Methods: L0, OccCond-g, MCSD-g.
 - Checkpoints: five fixed seeds (0–4) per method, selected by WeedsGalore validation only. Freeze SHA-256 for all 15 `best_val.pth` files before reading WeedMap predictions.
@@ -72,7 +72,7 @@ Searches actually screened: `"subpixel mapping" deep learning remote sensing fra
 - Report point estimates and 95% paired hierarchical bootstrap CI (seed, then spatial group/tile). Cluster at orthomosaic/flight when multiple independent units exist. If set 003 is only one flight/orthomosaic, state that intervals quantify within-collection tile variability and do not estimate between-site uncertainty. The bootstrap seed, replicate count, resampling order, and cluster identifiers must be frozen in the manifest.
 - Dataset-level external evaluation is descriptive/confirmatory of frozen transfer, not a new method-development gate. Report all three methods, even if a method loses.
 
-### WeedsGalore test lock and one-time release
+### WeedsGalore test lock và one-time release
 
 Before opening WeedsGalore test, freeze a JSON manifest with repository commit, split hash and explicit split IDs/hash, source `run_config.json` hashes, checkpoint SHA-256 values for L0/OccCond-g/MCSD-g seeds 0–4, WeedMap archive/data identity and preflight decision, fixed input transform, class map, metrics, bootstrap seed/replicates/cluster unit, and the primary/secondary contrasts above. Include realized profile artifact hashes when available. Commit the manifest and confirm no code/config changes after it is created. If WeedMap compatibility or its evaluator is unresolved, record WeedMap as `NOT_AUTHORIZED`; do not present K8.3 as a two-dataset run.
 
@@ -80,7 +80,7 @@ The Kaggle test cell below creates a `test_started` marker **before** its first 
 
 ## Kaggle cells
 
-**Kaggle only — do not run tests locally.** Copy the cells below from the committed/pushed documentation into the Kaggle notebook after updating the project checkout. Current order: K8.0 inventory (already done), K8.0b ZIP documentation (already done), K8.0c single-frame encoding (already done), K8.0d full-index class/mask audit (run only if not already saved), K8.0e revised synthetic loader/metric tests (run on Kaggle after code push), K8.0f backup. K8.1 profiling is already DONE and need not be rerun. K8.2/K8.3 are strictly NO-GO pending independently verified mask/radiometry/split/grouping, checkpoint integration and evaluator acceptance evidence. All diagnostic artifacts remain separate from the reviewed preflight and locked test manifest.
+**Chỉ chạy trên Kaggle — không chạy test local.** Copy các cell dưới đây từ documentation đã finalized vào Kaggle notebook sau khi cập nhật project checkout. Thứ tự hiện tại: K8.0 inventory (đã xong), K8.0b ZIP documentation (đã xong), K8.0c single-frame encoding (đã xong), K8.0d full-index class/mask audit (chỉ chạy nếu chưa có artifact), K8.0e revised synthetic loader/metric tests (chạy trên Kaggle sau code push), K8.0f backup. K8.1 profiling đã DONE và không cần chạy lại. K8.2/K8.3 vẫn NO-GO cho tới khi có evidence độc lập cho mask/radiometry/split/grouping, checkpoint integration và evaluator acceptance. Mọi diagnostic artifact phải tách khỏi reviewed preflight và locked test manifest.
 
 ### Cell K8.0 — WeedMap RedEdge-M 003 inventory (no inference)
 
@@ -512,7 +512,7 @@ with LOG.open('w', encoding='utf-8', buffering=1) as log:
 
 **Only Kaggle, never local.** First commit/push the revised `src/weedmap_evaluation.py` and `tests/test_weedmap_evaluation.py`, then pull that exact commit into the Kaggle clone (or restart the notebook against the updated checkout). This test cell must operate on the revised files from the review package; the earlier 78-line metric-only implementation and its 7 tests are not equivalent. Check that you are in the project root and the source/test files exist. The tests create temporary synthetic PNGs under pytest's temporary directory; they do **not** open WeedMap/WeedsGalore imagery, load a checkpoint, or evaluate predictions from a held-out test set.
 
-This cell saves the **actual Kaggle** pytest transcript and a hash-bound synthetic-core test report. It does *not* set `weedmap_evaluator_acceptance.json` to PASS, choose `valid_mask_code`, provide radiometric calibration evidence, or authorize K8.2/K8.3. Do not fabricate acceptance metadata from successful unit tests.
+This cell saves the **actual Kaggle** pytest transcript and a hash-bound synthetic-core test report. It does _not_ set `weedmap_evaluator_acceptance.json` to PASS, choose `valid_mask_code`, provide radiometric calibration evidence, or authorize K8.2/K8.3. Do not fabricate acceptance metadata from successful unit tests.
 
 ```python
 import hashlib
@@ -605,26 +605,25 @@ from IPython.display import FileLink, display
 display(FileLink(str(backup)))
 ```
 
-## Next Kaggle session after commit `fe3daf1` — evidence-only audit (2026-11-05)
+## Next Kaggle session — evidence-only audit (2026-11-05)
 
 **Gate: NO-GO for K8.2/K8.3.** Previous session completed K8.0, K8.0d, K8.0e (`14 passed`) and K8.0f. There is no need to rerun profiles, synthetic tests or inference. If the new Kaggle session has no saved `results/exp08`, restore the archive first; do not overwrite reviewed preflight artifacts.
 
-**New literature evidence:** Sa et al. (2018), Table 1 explicitly calls RedEdge-M **003 = test**, 94 *effective tiles* of size 480×360 and GSD 0.99 cm/pixel. Table 2 associates the RedEdge-M acquisition with the Rheinbach, Germany campaign. Source: https://www.mdpi.com/2072-4292/10/9/1423 (Table 1/Table 2). The installed 003 archive has 204 padded tile slots, while an earlier nonzero-signal audit found 102 nonempty slots; **94 vs 102 remains a discrepancy to reconcile** using the paper's effective-tile definition. Test-partition citation is sourced; physical tile provenance and spatial resampling remain limited to one orthomosaic/flight.
+**New literature evidence:** Sa et al. (2018), Table 1 explicitly calls RedEdge-M **003 = test**, 94 _effective tiles_ of size 480×360 and GSD 0.99 cm/pixel. Table 2 associates the RedEdge-M acquisition with the Rheinbach, Germany campaign. Source: https://www.mdpi.com/2072-4292/10/9/1423 (Table 1/Table 2). The installed 003 archive has 204 padded tile slots, while an earlier nonzero-signal audit found 102 nonempty slots; **94 vs 102 remains a discrepancy to reconcile** using the paper's effective-tile definition. Test-partition citation is sourced; physical tile provenance and spatial resampling remain limited to one orthomosaic/flight.
 
 **Important:** PNG `uint8 / 255` and `uint16 / 65535` both generate `float32` on load but do NOT prove reflectance calibration or a fixed cross-dataset transform. The published calibration describes orthomosaics, not the exact 8-bit tile PNG export formula. The released white-valid mask description also conflicts with observed zero-mask signal support. Neither question is settled by these cells. **Never set `manual_review_decision=GO` from a passed command alone.**
 
-### Cell K8.0g — Verify pushed commit and checkpoint artifact presence (no test data access)
+### Cell K8.0g — Verify current `HEAD` and checkpoint artifact presence (no test data access)
 
-Read-only gate: verifies the Kaggle clone is the intended pushed commit, checks 15 source-selected checkpoint/config paths and their SHA-256, hashes the metric source/test, and writes an audit JSON. It does not read test data or execute a model. Missing checkpoint files are reported as `MISSING`, not silently replaced; restore them before final lock.
+Read-only gate: ghi nhận `HEAD` hiện tại của Kaggle clone, kiểm tra 15 source-selected checkpoint/config paths cùng SHA-256, hash metric source/test và ghi audit JSON. Cell không đọc test data hoặc execute model. Checkpoint file thiếu được báo là `MISSING`, không âm thầm thay thế; hãy restore trước final lock.
 
 ```python
 import hashlib, json, os, subprocess
 from pathlib import Path
 from datetime import datetime, timezone
 
-PROJECT = Path('/kaggle/working/WeedsGalore_Ipr28')
-EXPECTED_COMMIT = 'fe3daf1a91203b20d73aac960d08f2dbf96be872'
-assert PROJECT.is_dir(), f'Project not found: {PROJECT}'
+PROJECT = Path(os.environ.get('WEEDSGALORE_PROJECT', '/kaggle/working/WeedsGalore_Ipr28'))
+assert PROJECT.is_dir(), f'Project not found: {PROJECT}. Set WEEDSGALORE_PROJECT if needed.'
 os.chdir(PROJECT)
 OUT = Path('results/exp08')
 OUT.mkdir(parents=True, exist_ok=True)
@@ -637,9 +636,7 @@ def sha256(path):
     return digest.hexdigest()
 
 actual = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
-print('Kaggle HEAD:', actual)
-print('Expected   :', EXPECTED_COMMIT)
-assert actual == EXPECTED_COMMIT, 'Kaggle has the wrong commit; pull/clone the pushed source before continuing'
+print('Current HEAD:', actual)
 assert not (OUT / 'test_started.json').exists(), 'A test marker exists: STOP and review previous run'
 
 paths = [Path(f'runs/{method}_s{seed}/{name}')
@@ -651,7 +648,7 @@ records = {str(p): {'exists': p.is_file(), 'size_bytes': p.stat().st_size if p.i
                     'sha256': sha256(p) if p.is_file() else None} for p in paths}
 missing = [p for p, data in records.items() if not data['exists']]
 report = {'status': 'AUDIT_ONLY_NOT_TEST_AUTHORIZATION', 'utc': datetime.now(timezone.utc).isoformat(),
-          'git_commit': actual, 'expected_commit': EXPECTED_COMMIT, 'artifacts': records,
+          'git_commit': actual, 'artifacts': records,
           'missing': missing, 'checkpoint_pairs_expected': 15, 'test_data_opened': False}
 dest = OUT / 'checkpoint_source_presence_audit.json'
 dest.write_text(json.dumps(report, indent=2), encoding='utf-8')
@@ -663,7 +660,7 @@ print('No test data or checkpoint inference was opened.')
 
 ### Cell K8.0h — Mask vs spectral-signal contingency for every frame (no labels or inference)
 
-This checks the **observed** association between mask code and all-five-bands-zero. It does **not** decide which mask value is officially valid and does not use `GroundTruth_iMap`. Save both hypotheses for evidence; do not use the result to tune a model or choose a mask convention opportunistically.
+Cell này kiểm tra association **observed** giữa mask code và trạng thái all-five-bands-zero. Cell **không** quyết định mask value nào officially valid và không dùng `GroundTruth_iMap`. Lưu cả hai hypotheses làm evidence; không dùng kết quả để tune model hoặc chọn mask convention opportunistically.
 
 ```python
 import json, os
@@ -672,10 +669,14 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
-PROJECT = Path('/kaggle/working/WeedsGalore_Ipr28')
+PROJECT = Path(os.environ.get('WEEDSGALORE_PROJECT', '/kaggle/working/WeedsGalore_Ipr28'))
 os.chdir(PROJECT)
-ROOT = Path('/kaggle/working/weedmap-2018/Tiles/RedEdge/003/003')
-assert ROOT.is_dir(), 'WeedMap 003 extracted directory missing'
+WEEDMAP_ROOT = Path(os.environ.get('WEEDMAP_ROOT', '/kaggle/working/weedmap-2018'))
+INDEX_ROOT = WEEDMAP_ROOT / 'Tiles' / 'RedEdge' / '003'
+ROOT = INDEX_ROOT / '003'
+if not (ROOT / 'tile').is_dir():
+    ROOT = INDEX_ROOT
+assert (ROOT / 'tile').is_dir(), f'WeedMap 003 extracted directory missing: {INDEX_ROOT}'
 BANDS = ('R', 'G', 'B', 'NIR', 'RE')
 frames = sorted(p.stem for p in (ROOT / 'tile' / 'R').glob('frame*.png'))
 assert len(frames) == 204, f'Expected 204 frame slots, got {len(frames)}'
@@ -716,18 +717,21 @@ print('Mask polarity remains PENDING. Saved:', out)
 
 ### Cell K8.0i — PNG metadata / radiometry source gap report (no fit, no inference)
 
-Prints fixed samples' PNG bit depths, ancillary metadata keys and the availability of orthomosaic TIFF files. It does not derive a transform from test pixels; missing metadata is documented as a **blocker** rather than guessed.
+Cell in PNG bit depths của fixed samples, ancillary metadata keys và sự tồn tại của orthomosaic TIFF files. Cell không derive transform từ test pixels; metadata thiếu được document như một **blocker**, không đoán.
 
 ```python
 import json, os
 from pathlib import Path
 from PIL import Image
 
-PROJECT = Path('/kaggle/working/WeedsGalore_Ipr28')
+PROJECT = Path(os.environ.get('WEEDSGALORE_PROJECT', '/kaggle/working/WeedsGalore_Ipr28'))
 os.chdir(PROJECT)
-WM = Path('/kaggle/working/weedmap-2018')
-ROOT = WM / 'Tiles/RedEdge/003/003/tile'
-assert ROOT.is_dir()
+WM = Path(os.environ.get('WEEDMAP_ROOT', '/kaggle/working/weedmap-2018'))
+INDEX_ROOT = WM / 'Tiles' / 'RedEdge' / '003'
+ROOT = INDEX_ROOT / '003' / 'tile'
+if not ROOT.is_dir():
+    ROOT = INDEX_ROOT / 'tile'
+assert ROOT.is_dir(), f'WeedMap 003 tile root missing: {INDEX_ROOT}'
 records = []
 for stem in ('frame0000', 'frame0020', 'frame0033'):
     for band in ('R', 'G', 'B', 'NIR', 'RE'):
@@ -755,26 +759,34 @@ print('Orthomosaic TIFF files found:', len(tiffs))
 print('Radiometry PENDING; saved:', out)
 ```
 
-### Cell K8.0j — Back up the additional evidence bundle (no inference)
+### Cell K8.0j — ZIP additional evidence bundle (no inference)
 
 ```python
+import os
 from pathlib import Path
 from zipfile import ZIP_DEFLATED, ZipFile
-from IPython.display import FileLink, display
+try:
+    from IPython.display import FileLink, display
+except ImportError:
+    FileLink = None
+    display = None
 
-PROJECT = Path('/kaggle/working/WeedsGalore_Ipr28')
+PROJECT = Path(os.environ.get('WEEDSGALORE_PROJECT', '/kaggle/working/WeedsGalore_Ipr28'))
 exp08 = PROJECT / 'results/exp08'
 assert exp08.is_dir()
-output = Path('/kaggle/working/exp08_evidence_after_fe3daf1.zip')
+output = Path(os.environ.get('EXP08_EVIDENCE_ZIP', '/kaggle/working/exp08_evidence_after_audit.zip'))
 with ZipFile(output, 'w', compression=ZIP_DEFLATED) as z:
     for file in sorted(exp08.rglob('*')):
         if file.is_file():
             z.write(file, arcname=str(file.relative_to(PROJECT)))
-print('Backup:', output, '| MB:', round(output.stat().st_size / 1024**2, 2))
-display(FileLink(str(output)))
+print('Evidence ZIP:', output, '| MB:', round(output.stat().st_size / 1024**2, 2))
+if FileLink is not None and display is not None:
+    display(FileLink(str(output)))
+else:
+    print('Notebook download link unavailable; use the printed local path.')
 ```
 
-**STOP after K8.0j.** Deliver `checkpoint_source_presence_audit.json`, `weedmap_mask_signal_contingency.json`, `weedmap_radiometry_provenance_gap.json` and the ZIP. K8.2 expects a truly accepted evaluator, resolved mask/radiometry, spatial grouping, 15 frozen checkpoint/config pairs and an immutable preflight; the 14 synthetic unit tests are **not** an end-to-end model inference acceptance. K8.3 releases the untouched WeedsGalore test once; do not run it until all gates pass. If radiometric provenance cannot be resolved before deadline, write the honest limitation and report zero-shot WeedMap as NOT RUN rather than manufacturing validation evidence.
+**DỪNG sau K8.0j.** Bàn giao `checkpoint_source_presence_audit.json`, `weedmap_mask_signal_contingency.json`, `weedmap_radiometry_provenance_gap.json` và ZIP. K8.2 yêu cầu evaluator đã thực sự accepted, mask/radiometry resolved, spatial grouping, 15 frozen checkpoint/config pairs và immutable preflight; 14 synthetic unit tests **không phải** end-to-end model inference acceptance. K8.3 chỉ release untouched WeedsGalore test một lần sau khi mọi gate PASS. Nếu radiometric provenance chưa thể resolve trước deadline, ghi limitation trung thực và báo zero-shot WeedMap là `NOT RUN`, không tạo validation evidence giả.
 
 ### Cell K8.1 — Profile L0, OccCond-g, MCSD-g, PS (600×600)
 
@@ -851,6 +863,81 @@ K8.1 completed on Tesla T4 with batch 1, FP32, input 600×600, 50 warmup iterati
 | PS        |       3.461811 |      13.544482 | 6.772241 |        14.470 [14.335, 14.591] |          145.390 |
 | OccCond-g |       3.462614 |      14.097442 | 7.048721 |        15.799 [15.714, 15.899] |          145.396 |
 | MCSD-g    |       3.462614 |      14.097442 | 7.048721 |        17.833 [17.693, 17.982] |          145.396 |
+
+###Cell K8.0k — Kaggle-only checkpoint and readiness audit (NO commit check, NO inference)
+
+Run only inside Kaggle. It does not read images/labels, run models, create the final test manifest, or create the test_started marker. If checkpoints are missing from the clone, mount the original private checkpoint archive as a Kaggle Dataset/Input first; do not retrain, replace, or select new checkpoints.
+
+```python
+from pathlib import Path
+from datetime import datetime, timezone
+import hashlib, json, os
+
+PROJECT = Path(os.environ.get('WEEDSGALORE_PROJECT', '/kaggle/working/WeedsGalore_Ipr28'))
+assert PROJECT.is_dir(), f'Missing project: {PROJECT}'
+os.chdir(PROJECT)
+OUT = PROJECT / 'results/exp08'
+OUT.mkdir(parents=True, exist_ok=True)
+
+def sha256_file(path):
+    digest = hashlib.sha256()
+    with path.open('rb') as f:
+        for block in iter(lambda: f.read(1024 * 1024), b''):
+            digest.update(block)
+    return digest.hexdigest()
+
+print('Kaggle project:', PROJECT)
+
+# Only search likely artifact mounts; never load checkpoints or test pixels.
+roots = [PROJECT, Path('/kaggle/input'), Path('/kaggle/working')]
+expected_names = ('best_val.pth', 'run_config.json')
+found = {}
+for root in roots:
+    if not root.is_dir():
+        continue
+    for pattern in ('runs/*/best_val.pth', 'runs/*/run_config.json',
+                    '**/L0_s*/best_val.pth', '**/OccCondg_s*/best_val.pth',
+                    '**/MCSDg_s*/best_val.pth',
+                    '**/L0_s*/run_config.json', '**/OccCondg_s*/run_config.json',
+                    '**/MCSDg_s*/run_config.json'):
+        # /kaggle/input may contain unrelated datasets; only report matching basename+parent.
+        for path in root.glob(pattern):
+            if path.is_file() and path.name in expected_names and path.parent.name.rsplit('_s', 1)[0] in ('L0','OccCondg','MCSDg'):
+                found[str(path.resolve())] = path
+
+inventory = {}
+for method in ('L0', 'OccCondg', 'MCSDg'):
+    for seed in range(5):
+        for filename in expected_names:
+            key = f'{method}_s{seed}/{filename}'
+            matches = sorted((p for p in found.values() if p.parent.name == f'{method}_s{seed}' and p.name == filename), key=str)
+            inventory[key] = [{'path': str(p), 'size_bytes': p.stat().st_size,
+                               'sha256': sha256_file(p)} for p in matches]
+
+missing = [key for key, matches in inventory.items() if not matches]
+ambiguous = [key for key, matches in inventory.items() if len({m['sha256'] for m in matches}) > 1]
+preflight = OUT / 'weedmap_003_preflight.json'
+acceptance = OUT / 'weedmap_evaluator_acceptance.json'
+report = {
+    'kind': 'READ_ONLY_KAGGLE_AUDIT_NOT_TEST_AUTHORIZATION',
+    'generated_at_utc': datetime.now(timezone.utc).isoformat(),
+    'files': inventory, 'missing': missing, 'conflicting_duplicates': ambiguous,
+    'preflight_exists': preflight.is_file(),
+    'acceptance_exists': acceptance.is_file(),
+    'test_started_exists': (OUT / 'test_started.json').exists(),
+    'radiometry_verified': False, 'mask_polarity_verified': False,
+    'authorization': 'NO_GO_K8_2_K8_3',
+}
+report_path = OUT / 'kaggle_checkpoint_readiness_audit.json'
+report_path.write_text(json.dumps(report, indent=2), encoding='utf-8')
+print('Found unique expected artifact names:', 30-len(missing), '/ 30')
+print('Missing:', missing)
+print('Conflicting duplicate versions:', ambiguous)
+print('Preflight present:', preflight.is_file(), 'Acceptance present:', acceptance.is_file())
+print('Marker present:', report['test_started_exists'])
+print('Saved:', report_path)
+print('NO-GO: this cell never authorizes K8.2 or K8.3')
+```
 
 ### Cell K8.2 — Lock the WeedsGalore test manifest
 

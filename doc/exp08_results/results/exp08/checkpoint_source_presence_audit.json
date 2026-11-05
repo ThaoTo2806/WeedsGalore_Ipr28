@@ -1,0 +1,201 @@
+{
+  "status": "AUDIT_ONLY_NOT_TEST_AUTHORIZATION",
+  "utc": "2026-11-05T11:58:16.290964+00:00",
+  "git_commit": "4ef869d7ca98dfb337809c3aa9aa520d7644f887",
+  "artifacts": {
+    "runs\\L0_s0\\best_val.pth": {
+      "exists": false,
+      "size_bytes": null,
+      "sha256": null
+    },
+    "runs\\L0_s0\\run_config.json": {
+      "exists": false,
+      "size_bytes": null,
+      "sha256": null
+    },
+    "runs\\L0_s1\\best_val.pth": {
+      "exists": false,
+      "size_bytes": null,
+      "sha256": null
+    },
+    "runs\\L0_s1\\run_config.json": {
+      "exists": false,
+      "size_bytes": null,
+      "sha256": null
+    },
+    "runs\\L0_s2\\best_val.pth": {
+      "exists": false,
+      "size_bytes": null,
+      "sha256": null
+    },
+    "runs\\L0_s2\\run_config.json": {
+      "exists": false,
+      "size_bytes": null,
+      "sha256": null
+    },
+    "runs\\L0_s3\\best_val.pth": {
+      "exists": false,
+      "size_bytes": null,
+      "sha256": null
+    },
+    "runs\\L0_s3\\run_config.json": {
+      "exists": false,
+      "size_bytes": null,
+      "sha256": null
+    },
+    "runs\\L0_s4\\best_val.pth": {
+      "exists": false,
+      "size_bytes": null,
+      "sha256": null
+    },
+    "runs\\L0_s4\\run_config.json": {
+      "exists": false,
+      "size_bytes": null,
+      "sha256": null
+    },
+    "runs\\OccCondg_s0\\best_val.pth": {
+      "exists": false,
+      "size_bytes": null,
+      "sha256": null
+    },
+    "runs\\OccCondg_s0\\run_config.json": {
+      "exists": false,
+      "size_bytes": null,
+      "sha256": null
+    },
+    "runs\\OccCondg_s1\\best_val.pth": {
+      "exists": false,
+      "size_bytes": null,
+      "sha256": null
+    },
+    "runs\\OccCondg_s1\\run_config.json": {
+      "exists": false,
+      "size_bytes": null,
+      "sha256": null
+    },
+    "runs\\OccCondg_s2\\best_val.pth": {
+      "exists": false,
+      "size_bytes": null,
+      "sha256": null
+    },
+    "runs\\OccCondg_s2\\run_config.json": {
+      "exists": false,
+      "size_bytes": null,
+      "sha256": null
+    },
+    "runs\\OccCondg_s3\\best_val.pth": {
+      "exists": false,
+      "size_bytes": null,
+      "sha256": null
+    },
+    "runs\\OccCondg_s3\\run_config.json": {
+      "exists": false,
+      "size_bytes": null,
+      "sha256": null
+    },
+    "runs\\OccCondg_s4\\best_val.pth": {
+      "exists": false,
+      "size_bytes": null,
+      "sha256": null
+    },
+    "runs\\OccCondg_s4\\run_config.json": {
+      "exists": false,
+      "size_bytes": null,
+      "sha256": null
+    },
+    "runs\\MCSDg_s0\\best_val.pth": {
+      "exists": false,
+      "size_bytes": null,
+      "sha256": null
+    },
+    "runs\\MCSDg_s0\\run_config.json": {
+      "exists": false,
+      "size_bytes": null,
+      "sha256": null
+    },
+    "runs\\MCSDg_s1\\best_val.pth": {
+      "exists": false,
+      "size_bytes": null,
+      "sha256": null
+    },
+    "runs\\MCSDg_s1\\run_config.json": {
+      "exists": false,
+      "size_bytes": null,
+      "sha256": null
+    },
+    "runs\\MCSDg_s2\\best_val.pth": {
+      "exists": false,
+      "size_bytes": null,
+      "sha256": null
+    },
+    "runs\\MCSDg_s2\\run_config.json": {
+      "exists": false,
+      "size_bytes": null,
+      "sha256": null
+    },
+    "runs\\MCSDg_s3\\best_val.pth": {
+      "exists": false,
+      "size_bytes": null,
+      "sha256": null
+    },
+    "runs\\MCSDg_s3\\run_config.json": {
+      "exists": false,
+      "size_bytes": null,
+      "sha256": null
+    },
+    "runs\\MCSDg_s4\\best_val.pth": {
+      "exists": false,
+      "size_bytes": null,
+      "sha256": null
+    },
+    "runs\\MCSDg_s4\\run_config.json": {
+      "exists": false,
+      "size_bytes": null,
+      "sha256": null
+    },
+    "src\\weedmap_evaluation.py": {
+      "exists": true,
+      "size_bytes": 8666,
+      "sha256": "cc5b1ba7e9c53327a922a4b6cfb9ddafd461d2a69d539c3e39e9f9c505fff901"
+    },
+    "tests\\test_weedmap_evaluation.py": {
+      "exists": true,
+      "size_bytes": 6460,
+      "sha256": "38131ce89ffcf86efc8ff1bfcf1ab7980ebed90984bfcd64e72e18a6bc201ee8"
+    }
+  },
+  "missing": [
+    "runs\\L0_s0\\best_val.pth",
+    "runs\\L0_s0\\run_config.json",
+    "runs\\L0_s1\\best_val.pth",
+    "runs\\L0_s1\\run_config.json",
+    "runs\\L0_s2\\best_val.pth",
+    "runs\\L0_s2\\run_config.json",
+    "runs\\L0_s3\\best_val.pth",
+    "runs\\L0_s3\\run_config.json",
+    "runs\\L0_s4\\best_val.pth",
+    "runs\\L0_s4\\run_config.json",
+    "runs\\OccCondg_s0\\best_val.pth",
+    "runs\\OccCondg_s0\\run_config.json",
+    "runs\\OccCondg_s1\\best_val.pth",
+    "runs\\OccCondg_s1\\run_config.json",
+    "runs\\OccCondg_s2\\best_val.pth",
+    "runs\\OccCondg_s2\\run_config.json",
+    "runs\\OccCondg_s3\\best_val.pth",
+    "runs\\OccCondg_s3\\run_config.json",
+    "runs\\OccCondg_s4\\best_val.pth",
+    "runs\\OccCondg_s4\\run_config.json",
+    "runs\\MCSDg_s0\\best_val.pth",
+    "runs\\MCSDg_s0\\run_config.json",
+    "runs\\MCSDg_s1\\best_val.pth",
+    "runs\\MCSDg_s1\\run_config.json",
+    "runs\\MCSDg_s2\\best_val.pth",
+    "runs\\MCSDg_s2\\run_config.json",
+    "runs\\MCSDg_s3\\best_val.pth",
+    "runs\\MCSDg_s3\\run_config.json",
+    "runs\\MCSDg_s4\\best_val.pth",
+    "runs\\MCSDg_s4\\run_config.json"
+  ],
+  "checkpoint_pairs_expected": 15,
+  "test_data_opened": false
+}

@@ -1,0 +1,17 @@
+{
+  "status": "OBSERVATIONAL_ONLY_MASK_POLARITY_UNRESOLVED",
+  "frames_total": 204,
+  "frames_with_any_band_nonzero": 102,
+  "contingency_counts": {
+    "mask_0_signal_0": 0,
+    "mask_0_signal_1": 13012439,
+    "mask_255_signal_0": 22238761,
+    "mask_255_signal_1": 0
+  },
+  "release_claim": "white mask is valid (verify semantics and version)",
+  "mask_validity_decision": "PENDING",
+  "label_pixels_opened": false,
+  "model_inference_run": false,
+  "paper_effective_tiles": 94,
+  "effective_tile_definition_reconciled": false
+}

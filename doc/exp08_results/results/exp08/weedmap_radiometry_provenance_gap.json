@@ -1,0 +1,177 @@
+{
+  "status": "RADIOMETRY_PENDING",
+  "samples": [
+    {
+      "sample": "frame0000",
+      "band": "R",
+      "png_mode": "L",
+      "size_wh": [
+        480,
+        360
+      ],
+      "info_keys": [],
+      "file": "D:\\HOCTAP\\abc\\WeedsGalore_baseline\\WeedsGalore_Ipr28\\weedmap_tiles_full\\Tiles\\RedEdge\\003\\003\\tile\\R\\frame0000.png"
+    },
+    {
+      "sample": "frame0000",
+      "band": "G",
+      "png_mode": "L",
+      "size_wh": [
+        480,
+        360
+      ],
+      "info_keys": [],
+      "file": "D:\\HOCTAP\\abc\\WeedsGalore_baseline\\WeedsGalore_Ipr28\\weedmap_tiles_full\\Tiles\\RedEdge\\003\\003\\tile\\G\\frame0000.png"
+    },
+    {
+      "sample": "frame0000",
+      "band": "B",
+      "png_mode": "L",
+      "size_wh": [
+        480,
+        360
+      ],
+      "info_keys": [],
+      "file": "D:\\HOCTAP\\abc\\WeedsGalore_baseline\\WeedsGalore_Ipr28\\weedmap_tiles_full\\Tiles\\RedEdge\\003\\003\\tile\\B\\frame0000.png"
+    },
+    {
+      "sample": "frame0000",
+      "band": "NIR",
+      "png_mode": "L",
+      "size_wh": [
+        480,
+        360
+      ],
+      "info_keys": [],
+      "file": "D:\\HOCTAP\\abc\\WeedsGalore_baseline\\WeedsGalore_Ipr28\\weedmap_tiles_full\\Tiles\\RedEdge\\003\\003\\tile\\NIR\\frame0000.png"
+    },
+    {
+      "sample": "frame0000",
+      "band": "RE",
+      "png_mode": "L",
+      "size_wh": [
+        480,
+        360
+      ],
+      "info_keys": [],
+      "file": "D:\\HOCTAP\\abc\\WeedsGalore_baseline\\WeedsGalore_Ipr28\\weedmap_tiles_full\\Tiles\\RedEdge\\003\\003\\tile\\RE\\frame0000.png"
+    },
+    {
+      "sample": "frame0020",
+      "band": "R",
+      "png_mode": "L",
+      "size_wh": [
+        480,
+        360
+      ],
+      "info_keys": [],
+      "file": "D:\\HOCTAP\\abc\\WeedsGalore_baseline\\WeedsGalore_Ipr28\\weedmap_tiles_full\\Tiles\\RedEdge\\003\\003\\tile\\R\\frame0020.png"
+    },
+    {
+      "sample": "frame0020",
+      "band": "G",
+      "png_mode": "L",
+      "size_wh": [
+        480,
+        360
+      ],
+      "info_keys": [],
+      "file": "D:\\HOCTAP\\abc\\WeedsGalore_baseline\\WeedsGalore_Ipr28\\weedmap_tiles_full\\Tiles\\RedEdge\\003\\003\\tile\\G\\frame0020.png"
+    },
+    {
+      "sample": "frame0020",
+      "band": "B",
+      "png_mode": "L",
+      "size_wh": [
+        480,
+        360
+      ],
+      "info_keys": [],
+      "file": "D:\\HOCTAP\\abc\\WeedsGalore_baseline\\WeedsGalore_Ipr28\\weedmap_tiles_full\\Tiles\\RedEdge\\003\\003\\tile\\B\\frame0020.png"
+    },
+    {
+      "sample": "frame0020",
+      "band": "NIR",
+      "png_mode": "L",
+      "size_wh": [
+        480,
+        360
+      ],
+      "info_keys": [],
+      "file": "D:\\HOCTAP\\abc\\WeedsGalore_baseline\\WeedsGalore_Ipr28\\weedmap_tiles_full\\Tiles\\RedEdge\\003\\003\\tile\\NIR\\frame0020.png"
+    },
+    {
+      "sample": "frame0020",
+      "band": "RE",
+      "png_mode": "L",
+      "size_wh": [
+        480,
+        360
+      ],
+      "info_keys": [],
+      "file": "D:\\HOCTAP\\abc\\WeedsGalore_baseline\\WeedsGalore_Ipr28\\weedmap_tiles_full\\Tiles\\RedEdge\\003\\003\\tile\\RE\\frame0020.png"
+    },
+    {
+      "sample": "frame0033",
+      "band": "R",
+      "png_mode": "L",
+      "size_wh": [
+        480,
+        360
+      ],
+      "info_keys": [],
+      "file": "D:\\HOCTAP\\abc\\WeedsGalore_baseline\\WeedsGalore_Ipr28\\weedmap_tiles_full\\Tiles\\RedEdge\\003\\003\\tile\\R\\frame0033.png"
+    },
+    {
+      "sample": "frame0033",
+      "band": "G",
+      "png_mode": "L",
+      "size_wh": [
+        480,
+        360
+      ],
+      "info_keys": [],
+      "file": "D:\\HOCTAP\\abc\\WeedsGalore_baseline\\WeedsGalore_Ipr28\\weedmap_tiles_full\\Tiles\\RedEdge\\003\\003\\tile\\G\\frame0033.png"
+    },
+    {
+      "sample": "frame0033",
+      "band": "B",
+      "png_mode": "L",
+      "size_wh": [
+        480,
+        360
+      ],
+      "info_keys": [],
+      "file": "D:\\HOCTAP\\abc\\WeedsGalore_baseline\\WeedsGalore_Ipr28\\weedmap_tiles_full\\Tiles\\RedEdge\\003\\003\\tile\\B\\frame0033.png"
+    },
+    {
+      "sample": "frame0033",
+      "band": "NIR",
+      "png_mode": "L",
+      "size_wh": [
+        480,
+        360
+      ],
+      "info_keys": [],
+      "file": "D:\\HOCTAP\\abc\\WeedsGalore_baseline\\WeedsGalore_Ipr28\\weedmap_tiles_full\\Tiles\\RedEdge\\003\\003\\tile\\NIR\\frame0033.png"
+    },
+    {
+      "sample": "frame0033",
+      "band": "RE",
+      "png_mode": "L",
+      "size_wh": [
+        480,
+        360
+      ],
+      "info_keys": [],
+      "file": "D:\\HOCTAP\\abc\\WeedsGalore_baseline\\WeedsGalore_Ipr28\\weedmap_tiles_full\\Tiles\\RedEdge\\003\\003\\tile\\RE\\frame0033.png"
+    }
+  ],
+  "orthomosaic_tiff_count_found": 0,
+  "orthomosaic_tiff_examples": [],
+  "png_export_formula_verified": false,
+  "source_compatible_fixed_transform_verified": false,
+  "no_target_fitted_transform": true,
+  "model_inference_run": false,
+  "next_required_evidence": "Publisher/author code or release documentation for 8-bit tile PNG encoding and fixed reflectance mapping"
+}

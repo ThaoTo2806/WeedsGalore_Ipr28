@@ -1,0 +1,150 @@
+{
+  "kind": "READ_ONLY_KAGGLE_AUDIT_NOT_TEST_AUTHORIZATION",
+  "generated_at_utc": "2026-11-05T12:21:38.173137+00:00",
+  "files": {
+    "L0_s0/best_val.pth": [],
+    "L0_s0/run_config.json": [
+      {
+        "path": "D:\\HOCTAP\\abc\\WeedsGalore_baseline\\WeedsGalore_Ipr28\\doc\\exp01_results\\results\\exp01\\runs_meta\\L0_s0\\run_config.json",
+        "size_bytes": 2321,
+        "sha256": "6a4bab13e7978ef65aab14f4aa16de83c7e59bb6133416f180d942572be398d0"
+      }
+    ],
+    "L0_s1/best_val.pth": [],
+    "L0_s1/run_config.json": [
+      {
+        "path": "D:\\HOCTAP\\abc\\WeedsGalore_baseline\\WeedsGalore_Ipr28\\doc\\exp01_results\\results\\exp01\\runs_meta\\L0_s1\\run_config.json",
+        "size_bytes": 2321,
+        "sha256": "b003fb2c9782357efd522d56092b0372eccbfa3cb24de49ca8c70c7fe9610505"
+      }
+    ],
+    "L0_s2/best_val.pth": [],
+    "L0_s2/run_config.json": [
+      {
+        "path": "D:\\HOCTAP\\abc\\WeedsGalore_baseline\\WeedsGalore_Ipr28\\doc\\exp03_results\\results\\exp03\\runs_meta\\L0_s2\\run_config.json",
+        "size_bytes": 2340,
+        "sha256": "e9a3bd90bd157416deee0e430c134cba3309d3a9c9866ed9fb0b90f9f977236b"
+      }
+    ],
+    "L0_s3/best_val.pth": [],
+    "L0_s3/run_config.json": [
+      {
+        "path": "D:\\HOCTAP\\abc\\WeedsGalore_baseline\\WeedsGalore_Ipr28\\doc\\exp06_results\\results\\exp06\\runs_meta\\L0_s3\\run_config.json",
+        "size_bytes": 2525,
+        "sha256": "cc96022f793d5c718ccbd3367ecb4c31c37a521ebd9aa67dfabaa4a714fd3b6f"
+      }
+    ],
+    "L0_s4/best_val.pth": [],
+    "L0_s4/run_config.json": [
+      {
+        "path": "D:\\HOCTAP\\abc\\WeedsGalore_baseline\\WeedsGalore_Ipr28\\doc\\exp06_results\\results\\exp06\\runs_meta\\L0_s4\\run_config.json",
+        "size_bytes": 2525,
+        "sha256": "9a3391dfff31937d90a0b9e61147ab3c74ec6361b2f839a71a4b84ce6422fdd4"
+      }
+    ],
+    "OccCondg_s0/best_val.pth": [],
+    "OccCondg_s0/run_config.json": [
+      {
+        "path": "D:\\HOCTAP\\abc\\WeedsGalore_baseline\\WeedsGalore_Ipr28\\doc\\exp07_results\\results\\exp07\\runs_meta\\OccCondg_s0\\run_config.json",
+        "size_bytes": 2549,
+        "sha256": "9d318cfa10d2de1755e3e1f83b290aa5b65779243fd4398795d4441fa1b1ecba"
+      }
+    ],
+    "OccCondg_s1/best_val.pth": [],
+    "OccCondg_s1/run_config.json": [
+      {
+        "path": "D:\\HOCTAP\\abc\\WeedsGalore_baseline\\WeedsGalore_Ipr28\\doc\\exp07_results\\results\\exp07\\runs_meta\\OccCondg_s1\\run_config.json",
+        "size_bytes": 2549,
+        "sha256": "9f7ba78dad52b8ff4e48b56a1e3177ef3ec5f3173ac36cc0486d4ba2667e80f3"
+      }
+    ],
+    "OccCondg_s2/best_val.pth": [],
+    "OccCondg_s2/run_config.json": [
+      {
+        "path": "D:\\HOCTAP\\abc\\WeedsGalore_baseline\\WeedsGalore_Ipr28\\doc\\exp07_results\\results\\exp07\\runs_meta\\OccCondg_s2\\run_config.json",
+        "size_bytes": 2549,
+        "sha256": "cd0e962d8479142bfc46c6211d3beeb33010355244b1b176ed6d294fdb242f11"
+      }
+    ],
+    "OccCondg_s3/best_val.pth": [],
+    "OccCondg_s3/run_config.json": [
+      {
+        "path": "D:\\HOCTAP\\abc\\WeedsGalore_baseline\\WeedsGalore_Ipr28\\doc\\exp07_results\\results\\exp07\\runs_meta\\OccCondg_s3\\run_config.json",
+        "size_bytes": 2549,
+        "sha256": "d0937d205f83359945376f0b11cc3643fff209d5bfddc3690e7b025d443fcbf1"
+      }
+    ],
+    "OccCondg_s4/best_val.pth": [],
+    "OccCondg_s4/run_config.json": [
+      {
+        "path": "D:\\HOCTAP\\abc\\WeedsGalore_baseline\\WeedsGalore_Ipr28\\doc\\exp07_results\\results\\exp07\\runs_meta\\OccCondg_s4\\run_config.json",
+        "size_bytes": 2549,
+        "sha256": "00ad3254a264acb3f4edc29bdd31d214f57deebd2daa29ea4d158bb8d7f66239"
+      }
+    ],
+    "MCSDg_s0/best_val.pth": [],
+    "MCSDg_s0/run_config.json": [
+      {
+        "path": "D:\\HOCTAP\\abc\\WeedsGalore_baseline\\WeedsGalore_Ipr28\\doc\\exp05_results\\results\\exp05\\runs_meta\\MCSDg_s0\\run_config.json",
+        "size_bytes": 2529,
+        "sha256": "e84887f4b088d8c910e2ba603f6bcf491cd74629f11ed638fbadd8ae832274b7"
+      }
+    ],
+    "MCSDg_s1/best_val.pth": [],
+    "MCSDg_s1/run_config.json": [
+      {
+        "path": "D:\\HOCTAP\\abc\\WeedsGalore_baseline\\WeedsGalore_Ipr28\\doc\\exp05_results\\results\\exp05\\runs_meta\\MCSDg_s1\\run_config.json",
+        "size_bytes": 2529,
+        "sha256": "88a7f5bb2a210d65453809ac5eee264c5fa04bbf64d76dfcf11e01fd44439d3d"
+      }
+    ],
+    "MCSDg_s2/best_val.pth": [],
+    "MCSDg_s2/run_config.json": [
+      {
+        "path": "D:\\HOCTAP\\abc\\WeedsGalore_baseline\\WeedsGalore_Ipr28\\doc\\exp05_results\\results\\exp05\\runs_meta\\MCSDg_s2\\run_config.json",
+        "size_bytes": 2529,
+        "sha256": "36523c22d9ac4aa5df9024c122015f158a6e6e6d4a8f989d3fe1b04b873847f0"
+      }
+    ],
+    "MCSDg_s3/best_val.pth": [],
+    "MCSDg_s3/run_config.json": [
+      {
+        "path": "D:\\HOCTAP\\abc\\WeedsGalore_baseline\\WeedsGalore_Ipr28\\doc\\exp06_results\\results\\exp06\\runs_meta\\MCSDg_s3\\run_config.json",
+        "size_bytes": 2529,
+        "sha256": "c40903d6fde2ca2491ce5abe7fa7389fe30cfda07446cbf1422422951627d12c"
+      }
+    ],
+    "MCSDg_s4/best_val.pth": [],
+    "MCSDg_s4/run_config.json": [
+      {
+        "path": "D:\\HOCTAP\\abc\\WeedsGalore_baseline\\WeedsGalore_Ipr28\\doc\\exp06_results\\results\\exp06\\runs_meta\\MCSDg_s4\\run_config.json",
+        "size_bytes": 2529,
+        "sha256": "7fc63f8d8bafac4fd908d1010bb3d74f3461a524d93dfe07ae82d155bfef79de"
+      }
+    ]
+  },
+  "missing": [
+    "L0_s0/best_val.pth",
+    "L0_s1/best_val.pth",
+    "L0_s2/best_val.pth",
+    "L0_s3/best_val.pth",
+    "L0_s4/best_val.pth",
+    "OccCondg_s0/best_val.pth",
+    "OccCondg_s1/best_val.pth",
+    "OccCondg_s2/best_val.pth",
+    "OccCondg_s3/best_val.pth",
+    "OccCondg_s4/best_val.pth",
+    "MCSDg_s0/best_val.pth",
+    "MCSDg_s1/best_val.pth",
+    "MCSDg_s2/best_val.pth",
+    "MCSDg_s3/best_val.pth",
+    "MCSDg_s4/best_val.pth"
+  ],
+  "conflicting_duplicates": [],
+  "preflight_exists": false,
+  "acceptance_exists": false,
+  "test_started_exists": false,
+  "radiometry_verified": false,
+  "mask_polarity_verified": false,
+  "authorization": "NO_GO_K8_2_K8_3"
+}
