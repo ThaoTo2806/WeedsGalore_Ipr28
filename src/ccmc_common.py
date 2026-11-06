@@ -5,7 +5,8 @@ from absl import flags
 
 from nets import CCMCSegFormer, SegFormer5Band
 from nets.mcsd import MCSDSegFormer
-from nets.llr_subcell import LLR_SUBCELL_HEADS, LLRSubcellSegFormer
+from nets.llr_subcell import (LLR_RESIDUAL_HEADS, LLR_SUBCELL_HEADS,
+                               LLRResidualSubcellSegFormer, LLRSubcellSegFormer)
 
 
 def define_model_flags():
@@ -25,14 +26,26 @@ def define_model_flags():
     flags.DEFINE_list('ccmc_stages', ['2', '3'], 'modulated stages (1-based)')
     flags.DEFINE_float('ccmc_eps', 0.1, 'eps floor')
     flags.DEFINE_enum('head', 'bilinear', ['bilinear', 'mcsd', 'pixelshuffle', 'occ_conditioned',
-                                           *LLR_SUBCELL_HEADS],
+                                           *LLR_SUBCELL_HEADS, *LLR_RESIDUAL_HEADS],
                       'prediction head')
     flags.DEFINE_integer('sinkhorn_iters', 5, 'Sinkhorn iterations (mcsd)')
     flags.DEFINE_float('mcsd_tau', 1.0, 'placement temperature (mcsd)')
     flags.DEFINE_boolean('spectral_guide', False, 'raw-band placement prior (mcsd)')
+    flags.DEFINE_float('beta', 0.5, 'fixed occupancy guidance strength for LLR residual heads')
+    flags.DEFINE_float('residual_alpha_init', 0.02, 'initial sigmoid gate for LLR residual heads')
 
 
 def build_model(F):
+    if F.head in LLR_RESIDUAL_HEADS:
+        if F.ccmc or not F.use_low_level_refine or F.llr_source != 'raw' or F.spectral_guide:
+            raise ValueError('LLR residual heads require --ccmc=False --use_low_level_refine=True '
+                             '--llr_source=raw --spectral_guide=False')
+        return LLRResidualSubcellSegFormer(
+            num_classes=F.num_classes, in_channels=F.in_channels,
+            use_multiscale_fusion=F.use_multiscale_fusion, head=F.head,
+            beta=F.beta, residual_alpha_init=F.residual_alpha_init,
+            pretrained_backbone=True,
+        )
     if F.head in LLR_SUBCELL_HEADS:
         if F.ccmc or not F.use_low_level_refine or F.llr_source != 'raw' or F.spectral_guide:
             raise ValueError('2x2 LLR heads require --ccmc=False --use_low_level_refine=True '

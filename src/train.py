@@ -12,7 +12,8 @@ from nets import (deeplabv3plus_resnet50, deeplabv3plus_resnet50_do,
                   SegFormer5Band, UNet, CCMCSegFormer)
 from nets.ccmc_sr import GT_MODES, aux_target
 from nets.mcsd import MCSDSegFormer, occupancy_loss
-from nets.llr_subcell import LLR_SUBCELL_HEADS, LLRSubcellSegFormer
+from nets.llr_subcell import (LLR_RESIDUAL_HEADS, LLR_SUBCELL_HEADS,
+                               LLRResidualSubcellSegFormer, LLRSubcellSegFormer)
 from pathlib import Path
 import hashlib
 import json
@@ -134,12 +135,14 @@ flags.DEFINE_float('lam_lr', 0.0, 'separate Adam lr for the lambda logits (0 = s
 flags.DEFINE_float('aux_weight', 0.3, 'weight of the prior aux BCE loss (learned_veg/learned_weed)')
 # --- MCSD: mass-conserving sub-cell decoding (src/nets/mcsd.py) ---
 flags.DEFINE_enum('head', 'bilinear', ['bilinear', 'mcsd', 'pixelshuffle', 'occ_conditioned',
-                                       *LLR_SUBCELL_HEADS],
+                                       *LLR_SUBCELL_HEADS, *LLR_RESIDUAL_HEADS],
                   'prediction head; *2 heads replace bilinear on the raw-LLR H/2 feature')
 flags.DEFINE_integer('sinkhorn_iters', 5, 'Sinkhorn iterations per cell (mcsd)')
 flags.DEFINE_float('mcsd_tau', 1.0, 'temperature of the placement scores (mcsd)')
 flags.DEFINE_boolean('spectral_guide', False, 'add a full-resolution placement prior from the raw bands')
 flags.DEFINE_float('occ_weight', 0.3, 'weight of the cell-occupancy soft-CE loss (mcsd/pixelshuffle)')
+flags.DEFINE_float('beta', 0.5, 'fixed occupancy guidance strength for LLR residual heads')
+flags.DEFINE_float('residual_alpha_init', 0.02, 'initial sigmoid gate for LLR residual heads')
 flags.DEFINE_string('run_name', '', 'run id written to run_config.json (e.g. L3__seed0)')
 flags.DEFINE_boolean('resume', False, 'resume from <out_dir>/last.pth if it exists')
 flags.DEFINE_boolean('detect_anomaly', False, 'torch.autograd anomaly detection (very slow, debug only)')
@@ -260,7 +263,21 @@ def main(_):
                                 num_workers=FLAGS.num_workers, collate_fn=None, drop_last=False)
 
     # Network
-    if FLAGS.head in LLR_SUBCELL_HEADS:
+    if FLAGS.head in LLR_RESIDUAL_HEADS:
+        if (FLAGS.ccmc or not FLAGS.segformer or not FLAGS.use_low_level_refine
+            or FLAGS.llr_source != 'raw' or FLAGS.spectral_guide):
+            raise SystemExit('LLR residual heads require --ccmc=False --segformer=True '
+                     '--use_low_level_refine=True --llr_source=raw --spectral_guide=False')
+        net = LLRResidualSubcellSegFormer(
+            num_classes=FLAGS.num_classes,
+            in_channels=FLAGS.in_channels,
+            use_multiscale_fusion=FLAGS.use_multiscale_fusion,
+            pretrained_backbone=FLAGS.pretrained_backbone,
+            head=FLAGS.head,
+            beta=FLAGS.beta,
+            residual_alpha_init=FLAGS.residual_alpha_init,
+        )
+    elif FLAGS.head in LLR_SUBCELL_HEADS:
         if (FLAGS.ccmc or not FLAGS.segformer or not FLAGS.use_low_level_refine
             or FLAGS.llr_source != 'raw' or FLAGS.spectral_guide):
             raise SystemExit('LLR 2x2 heads require --ccmc=False --segformer=True '
