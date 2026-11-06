@@ -1,0 +1,9 @@
+OccCondg vs L0 | seeds=5 | cluster=image (n=26) | seed_bootstrap=True
+metric                    A        B    delta   95% CI           P(d<=0)
+SmallWeedRecall       59.03    48.48   +10.55   [ +6.39, +14.84]   0.0
+cov_small             68.61    61.06    +7.55   [ +2.97, +12.47]   0.0009
+mIoU                  83.57    82.69    +0.88   [ +0.42,  +1.54]   0.0004
+IoU_weed              76.39    75.13    +1.26   [ +0.59,  +2.53]   0.0002
+IoU_crop              76.04    74.80    +1.23   [ +0.47,  +2.04]   0.0024
+BIoU_weed             54.70    51.78    +2.92   [ +1.62,  +4.54]   0.0
+PrecisionWeed         82.10    81.22    +0.89   [ -0.22,  +2.32]   0.0559

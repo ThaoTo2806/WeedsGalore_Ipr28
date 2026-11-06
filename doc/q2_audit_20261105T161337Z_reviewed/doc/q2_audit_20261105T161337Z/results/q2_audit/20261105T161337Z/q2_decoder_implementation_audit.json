@@ -1,0 +1,525 @@
+{
+  "status": "SOURCE_CAPTURED_MANUAL_REVIEW_REQUIRED",
+  "git_head": "5605a9978216bd0eecf1879de741d336f7d0afb4",
+  "source_sha256": {
+    "src/nets/mcsd.py": "ed2626dc6c992848ae9431764f31cf78a94a56c768d7694181cec7ab56a6163e",
+    "src/train.py": "ef68720c8c2b626c52c47c9e4b6de92cbeb60bf1b5f70f5f27d8bab58a8ab3ac",
+    "src/evaluate_ccmc.py": "9e47a85e65e55fb00bc48e9653a66c9eae9b3398bb47535387272b21c6eb24b4"
+  },
+  "source_excerpts": {
+    "src/nets/mcsd.py": {
+      "sinkhorn_subcell": {
+        "start_line": 39,
+        "end_line": 57,
+        "text": "def sinkhorn_subcell(log_q, scores, iters=5, tau=1.0):\n    \"\"\"Log-domain Sinkhorn per cell.\n\n    log_q:  (B, C, h, w) log class fractions (log_softmax over C).\n    scores: (B, C, R2, h, w) placement scores, R2 = r*r sub-pixels.\n    Returns log P (B, C, R2, h, w) with sum_C P = 1 exactly and sum_R2 P ~= R2 * q.\n    \"\"\"\n    r2 = scores.shape[2]\n    log_k = scores.float() / tau\n    log_rows = log_q.float().unsqueeze(2) + torch.log(torch.tensor(float(r2), device=log_k.device))\n    log_v = torch.zeros_like(log_k[:, :1])          # (B, 1, R2, h, w): column scalings\n    log_u = torch.zeros_like(log_k[:, :, :1])       # (B, C, 1, h, w):  row scalings\n    for _ in range(iters):\n        log_u = log_rows - torch.logsumexp(log_k + log_v, dim=2, keepdim=True)\n        log_v = -torch.logsumexp(log_k + log_u, dim=1, keepdim=True)  # columns sum to 1\n    return log_k + log_u + log_v\n\n\ndef occupancy_conditioned_subcell(log_q, scores, tau=1.0):"
+      },
+      "occupancy_conditioned_subcell": {
+        "start_line": 57,
+        "end_line": 63,
+        "text": "def occupancy_conditioned_subcell(log_q, scores, tau=1.0):\n    \"\"\"Normalize occupancy-conditioned placement scores independently per sub-pixel.\"\"\"\n    logits = log_q.float().unsqueeze(2) + scores.float() / tau\n    return F.log_softmax(logits, dim=1)\n\n\nclass MCSDSegFormer(SegFormer5Band):"
+      },
+      "forward_subcell_path": {
+        "start_line": 114,
+        "end_line": 128,
+        "text": "        if self.guide is not None:\n            full = F.pixel_shuffle(scores, r) + self.guide(x)   # (B, C, H, W)\n            scores = F.pixel_unshuffle(full, r)\n        c = self.num_classes\n        scores = scores.view(b, c, r * r, h, w)               # channel = c*r*r + (i*r + j)\n        if self.head == 'mcsd':\n            log_p = sinkhorn_subcell(F.log_softmax(occ_logits.float(), dim=1), scores,\n                                     self.sinkhorn_iters, self.tau)\n        elif self.head == 'occ_conditioned':\n            log_q = F.log_softmax(occ_logits.float(), dim=1)\n            log_p = occupancy_conditioned_subcell(log_q, scores, self.tau)\n        else:  # pixelshuffle control: per-pixel softmax, no occupancy conditioning\n            log_p = F.log_softmax(scores.float(), dim=1)\n        out = F.pixel_shuffle(log_p.reshape(b, c * r * r, h, w), r)\n        return (out, {'occ_logits': occ_logits}) if return_aux else out"
+      },
+      "occupancy_loss": {
+        "start_line": 131,
+        "end_line": 139,
+        "text": "def occupancy_loss(occ_logits, labels, num_classes):\n    \"\"\"Soft cross-entropy between predicted cell fractions and GT class fractions.\"\"\"\n    onehot = F.one_hot(labels.clamp(min=0).long(), num_classes).permute(0, 3, 1, 2).float()\n    valid = (labels >= 0).float().unsqueeze(1)\n    target = F.adaptive_avg_pool2d(onehot * valid, occ_logits.shape[-2:])\n    mass = target.sum(1, keepdim=True)\n    target = target / mass.clamp(min=1e-6)\n    loss = -(target * F.log_softmax(occ_logits.float(), dim=1)).sum(1)\n    return (loss * (mass.squeeze(1) > 0)).mean()"
+      }
+    },
+    "src/train.py": {
+      "auxiliary_loss_flags": {
+        "start_line": 341,
+        "end_line": 379,
+        "text": "    use_aux = FLAGS.ccmc and FLAGS.prior_mode in ('learned_veg', 'learned_weed') and FLAGS.aux_weight > 0\n    use_occ = FLAGS.head != 'bilinear' and FLAGS.occ_weight > 0\n    bce = torch.nn.BCEWithLogitsLoss()\n    run_config = {'run_name': FLAGS.run_name, 'split_hash': split_hash(), 'env': environment_info(),\n                  'flags': FLAGS.flag_values_dict(),\n                  'num_params': sum(p.numel() for p in net.parameters()),\n                  'uses_gt_prior': is_oracle, 'aux_loss': use_aux}\n    with open(f'{FLAGS.out_dir}/run_config.json', 'w') as f:\n        json.dump(run_config, f, indent=2, default=str)\n    history_path = f'{FLAGS.out_dir}/history.jsonl'\n\n    if FLAGS.detect_anomaly:\n        torch.autograd.set_detect_anomaly(True)\n\n    start_epoch, best_epoch = 0, -1\n    last_path = f'{FLAGS.out_dir}/last.pth'\n    if FLAGS.resume and os.path.exists(last_path):\n        state = torch.load(last_path, map_location=device, weights_only=False)\n        net.load_state_dict(state['model'])\n        optimizer.load_state_dict(state['optimizer'])\n        data_generator.set_state(state['data_generator'])\n        torch.set_rng_state(state['torch_rng'])\n        if torch.cuda.is_available() and state.get('cuda_rng') is not None:\n            torch.cuda.set_rng_state_all(state['cuda_rng'])\n        np.random.set_state(state['numpy_rng'])\n        random.setstate(state['python_rng'])\n        start_epoch, tot_iter = state['epoch'] + 1, state['tot_iter']\n        best_val_miou, best_epoch = state['best_val_miou'], state['best_epoch']\n        print(f'Resumed from {last_path} at epoch {start_epoch} (best {best_val_miou:.2f}% @ {best_epoch})')\n\n    def forward_train(features, labels, binary_labels):\n        if FLAGS.head != 'bilinear':\n            return net(features, return_aux=True)\n        if not FLAGS.ccmc:\n            return net(features), None\n        prior_mask = binary_labels if is_oracle else None\n        return net(features, prior_mask=prior_mask, return_aux=True)\n\n    # Train"
+      },
+      "training_forward": {
+        "start_line": 371,
+        "end_line": 379,
+        "text": "    def forward_train(features, labels, binary_labels):\n        if FLAGS.head != 'bilinear':\n            return net(features, return_aux=True)\n        if not FLAGS.ccmc:\n            return net(features), None\n        prior_mask = binary_labels if is_oracle else None\n        return net(features, prior_mask=prior_mask, return_aux=True)\n\n    # Train"
+      },
+      "occupancy_auxiliary_loss": {
+        "start_line": 410,
+        "end_line": 414,
+        "text": "            if use_occ:\n                occ_loss = occupancy_loss(extras['occ_logits'], labels, FLAGS.num_classes)\n                loss = loss + FLAGS.occ_weight * occ_loss\n                epoch_aux += occ_loss.item()\n            epoch_steps += 1"
+      },
+      "validation_loop": {
+        "start_line": 447,
+        "end_line": 461,
+        "text": "        net.eval()\n        val_evaluator.reset()\n        with torch.no_grad():\n            for features, unique_labels, binary_labels in val_dataloader:\n                labels = binary_labels if FLAGS.num_classes == 3 else unique_labels\n                features, labels = features.to(device), labels.to(device)\n                if FLAGS.ccmc:\n                    # Oracle (C2/C3) models read GT of the val image: label leakage, diagnostic only.\n                    prior_mask = binary_labels.to(device) if is_oracle else None\n                    predictions = net(features, prior_mask=prior_mask).argmax(dim=1)\n                else:\n                    predictions = net(features).argmax(dim=1)\n                val_evaluator.update(predictions, labels)\n\n        val_scores = val_evaluator.compute() * 100"
+      }
+    },
+    "src/evaluate_ccmc.py": {
+      "test_confirmation_guard": {
+        "start_line": 53,
+        "end_line": 60,
+        "text": "    if FLAGS.split == 'test' and not FLAGS.confirm_test_locked:\n        raise SystemExit('Refusing to evaluate on TEST: set --confirm_test_locked=True only after '\n                         'the configuration is frozen on validation (single final run).')\n    if FLAGS.num_classes != 3:\n        raise SystemExit('CCMC-SR evaluation expects num_classes=3')\n    if FLAGS.head != 'bilinear':\n        FLAGS.ccmc = False  # MCSD / pixelshuffle heads are SegFormer5Band-based, no prior\n    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')"
+      }
+    }
+  },
+  "run_configs": {
+    "L0_s0": {
+      "status": "MISSING",
+      "checkpoint": {
+        "status": "FOUND",
+        "sha256": "e408cc6311fc156afed559267873a110df4f91d7779a6353a5d1bed90ee353ae",
+        "path": "/kaggle/input/datasets/thothanh28/ccmc-ckpts/runs/L0_s0/best_val.pth"
+      }
+    },
+    "L0_s1": {
+      "status": "MISSING",
+      "checkpoint": {
+        "status": "FOUND",
+        "sha256": "b86f062c302811aba0418703457d59f569d6cb44df48f01010bb39767184e598",
+        "path": "/kaggle/input/datasets/thothanh28/ccmc-ckpts/runs/L0_s1/best_val.pth"
+      }
+    },
+    "L0_s2": {
+      "status": "MISSING",
+      "checkpoint": {
+        "status": "FOUND",
+        "sha256": "ec5521526a3da854a3f885ad1124b85c0ce8a901772502f0e96d3566b574980a",
+        "path": "/kaggle/input/datasets/thothanh28/exp03-ckpts/runs/L0_s2/best_val.pth"
+      }
+    },
+    "L0_s3": {
+      "status": "FOUND",
+      "path": "doc/exp06_results/results/exp06/runs_meta/L0_s3/run_config.json",
+      "sha256": "cc96022f793d5c718ccbd3367ecb4c31c37a521ebd9aa67dfabaa4a714fd3b6f",
+      "checkpoint": {
+        "status": "FOUND",
+        "sha256": "b7206137afed490a11d111cb9df4084baaff71fd7858a155af35af21b126beff",
+        "path": "/kaggle/input/datasets/thothanh28/exp06-ckpts/runs/L0_s3/best_val.pth"
+      },
+      "split_hash": "675667edf3f35f16",
+      "flags": {
+        "seed": 3,
+        "head": "bilinear",
+        "ccmc": true,
+        "in_channels": 5,
+        "num_classes": 3,
+        "spectral_guide": false,
+        "sinkhorn_iters": 5,
+        "mcsd_tau": 1.0,
+        "occ_weight": 0.3
+      }
+    },
+    "L0_s4": {
+      "status": "FOUND",
+      "path": "doc/exp06_results/results/exp06/runs_meta/L0_s4/run_config.json",
+      "sha256": "9a3391dfff31937d90a0b9e61147ab3c74ec6361b2f839a71a4b84ce6422fdd4",
+      "checkpoint": {
+        "status": "FOUND",
+        "sha256": "0f88fe5d641323acbbd802e664ece0163ae7846527a94bb41aa9be3c40362047",
+        "path": "/kaggle/input/datasets/thothanh28/exp06-ckpts/runs/L0_s4/best_val.pth"
+      },
+      "split_hash": "675667edf3f35f16",
+      "flags": {
+        "seed": 4,
+        "head": "bilinear",
+        "ccmc": true,
+        "in_channels": 5,
+        "num_classes": 3,
+        "spectral_guide": false,
+        "sinkhorn_iters": 5,
+        "mcsd_tau": 1.0,
+        "occ_weight": 0.3
+      }
+    },
+    "PS_s0": {
+      "status": "MISSING",
+      "checkpoint": {
+        "status": "FOUND",
+        "sha256": "7fc270eaa52bfbff9a72d499219a2b4932eef461dd6a5f0ff74b03c3aad6027b",
+        "path": "/kaggle/input/datasets/thothanh28/exp05-ckpts/runs/PS_s0/best_val.pth"
+      }
+    },
+    "PS_s1": {
+      "status": "MISSING",
+      "checkpoint": {
+        "status": "FOUND",
+        "sha256": "3bb00607005a145d1316f0a70855992fe685d65c13baacf624d1b0dc672aa3e2",
+        "path": "/kaggle/input/datasets/thothanh28/exp05-ckpts/runs/PS_s1/best_val.pth"
+      }
+    },
+    "PS_s2": {
+      "status": "MISSING",
+      "checkpoint": {
+        "status": "FOUND",
+        "sha256": "ed038323aa33936f193b103ce7e717c6b37d794065cc7c54c4399d377301c99c",
+        "path": "/kaggle/input/datasets/thothanh28/exp05-ckpts/runs/PS_s2/best_val.pth"
+      }
+    },
+    "PS_s3": {
+      "status": "FOUND",
+      "path": "doc/exp06_results/results/exp06/runs_meta/PS_s3/run_config.json",
+      "sha256": "5e72da642e49f27a09ca39f024d0baa3d89fd75b8df372cd81306ea747f3b838",
+      "checkpoint": {
+        "status": "FOUND",
+        "sha256": "55866e0679d33df8abaa16b357db3c96480f1545c2aea383c7b5731f979b25af",
+        "path": "/kaggle/input/datasets/thothanh28/exp06-ckpts/runs/PS_s3/best_val.pth"
+      },
+      "split_hash": "675667edf3f35f16",
+      "flags": {
+        "seed": 3,
+        "head": "pixelshuffle",
+        "ccmc": false,
+        "in_channels": 5,
+        "num_classes": 3,
+        "spectral_guide": false,
+        "sinkhorn_iters": 5,
+        "mcsd_tau": 1.0,
+        "occ_weight": 0.3
+      }
+    },
+    "PS_s4": {
+      "status": "FOUND",
+      "path": "doc/exp06_results/results/exp06/runs_meta/PS_s4/run_config.json",
+      "sha256": "742832b8c6ef76f905b171b25591ad87dfb2c9f11af93c827edf7cfd8f9499c9",
+      "checkpoint": {
+        "status": "FOUND",
+        "sha256": "157578c3d9c5b5937b2bae9cd1906a55455fdda981abc86d674c8a16db883de5",
+        "path": "/kaggle/input/datasets/thothanh28/exp06-ckpts/runs/PS_s4/best_val.pth"
+      },
+      "split_hash": "675667edf3f35f16",
+      "flags": {
+        "seed": 4,
+        "head": "pixelshuffle",
+        "ccmc": false,
+        "in_channels": 5,
+        "num_classes": 3,
+        "spectral_guide": false,
+        "sinkhorn_iters": 5,
+        "mcsd_tau": 1.0,
+        "occ_weight": 0.3
+      }
+    },
+    "MCSDg_s0": {
+      "status": "MISSING",
+      "checkpoint": {
+        "status": "FOUND",
+        "sha256": "ff2c0f7d5b3b711c761bbea62740224c2350adb422990dc393040f6515313ba1",
+        "path": "/kaggle/input/datasets/thothanh28/exp05-ckpts/runs/MCSDg_s0/best_val.pth"
+      }
+    },
+    "MCSDg_s1": {
+      "status": "MISSING",
+      "checkpoint": {
+        "status": "FOUND",
+        "sha256": "8f4baf60819fec101abea8d7b9291585a34a4223f2b7edd14a1a1715e5b636d1",
+        "path": "/kaggle/input/datasets/thothanh28/exp05-ckpts/runs/MCSDg_s1/best_val.pth"
+      }
+    },
+    "MCSDg_s2": {
+      "status": "MISSING",
+      "checkpoint": {
+        "status": "FOUND",
+        "sha256": "89b3ca1ae700faf337fbc913cc3b894ca22785ed8c82cfeb02e0dc4451e39daf",
+        "path": "/kaggle/input/datasets/thothanh28/exp05-ckpts/runs/MCSDg_s2/best_val.pth"
+      }
+    },
+    "MCSDg_s3": {
+      "status": "FOUND",
+      "path": "doc/exp06_results/results/exp06/runs_meta/MCSDg_s3/run_config.json",
+      "sha256": "c40903d6fde2ca2491ce5abe7fa7389fe30cfda07446cbf1422422951627d12c",
+      "checkpoint": {
+        "status": "FOUND",
+        "sha256": "a7681dd2803cbfc042f8b227d020fb80303035a0c9cc80abf6f020cc2ec5ad3d",
+        "path": "/kaggle/input/datasets/thothanh28/exp06-ckpts/runs/MCSDg_s3/best_val.pth"
+      },
+      "split_hash": "675667edf3f35f16",
+      "flags": {
+        "seed": 3,
+        "head": "mcsd",
+        "ccmc": false,
+        "in_channels": 5,
+        "num_classes": 3,
+        "spectral_guide": true,
+        "sinkhorn_iters": 5,
+        "mcsd_tau": 1.0,
+        "occ_weight": 0.3
+      }
+    },
+    "MCSDg_s4": {
+      "status": "FOUND",
+      "path": "doc/exp06_results/results/exp06/runs_meta/MCSDg_s4/run_config.json",
+      "sha256": "7fc63f8d8bafac4fd908d1010bb3d74f3461a524d93dfe07ae82d155bfef79de",
+      "checkpoint": {
+        "status": "FOUND",
+        "sha256": "b536ff2eedc67f7c1b2539a1b40219e14e746f801df98d528e086008ebd53499",
+        "path": "/kaggle/input/datasets/thothanh28/exp06-ckpts/runs/MCSDg_s4/best_val.pth"
+      },
+      "split_hash": "675667edf3f35f16",
+      "flags": {
+        "seed": 4,
+        "head": "mcsd",
+        "ccmc": false,
+        "in_channels": 5,
+        "num_classes": 3,
+        "spectral_guide": true,
+        "sinkhorn_iters": 5,
+        "mcsd_tau": 1.0,
+        "occ_weight": 0.3
+      }
+    },
+    "OccCondg_s0": {
+      "status": "FOUND",
+      "path": "doc/exp07_results/results/exp07/runs_meta/OccCondg_s0/run_config.json",
+      "sha256": "9d318cfa10d2de1755e3e1f83b290aa5b65779243fd4398795d4441fa1b1ecba",
+      "checkpoint": {
+        "status": "FOUND",
+        "sha256": "2607b8cb18cc74b3d170cc1d796ecd1ba1b44744c36a23fa46429bb4b0ac8ad0",
+        "path": "/kaggle/input/datasets/phpadmin123/exp07-occcond-ckpts/runs/OccCondg_s0/best_val.pth"
+      },
+      "split_hash": "675667edf3f35f16",
+      "flags": {
+        "seed": 0,
+        "head": "occ_conditioned",
+        "ccmc": false,
+        "in_channels": 5,
+        "num_classes": 3,
+        "spectral_guide": true,
+        "sinkhorn_iters": 5,
+        "mcsd_tau": 1.0,
+        "occ_weight": 0.3
+      }
+    },
+    "OccCondg_s1": {
+      "status": "FOUND",
+      "path": "doc/exp07_results/results/exp07/runs_meta/OccCondg_s1/run_config.json",
+      "sha256": "9f7ba78dad52b8ff4e48b56a1e3177ef3ec5f3173ac36cc0486d4ba2667e80f3",
+      "checkpoint": {
+        "status": "FOUND",
+        "sha256": "6dd0ead2cf69f9d9ade9291527a6b06783da926af48fa05c22f070232dce6c6a",
+        "path": "/kaggle/input/datasets/phpadmin123/exp07-occcond-ckpts/runs/OccCondg_s1/best_val.pth"
+      },
+      "split_hash": "675667edf3f35f16",
+      "flags": {
+        "seed": 1,
+        "head": "occ_conditioned",
+        "ccmc": false,
+        "in_channels": 5,
+        "num_classes": 3,
+        "spectral_guide": true,
+        "sinkhorn_iters": 5,
+        "mcsd_tau": 1.0,
+        "occ_weight": 0.3
+      }
+    },
+    "OccCondg_s2": {
+      "status": "FOUND",
+      "path": "doc/exp07_results/results/exp07/runs_meta/OccCondg_s2/run_config.json",
+      "sha256": "cd0e962d8479142bfc46c6211d3beeb33010355244b1b176ed6d294fdb242f11",
+      "checkpoint": {
+        "status": "FOUND",
+        "sha256": "fb21d1ab337a36c9a0d5f20832f7711736a93a4e10fca5518fa9dde495fb8409",
+        "path": "/kaggle/input/datasets/phpadmin123/exp07-occcond-ckpts/runs/OccCondg_s2/best_val.pth"
+      },
+      "split_hash": "675667edf3f35f16",
+      "flags": {
+        "seed": 2,
+        "head": "occ_conditioned",
+        "ccmc": false,
+        "in_channels": 5,
+        "num_classes": 3,
+        "spectral_guide": true,
+        "sinkhorn_iters": 5,
+        "mcsd_tau": 1.0,
+        "occ_weight": 0.3
+      }
+    },
+    "OccCondg_s3": {
+      "status": "FOUND",
+      "path": "doc/exp07_results/results/exp07/runs_meta/OccCondg_s3/run_config.json",
+      "sha256": "d0937d205f83359945376f0b11cc3643fff209d5bfddc3690e7b025d443fcbf1",
+      "checkpoint": {
+        "status": "FOUND",
+        "sha256": "8f9a5712cecc7b01a3a645022e5dda0b9c25e752600b59d56a0bb7ff1397baf1",
+        "path": "/kaggle/input/datasets/phpadmin123/exp07-occcond-ckpts/runs/OccCondg_s3/best_val.pth"
+      },
+      "split_hash": "675667edf3f35f16",
+      "flags": {
+        "seed": 3,
+        "head": "occ_conditioned",
+        "ccmc": false,
+        "in_channels": 5,
+        "num_classes": 3,
+        "spectral_guide": true,
+        "sinkhorn_iters": 5,
+        "mcsd_tau": 1.0,
+        "occ_weight": 0.3
+      }
+    },
+    "OccCondg_s4": {
+      "status": "FOUND",
+      "path": "doc/exp07_results/results/exp07/runs_meta/OccCondg_s4/run_config.json",
+      "sha256": "00ad3254a264acb3f4edc29bdd31d214f57deebd2daa29ea4d158bb8d7f66239",
+      "checkpoint": {
+        "status": "FOUND",
+        "sha256": "810744f246c17a0d6dc1d7a70c6e13fca1a0f0a258644f4698dbf70a00389642",
+        "path": "/kaggle/input/datasets/phpadmin123/exp07-occcond-ckpts/runs/OccCondg_s4/best_val.pth"
+      },
+      "split_hash": "675667edf3f35f16",
+      "flags": {
+        "seed": 4,
+        "head": "occ_conditioned",
+        "ccmc": false,
+        "in_channels": 5,
+        "num_classes": 3,
+        "spectral_guide": true,
+        "sinkhorn_iters": 5,
+        "mcsd_tau": 1.0,
+        "occ_weight": 0.3
+      }
+    },
+    "Dnone_s0": {
+      "status": "MISSING",
+      "checkpoint": {
+        "status": "FOUND",
+        "sha256": "80066656248c69a2aca71f9eab31bd16733faa081caddd0e4589aba2d404de1d",
+        "path": "/kaggle/input/datasets/thothanh28/exp04-ckpts/runs/Dnone_s0/best_val.pth"
+      }
+    },
+    "Dnone_s1": {
+      "status": "MISSING",
+      "checkpoint": {
+        "status": "FOUND",
+        "sha256": "db6fecfb4bd7205fcd6311157e96a5a1fd364ccedc0bbbf24ce46e8f07abb88f",
+        "path": "/kaggle/input/datasets/thothanh28/exp04-ckpts/runs/Dnone_s1/best_val.pth"
+      }
+    },
+    "Dnone_s2": {
+      "status": "MISSING",
+      "checkpoint": {
+        "status": "FOUND",
+        "sha256": "a8e23ef2a6ee640acf749c5222fbae615f889f43c29d3fedbd8b826cf567f836",
+        "path": "/kaggle/input/datasets/thothanh28/exp04-ckpts/runs/Dnone_s2/best_val.pth"
+      }
+    },
+    "Dnone_s3": {
+      "status": "FOUND",
+      "path": "doc/exp06_results/results/exp06/runs_meta/Dnone_s3/run_config.json",
+      "sha256": "01b3c927bdedfad15acd0de8da4e7693724d8cc3d81779195fcca993c60cf2db",
+      "checkpoint": {
+        "status": "FOUND",
+        "sha256": "17597c5b0928035ac09a103c81819a04d903ac6f1156e96f72beffd23dcbc8ab",
+        "path": "/kaggle/input/datasets/thothanh28/exp06-ckpts/runs/Dnone_s3/best_val.pth"
+      },
+      "split_hash": "675667edf3f35f16",
+      "flags": {
+        "seed": 3,
+        "head": "bilinear",
+        "ccmc": false,
+        "in_channels": 5,
+        "num_classes": 3,
+        "spectral_guide": false,
+        "sinkhorn_iters": 5,
+        "mcsd_tau": 1.0,
+        "occ_weight": 0.3
+      }
+    },
+    "Dnone_s4": {
+      "status": "FOUND",
+      "path": "doc/exp06_results/results/exp06/runs_meta/Dnone_s4/run_config.json",
+      "sha256": "7856b545faaa47471c92fce541e178c6f4eb47ec272dfeb02bdf9082cb4263e3",
+      "checkpoint": {
+        "status": "FOUND",
+        "sha256": "fafd05dcf7eed88eee7f8abab46b46d879fa4f87fdada2af5c4bfff61c97f8c1",
+        "path": "/kaggle/input/datasets/thothanh28/exp06-ckpts/runs/Dnone_s4/best_val.pth"
+      },
+      "split_hash": "675667edf3f35f16",
+      "flags": {
+        "seed": 4,
+        "head": "bilinear",
+        "ccmc": false,
+        "in_channels": 5,
+        "num_classes": 3,
+        "spectral_guide": false,
+        "sinkhorn_iters": 5,
+        "mcsd_tau": 1.0,
+        "occ_weight": 0.3
+      }
+    },
+    "LiteSent_s0": {
+      "status": "MISSING",
+      "checkpoint": {
+        "status": "FOUND",
+        "sha256": "63b1c926f40623d533ee9a3423c011871f6258aa9e2ef2f1ec120ea88404a34a",
+        "path": "/kaggle/input/datasets/thothanh28/ccmc-ckpts/runs/LiteSent_s0/best_val.pth"
+      }
+    },
+    "LiteSent_s1": {
+      "status": "MISSING",
+      "checkpoint": {
+        "status": "FOUND",
+        "sha256": "ef361a3f834272641a0a34aa560b234825c7ff4c44e333040f04b0092d58ab31",
+        "path": "/kaggle/input/datasets/thothanh28/exp04-ckpts/runs/LiteSent_s1/best_val.pth"
+      }
+    },
+    "LiteSent_s2": {
+      "status": "MISSING",
+      "checkpoint": {
+        "status": "FOUND",
+        "sha256": "efcf6de6b3084d9acac8b17268102344b80ea9928ab0947459780149a528bde8",
+        "path": "/kaggle/input/datasets/thothanh28/exp04-ckpts/runs/LiteSent_s2/best_val.pth"
+      }
+    },
+    "LiteSent_s3": {
+      "status": "FOUND",
+      "path": "doc/exp06_results/results/exp06/runs_meta/LiteSent_s3/run_config.json",
+      "sha256": "3e31d1eee915587c652622df216f4d6f8d47b555a0fbf9211dd10ed27fc068ab",
+      "checkpoint": {
+        "status": "FOUND",
+        "sha256": "faa9ce62642270e03d1ef163986368e7f37ae36f1b3ef9ba287c62ead6df433f",
+        "path": "/kaggle/input/datasets/thothanh28/exp06-ckpts/runs/LiteSent_s3/best_val.pth"
+      },
+      "split_hash": "675667edf3f35f16",
+      "flags": {
+        "seed": 3,
+        "head": "bilinear",
+        "ccmc": false,
+        "in_channels": 5,
+        "num_classes": 3,
+        "spectral_guide": false,
+        "sinkhorn_iters": 5,
+        "mcsd_tau": 1.0,
+        "occ_weight": 0.3
+      }
+    },
+    "LiteSent_s4": {
+      "status": "FOUND",
+      "path": "doc/exp06_results/results/exp06/runs_meta/LiteSent_s4/run_config.json",
+      "sha256": "5f5b018a53216c4620775553c7636f2a961ad89b5be0f2db64bbbda04056ce88",
+      "checkpoint": {
+        "status": "FOUND",
+        "sha256": "7762226f33f6b1e316a1bdd2f8da85bba4e03a7fa46faf22b5aa490f22fd5444",
+        "path": "/kaggle/input/datasets/thothanh28/exp06-ckpts/runs/LiteSent_s4/best_val.pth"
+      },
+      "split_hash": "675667edf3f35f16",
+      "flags": {
+        "seed": 4,
+        "head": "bilinear",
+        "ccmc": false,
+        "in_channels": 5,
+        "num_classes": 3,
+        "spectral_guide": false,
+        "sinkhorn_iters": 5,
+        "mcsd_tau": 1.0,
+        "occ_weight": 0.3
+      }
+    }
+  },
+  "issues": [],
+  "interpretation_checklist": [
+    "Confirm OccCond-g computes class-wise softmax(log_q + scores / tau) per sub-cell.",
+    "Confirm this normalization does not enforce mean_subcell(P) == q.",
+    "Confirm MCSD uses finite log-domain Sinkhorn; columns are normalized each iteration and row marginals are approximate.",
+    "Confirm spectral guide is added after pixel_shuffle(scores) and before pixel_unshuffle.",
+    "Confirm occupancy_loss(extras[occ_logits], labels, ...) is called inside the train loop only.",
+    "Compare each frozen run_config head/guide/iteration/loss flags and split hash with the intended source/checkpoint record.",
+    "Keep the paper wording aligned to implementation; do not describe finite Sinkhorn as exact conservation."
+  ],
+  "test_data_accessed_by_this_cell": false
+}

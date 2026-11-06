@@ -1,0 +1,1227 @@
+{
+  "status": "PASS_PROVENANCE_RECONCILED_WITH_DOCUMENTED_DEFAULT",
+  "run_id": "20261105T161337Z",
+  "evaluation_split": "validation only; verified from per-run evaluation summaries",
+  "split_hash_expected": "675667edf3f35f16",
+  "run_count": 30,
+  "run_records": {
+    "L0_s0": {
+      "status": "PASS",
+      "issues": [],
+      "config": {
+        "status": "PASS",
+        "valid_candidates": [
+          {
+            "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp01_results/results/exp01/runs_meta/L0_s0/run_config.json",
+            "sha256": "6a4bab13e7978ef65aab14f4aa16de83c7e59bb6133416f180d942572be398d0",
+            "git_commit": "ea354cd",
+            "run_name": "L0__s0",
+            "split_hash": "675667edf3f35f16",
+            "errors": [],
+            "documented_defaults": []
+          }
+        ],
+        "rejected_candidates": []
+      },
+      "per_image_csv": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/L0_s0_val_per_image.csv",
+        "sha256": "dd54c58e599a032c992757880176e682d571a9532c571a03877c5bc1704e4512"
+      },
+      "evaluation_summary": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/L0_s0_val_summary.json",
+        "sha256": "500a74d990227f2a78fd0541a88f6ca449222b26fd2f80ad99475efbb960b30d",
+        "run_name": "L0_s0",
+        "split": "val",
+        "n_images": 26,
+        "ckpt": "runs/L0_s0/best_val.pth",
+        "head": "bilinear",
+        "GT_LEAKAGE": false
+      },
+      "checkpoint": {
+        "path": "/kaggle/input/datasets/thothanh28/ccmc-ckpts/runs/L0_s0/best_val.pth",
+        "sha256": "e408cc6311fc156afed559267873a110df4f91d7779a6353a5d1bed90ee353ae"
+      }
+    },
+    "L0_s1": {
+      "status": "PASS",
+      "issues": [],
+      "config": {
+        "status": "PASS",
+        "valid_candidates": [
+          {
+            "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp01_results/results/exp01/runs_meta/L0_s1/run_config.json",
+            "sha256": "b003fb2c9782357efd522d56092b0372eccbfa3cb24de49ca8c70c7fe9610505",
+            "git_commit": "ea354cd",
+            "run_name": "L0__s1",
+            "split_hash": "675667edf3f35f16",
+            "errors": [],
+            "documented_defaults": []
+          }
+        ],
+        "rejected_candidates": []
+      },
+      "per_image_csv": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/L0_s1_val_per_image.csv",
+        "sha256": "2ce1a3253ecb8bd60068f942decc33e8df273700b1bb231a12a5a7e5c206d5d9"
+      },
+      "evaluation_summary": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/L0_s1_val_summary.json",
+        "sha256": "ef80ed92b4c369d8113923b35068528c8bf34f9a8732684e96411db8491d0b34",
+        "run_name": "L0_s1",
+        "split": "val",
+        "n_images": 26,
+        "ckpt": "runs/L0_s1/best_val.pth",
+        "head": "bilinear",
+        "GT_LEAKAGE": false
+      },
+      "checkpoint": {
+        "path": "/kaggle/input/datasets/thothanh28/ccmc-ckpts/runs/L0_s1/best_val.pth",
+        "sha256": "b86f062c302811aba0418703457d59f569d6cb44df48f01010bb39767184e598"
+      }
+    },
+    "L0_s2": {
+      "status": "PASS",
+      "issues": [],
+      "config": {
+        "status": "PASS",
+        "valid_candidates": [
+          {
+            "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp03_results/results/exp03/runs_meta/L0_s2/run_config.json",
+            "sha256": "e9a3bd90bd157416deee0e430c134cba3309d3a9c9866ed9fb0b90f9f977236b",
+            "git_commit": "502bd1e",
+            "run_name": "L0__s2",
+            "split_hash": "675667edf3f35f16",
+            "errors": [],
+            "documented_defaults": []
+          }
+        ],
+        "rejected_candidates": []
+      },
+      "per_image_csv": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/L0_s2_val_per_image.csv",
+        "sha256": "03764f85fe3ea09b47783d8ee4bfe94b822128deb0386a312d636557f865e7e2"
+      },
+      "evaluation_summary": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/L0_s2_val_summary.json",
+        "sha256": "6f9cbd38d713f2062dcfd559c78040a6e5ce1b3635c62a10cced1f8bb42dfbf3",
+        "run_name": "L0_s2",
+        "split": "val",
+        "n_images": 26,
+        "ckpt": "runs/L0_s2/best_val.pth",
+        "head": "bilinear",
+        "GT_LEAKAGE": false
+      },
+      "checkpoint": {
+        "path": "/kaggle/input/datasets/thothanh28/exp03-ckpts/runs/L0_s2/best_val.pth",
+        "sha256": "ec5521526a3da854a3f885ad1124b85c0ce8a901772502f0e96d3566b574980a"
+      }
+    },
+    "L0_s3": {
+      "status": "PASS",
+      "issues": [],
+      "config": {
+        "status": "PASS",
+        "valid_candidates": [
+          {
+            "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/runs_meta/L0_s3/run_config.json",
+            "sha256": "cc96022f793d5c718ccbd3367ecb4c31c37a521ebd9aa67dfabaa4a714fd3b6f",
+            "git_commit": "52a8843",
+            "run_name": "L0__s3",
+            "split_hash": "675667edf3f35f16",
+            "errors": [],
+            "documented_defaults": []
+          }
+        ],
+        "rejected_candidates": []
+      },
+      "per_image_csv": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/L0_s3_val_per_image.csv",
+        "sha256": "50f0689cc174f4db5a1bcf703c4470a1193966c6bde0f79e92d289629f596495"
+      },
+      "evaluation_summary": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/L0_s3_val_summary.json",
+        "sha256": "ed23549df619ba0a957c94e5039699517df54e2485659090044a8a63ad1b128f",
+        "run_name": "L0_s3",
+        "split": "val",
+        "n_images": 26,
+        "ckpt": "runs/L0_s3/best_val.pth",
+        "head": "bilinear",
+        "GT_LEAKAGE": false
+      },
+      "checkpoint": {
+        "path": "/kaggle/input/datasets/thothanh28/exp06-ckpts/runs/L0_s3/best_val.pth",
+        "sha256": "b7206137afed490a11d111cb9df4084baaff71fd7858a155af35af21b126beff"
+      }
+    },
+    "L0_s4": {
+      "status": "PASS",
+      "issues": [],
+      "config": {
+        "status": "PASS",
+        "valid_candidates": [
+          {
+            "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/runs_meta/L0_s4/run_config.json",
+            "sha256": "9a3391dfff31937d90a0b9e61147ab3c74ec6361b2f839a71a4b84ce6422fdd4",
+            "git_commit": "52a8843",
+            "run_name": "L0__s4",
+            "split_hash": "675667edf3f35f16",
+            "errors": [],
+            "documented_defaults": []
+          }
+        ],
+        "rejected_candidates": []
+      },
+      "per_image_csv": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/L0_s4_val_per_image.csv",
+        "sha256": "b719912904f53e2ea423600f1803c399c294336dfdb8addc0893989e8de3440c"
+      },
+      "evaluation_summary": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/L0_s4_val_summary.json",
+        "sha256": "3bab092a250d3449a063ceaed2277eaa454ee0cff4c23856795c6fd7b316597b",
+        "run_name": "L0_s4",
+        "split": "val",
+        "n_images": 26,
+        "ckpt": "runs/L0_s4/best_val.pth",
+        "head": "bilinear",
+        "GT_LEAKAGE": false
+      },
+      "checkpoint": {
+        "path": "/kaggle/input/datasets/thothanh28/exp06-ckpts/runs/L0_s4/best_val.pth",
+        "sha256": "0f88fe5d641323acbbd802e664ece0163ae7846527a94bb41aa9be3c40362047"
+      }
+    },
+    "PS_s0": {
+      "status": "PASS",
+      "issues": [],
+      "config": {
+        "status": "PASS",
+        "valid_candidates": [
+          {
+            "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp05_results/results/exp05/runs_meta/PS_s0/run_config.json",
+            "sha256": "23a2a5f27a7ea38d41c61e4d1725c768b0ac9fed4c6bfdbbb448f7855e57be3d",
+            "git_commit": "ba622ff",
+            "run_name": "PS__s0",
+            "split_hash": "675667edf3f35f16",
+            "errors": [],
+            "documented_defaults": []
+          }
+        ],
+        "rejected_candidates": []
+      },
+      "per_image_csv": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/PS_s0_val_per_image.csv",
+        "sha256": "673f05825486e781b66299124dbaf570fc66722a088414d937e6127f045fc152"
+      },
+      "evaluation_summary": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/PS_s0_val_summary.json",
+        "sha256": "326c854e5a59c05a948ab624462e5dc63291367d01a861aefe7f9ca76b898472",
+        "run_name": "PS_s0",
+        "split": "val",
+        "n_images": 26,
+        "ckpt": "runs/PS_s0/best_val.pth",
+        "head": "pixelshuffle",
+        "GT_LEAKAGE": false
+      },
+      "checkpoint": {
+        "path": "/kaggle/input/datasets/thothanh28/exp05-ckpts/runs/PS_s0/best_val.pth",
+        "sha256": "7fc270eaa52bfbff9a72d499219a2b4932eef461dd6a5f0ff74b03c3aad6027b"
+      }
+    },
+    "PS_s1": {
+      "status": "PASS",
+      "issues": [],
+      "config": {
+        "status": "PASS",
+        "valid_candidates": [
+          {
+            "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp05_results/results/exp05/runs_meta/PS_s1/run_config.json",
+            "sha256": "215d413609ae5b16b7b3619df531e07ddbd8ee41ecd11f60e52526f2e09273ea",
+            "git_commit": "ba622ff",
+            "run_name": "PS__s1",
+            "split_hash": "675667edf3f35f16",
+            "errors": [],
+            "documented_defaults": []
+          }
+        ],
+        "rejected_candidates": []
+      },
+      "per_image_csv": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/PS_s1_val_per_image.csv",
+        "sha256": "8a73718744d51efad5b7dd2ee8e1e213c4f26fa117698fca53e5a2016419c04d"
+      },
+      "evaluation_summary": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/PS_s1_val_summary.json",
+        "sha256": "8a07336e45552d5bd9403e6da82b7c6d9005f58cbaef5d8aee133a9d687b2e47",
+        "run_name": "PS_s1",
+        "split": "val",
+        "n_images": 26,
+        "ckpt": "runs/PS_s1/best_val.pth",
+        "head": "pixelshuffle",
+        "GT_LEAKAGE": false
+      },
+      "checkpoint": {
+        "path": "/kaggle/input/datasets/thothanh28/exp05-ckpts/runs/PS_s1/best_val.pth",
+        "sha256": "3bb00607005a145d1316f0a70855992fe685d65c13baacf624d1b0dc672aa3e2"
+      }
+    },
+    "PS_s2": {
+      "status": "PASS",
+      "issues": [],
+      "config": {
+        "status": "PASS",
+        "valid_candidates": [
+          {
+            "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp05_results/results/exp05/runs_meta/PS_s2/run_config.json",
+            "sha256": "ae0fb4277665a8db6ee638df73ddbd2b541812462ed3f0cf752cd7fc942d8acc",
+            "git_commit": "ba622ff",
+            "run_name": "PS__s2",
+            "split_hash": "675667edf3f35f16",
+            "errors": [],
+            "documented_defaults": []
+          }
+        ],
+        "rejected_candidates": []
+      },
+      "per_image_csv": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/PS_s2_val_per_image.csv",
+        "sha256": "f1418d81f6bb287c16c0869801bf7eec8c65ce764b05985e3b5f1e4882d8e9d9"
+      },
+      "evaluation_summary": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/PS_s2_val_summary.json",
+        "sha256": "a4b36777241bdde8ca7d91e54b5c1b4f1af287ea60917148ca7ec0cfb14147af",
+        "run_name": "PS_s2",
+        "split": "val",
+        "n_images": 26,
+        "ckpt": "runs/PS_s2/best_val.pth",
+        "head": "pixelshuffle",
+        "GT_LEAKAGE": false
+      },
+      "checkpoint": {
+        "path": "/kaggle/input/datasets/thothanh28/exp05-ckpts/runs/PS_s2/best_val.pth",
+        "sha256": "ed038323aa33936f193b103ce7e717c6b37d794065cc7c54c4399d377301c99c"
+      }
+    },
+    "PS_s3": {
+      "status": "PASS",
+      "issues": [],
+      "config": {
+        "status": "PASS",
+        "valid_candidates": [
+          {
+            "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/runs_meta/PS_s3/run_config.json",
+            "sha256": "5e72da642e49f27a09ca39f024d0baa3d89fd75b8df372cd81306ea747f3b838",
+            "git_commit": "52a8843",
+            "run_name": "PS__s3",
+            "split_hash": "675667edf3f35f16",
+            "errors": [],
+            "documented_defaults": []
+          }
+        ],
+        "rejected_candidates": []
+      },
+      "per_image_csv": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/PS_s3_val_per_image.csv",
+        "sha256": "b207ec50a66d1a7e3346ad4861ae4f5e9ddcfa62bea8ff3a27e13b74a8769c5a"
+      },
+      "evaluation_summary": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/PS_s3_val_summary.json",
+        "sha256": "2658b2203c251448755d252c25f8fa35992c5dd2719cdf9bb73e395e5c696309",
+        "run_name": "PS_s3",
+        "split": "val",
+        "n_images": 26,
+        "ckpt": "runs/PS_s3/best_val.pth",
+        "head": "pixelshuffle",
+        "GT_LEAKAGE": false
+      },
+      "checkpoint": {
+        "path": "/kaggle/input/datasets/thothanh28/exp06-ckpts/runs/PS_s3/best_val.pth",
+        "sha256": "55866e0679d33df8abaa16b357db3c96480f1545c2aea383c7b5731f979b25af"
+      }
+    },
+    "PS_s4": {
+      "status": "PASS",
+      "issues": [],
+      "config": {
+        "status": "PASS",
+        "valid_candidates": [
+          {
+            "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/runs_meta/PS_s4/run_config.json",
+            "sha256": "742832b8c6ef76f905b171b25591ad87dfb2c9f11af93c827edf7cfd8f9499c9",
+            "git_commit": "52a8843",
+            "run_name": "PS__s4",
+            "split_hash": "675667edf3f35f16",
+            "errors": [],
+            "documented_defaults": []
+          }
+        ],
+        "rejected_candidates": []
+      },
+      "per_image_csv": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/PS_s4_val_per_image.csv",
+        "sha256": "7eb482e69e1a512afccbe30c070b8b234a2c07b136f0490890e92dba7ec4829d"
+      },
+      "evaluation_summary": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/PS_s4_val_summary.json",
+        "sha256": "3a91cd0ee519113ac1c85cde1cfcb946911932645b4fc54e46217fc93715a6f5",
+        "run_name": "PS_s4",
+        "split": "val",
+        "n_images": 26,
+        "ckpt": "runs/PS_s4/best_val.pth",
+        "head": "pixelshuffle",
+        "GT_LEAKAGE": false
+      },
+      "checkpoint": {
+        "path": "/kaggle/input/datasets/thothanh28/exp06-ckpts/runs/PS_s4/best_val.pth",
+        "sha256": "157578c3d9c5b5937b2bae9cd1906a55455fdda981abc86d674c8a16db883de5"
+      }
+    },
+    "MCSDg_s0": {
+      "status": "PASS",
+      "issues": [],
+      "config": {
+        "status": "PASS",
+        "valid_candidates": [
+          {
+            "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp05_results/results/exp05/runs_meta/MCSDg_s0/run_config.json",
+            "sha256": "e84887f4b088d8c910e2ba603f6bcf491cd74629f11ed638fbadd8ae832274b7",
+            "git_commit": "ba622ff",
+            "run_name": "MCSDg__s0",
+            "split_hash": "675667edf3f35f16",
+            "errors": [],
+            "documented_defaults": []
+          }
+        ],
+        "rejected_candidates": []
+      },
+      "per_image_csv": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/MCSDg_s0_val_per_image.csv",
+        "sha256": "6775118f93d0768a71314ad0982c34e8a1f8ee91e72622ca40efb5493fd29adc"
+      },
+      "evaluation_summary": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/MCSDg_s0_val_summary.json",
+        "sha256": "9082be5a53d2809a014338af0ff3996f257a654523541d8edd2b1e64e4c968e2",
+        "run_name": "MCSDg_s0",
+        "split": "val",
+        "n_images": 26,
+        "ckpt": "runs/MCSDg_s0/best_val.pth",
+        "head": "mcsd",
+        "GT_LEAKAGE": false
+      },
+      "checkpoint": {
+        "path": "/kaggle/input/datasets/thothanh28/exp05-ckpts/runs/MCSDg_s0/best_val.pth",
+        "sha256": "ff2c0f7d5b3b711c761bbea62740224c2350adb422990dc393040f6515313ba1"
+      }
+    },
+    "MCSDg_s1": {
+      "status": "PASS",
+      "issues": [],
+      "config": {
+        "status": "PASS",
+        "valid_candidates": [
+          {
+            "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp05_results/results/exp05/runs_meta/MCSDg_s1/run_config.json",
+            "sha256": "88a7f5bb2a210d65453809ac5eee264c5fa04bbf64d76dfcf11e01fd44439d3d",
+            "git_commit": "ba622ff",
+            "run_name": "MCSDg__s1",
+            "split_hash": "675667edf3f35f16",
+            "errors": [],
+            "documented_defaults": []
+          }
+        ],
+        "rejected_candidates": []
+      },
+      "per_image_csv": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/MCSDg_s1_val_per_image.csv",
+        "sha256": "427a9d3cc21f16918f7211b74f953d15ab4964ce32328a726ad601f9ab54b721"
+      },
+      "evaluation_summary": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/MCSDg_s1_val_summary.json",
+        "sha256": "50b13c4a5e64f970c3a2952432142eaacfb7b6a92cb34c24b8cda23eb4a6d9a6",
+        "run_name": "MCSDg_s1",
+        "split": "val",
+        "n_images": 26,
+        "ckpt": "runs/MCSDg_s1/best_val.pth",
+        "head": "mcsd",
+        "GT_LEAKAGE": false
+      },
+      "checkpoint": {
+        "path": "/kaggle/input/datasets/thothanh28/exp05-ckpts/runs/MCSDg_s1/best_val.pth",
+        "sha256": "8f4baf60819fec101abea8d7b9291585a34a4223f2b7edd14a1a1715e5b636d1"
+      }
+    },
+    "MCSDg_s2": {
+      "status": "PASS",
+      "issues": [],
+      "config": {
+        "status": "PASS",
+        "valid_candidates": [
+          {
+            "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp05_results/results/exp05/runs_meta/MCSDg_s2/run_config.json",
+            "sha256": "36523c22d9ac4aa5df9024c122015f158a6e6e6d4a8f989d3fe1b04b873847f0",
+            "git_commit": "ba622ff",
+            "run_name": "MCSDg__s2",
+            "split_hash": "675667edf3f35f16",
+            "errors": [],
+            "documented_defaults": []
+          }
+        ],
+        "rejected_candidates": []
+      },
+      "per_image_csv": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/MCSDg_s2_val_per_image.csv",
+        "sha256": "620a404fb194fd6ae9913d4e16d78d27d0c146a27334a4f97b960919c40fa3c7"
+      },
+      "evaluation_summary": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/MCSDg_s2_val_summary.json",
+        "sha256": "60cb41c600d1ceb584d502c8b3b8d7fdc157406d766142675e41f27b3e3a55b9",
+        "run_name": "MCSDg_s2",
+        "split": "val",
+        "n_images": 26,
+        "ckpt": "runs/MCSDg_s2/best_val.pth",
+        "head": "mcsd",
+        "GT_LEAKAGE": false
+      },
+      "checkpoint": {
+        "path": "/kaggle/input/datasets/thothanh28/exp05-ckpts/runs/MCSDg_s2/best_val.pth",
+        "sha256": "89b3ca1ae700faf337fbc913cc3b894ca22785ed8c82cfeb02e0dc4451e39daf"
+      }
+    },
+    "MCSDg_s3": {
+      "status": "PASS",
+      "issues": [],
+      "config": {
+        "status": "PASS",
+        "valid_candidates": [
+          {
+            "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/runs_meta/MCSDg_s3/run_config.json",
+            "sha256": "c40903d6fde2ca2491ce5abe7fa7389fe30cfda07446cbf1422422951627d12c",
+            "git_commit": "52a8843",
+            "run_name": "MCSDg__s3",
+            "split_hash": "675667edf3f35f16",
+            "errors": [],
+            "documented_defaults": []
+          }
+        ],
+        "rejected_candidates": []
+      },
+      "per_image_csv": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/MCSDg_s3_val_per_image.csv",
+        "sha256": "508fb72d2c4d5a1b410ec7cc35d4f65987d85428c81445f38a93b7ed978c58f3"
+      },
+      "evaluation_summary": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/MCSDg_s3_val_summary.json",
+        "sha256": "fc09f998c96cf57b48738a17064e987ebdc97304fe5f884e0c537c11df6e5c4c",
+        "run_name": "MCSDg_s3",
+        "split": "val",
+        "n_images": 26,
+        "ckpt": "runs/MCSDg_s3/best_val.pth",
+        "head": "mcsd",
+        "GT_LEAKAGE": false
+      },
+      "checkpoint": {
+        "path": "/kaggle/input/datasets/thothanh28/exp06-ckpts/runs/MCSDg_s3/best_val.pth",
+        "sha256": "a7681dd2803cbfc042f8b227d020fb80303035a0c9cc80abf6f020cc2ec5ad3d"
+      }
+    },
+    "MCSDg_s4": {
+      "status": "PASS",
+      "issues": [],
+      "config": {
+        "status": "PASS",
+        "valid_candidates": [
+          {
+            "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/runs_meta/MCSDg_s4/run_config.json",
+            "sha256": "7fc63f8d8bafac4fd908d1010bb3d74f3461a524d93dfe07ae82d155bfef79de",
+            "git_commit": "52a8843",
+            "run_name": "MCSDg__s4",
+            "split_hash": "675667edf3f35f16",
+            "errors": [],
+            "documented_defaults": []
+          }
+        ],
+        "rejected_candidates": []
+      },
+      "per_image_csv": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/MCSDg_s4_val_per_image.csv",
+        "sha256": "ec7b0b74a0e69197bf80d5104499884af9b419f5e612f4ee0473304e8403d605"
+      },
+      "evaluation_summary": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/MCSDg_s4_val_summary.json",
+        "sha256": "6aa0fe528d7667ad133d3bca0701f7d84f607c34ae1994f1982988b7769816d8",
+        "run_name": "MCSDg_s4",
+        "split": "val",
+        "n_images": 26,
+        "ckpt": "runs/MCSDg_s4/best_val.pth",
+        "head": "mcsd",
+        "GT_LEAKAGE": false
+      },
+      "checkpoint": {
+        "path": "/kaggle/input/datasets/thothanh28/exp06-ckpts/runs/MCSDg_s4/best_val.pth",
+        "sha256": "b536ff2eedc67f7c1b2539a1b40219e14e746f801df98d528e086008ebd53499"
+      }
+    },
+    "OccCondg_s0": {
+      "status": "PASS",
+      "issues": [],
+      "config": {
+        "status": "PASS",
+        "valid_candidates": [
+          {
+            "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp07_results/results/exp07/runs_meta/OccCondg_s0/run_config.json",
+            "sha256": "9d318cfa10d2de1755e3e1f83b290aa5b65779243fd4398795d4441fa1b1ecba",
+            "git_commit": "de402b5",
+            "run_name": "OccCondg__s0",
+            "split_hash": "675667edf3f35f16",
+            "errors": [],
+            "documented_defaults": []
+          }
+        ],
+        "rejected_candidates": []
+      },
+      "per_image_csv": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp07_results/results/exp07/OccCondg_s0_val_per_image.csv",
+        "sha256": "8002bf184ed38090bdd9c5252eb920112c71ec4295311e69f9b137be6f1bbd7f"
+      },
+      "evaluation_summary": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp07_results/results/exp07/OccCondg_s0_val_summary.json",
+        "sha256": "eaf460ccb7780f1bf25408fa934621d4eece0e7cda654c6347340293afc211bf",
+        "run_name": "OccCondg_s0",
+        "split": "val",
+        "n_images": 26,
+        "ckpt": "runs/OccCondg_s0/best_val.pth",
+        "head": "occ_conditioned",
+        "GT_LEAKAGE": false
+      },
+      "checkpoint": {
+        "path": "/kaggle/input/datasets/phpadmin123/exp07-occcond-ckpts/runs/OccCondg_s0/best_val.pth",
+        "sha256": "2607b8cb18cc74b3d170cc1d796ecd1ba1b44744c36a23fa46429bb4b0ac8ad0"
+      }
+    },
+    "OccCondg_s1": {
+      "status": "PASS",
+      "issues": [],
+      "config": {
+        "status": "PASS",
+        "valid_candidates": [
+          {
+            "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp07_results/results/exp07/runs_meta/OccCondg_s1/run_config.json",
+            "sha256": "9f7ba78dad52b8ff4e48b56a1e3177ef3ec5f3173ac36cc0486d4ba2667e80f3",
+            "git_commit": "de402b5",
+            "run_name": "OccCondg__s1",
+            "split_hash": "675667edf3f35f16",
+            "errors": [],
+            "documented_defaults": []
+          }
+        ],
+        "rejected_candidates": []
+      },
+      "per_image_csv": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp07_results/results/exp07/OccCondg_s1_val_per_image.csv",
+        "sha256": "cf98b59db9636279a005a9e2d06af42e7d409da3fb9a945cced01b49efcce874"
+      },
+      "evaluation_summary": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp07_results/results/exp07/OccCondg_s1_val_summary.json",
+        "sha256": "0860124f6f29190471fb4425e4265b601cea9fc3a271376cd4e63e1a5e29c9a5",
+        "run_name": "OccCondg_s1",
+        "split": "val",
+        "n_images": 26,
+        "ckpt": "runs/OccCondg_s1/best_val.pth",
+        "head": "occ_conditioned",
+        "GT_LEAKAGE": false
+      },
+      "checkpoint": {
+        "path": "/kaggle/input/datasets/phpadmin123/exp07-occcond-ckpts/runs/OccCondg_s1/best_val.pth",
+        "sha256": "6dd0ead2cf69f9d9ade9291527a6b06783da926af48fa05c22f070232dce6c6a"
+      }
+    },
+    "OccCondg_s2": {
+      "status": "PASS",
+      "issues": [],
+      "config": {
+        "status": "PASS",
+        "valid_candidates": [
+          {
+            "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp07_results/results/exp07/runs_meta/OccCondg_s2/run_config.json",
+            "sha256": "cd0e962d8479142bfc46c6211d3beeb33010355244b1b176ed6d294fdb242f11",
+            "git_commit": "de402b5",
+            "run_name": "OccCondg__s2",
+            "split_hash": "675667edf3f35f16",
+            "errors": [],
+            "documented_defaults": []
+          }
+        ],
+        "rejected_candidates": []
+      },
+      "per_image_csv": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp07_results/results/exp07/OccCondg_s2_val_per_image.csv",
+        "sha256": "6023e3480b76960821f242c64486f4207cafcd310b0e1cfe53d863ef147fe51c"
+      },
+      "evaluation_summary": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp07_results/results/exp07/OccCondg_s2_val_summary.json",
+        "sha256": "40b4838c4f4e32964fe4136e29dca8b528a13fd67cded0b90f5560f7f652247d",
+        "run_name": "OccCondg_s2",
+        "split": "val",
+        "n_images": 26,
+        "ckpt": "runs/OccCondg_s2/best_val.pth",
+        "head": "occ_conditioned",
+        "GT_LEAKAGE": false
+      },
+      "checkpoint": {
+        "path": "/kaggle/input/datasets/phpadmin123/exp07-occcond-ckpts/runs/OccCondg_s2/best_val.pth",
+        "sha256": "fb21d1ab337a36c9a0d5f20832f7711736a93a4e10fca5518fa9dde495fb8409"
+      }
+    },
+    "OccCondg_s3": {
+      "status": "PASS",
+      "issues": [],
+      "config": {
+        "status": "PASS",
+        "valid_candidates": [
+          {
+            "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp07_results/results/exp07/runs_meta/OccCondg_s3/run_config.json",
+            "sha256": "d0937d205f83359945376f0b11cc3643fff209d5bfddc3690e7b025d443fcbf1",
+            "git_commit": "de402b5",
+            "run_name": "OccCondg__s3",
+            "split_hash": "675667edf3f35f16",
+            "errors": [],
+            "documented_defaults": []
+          }
+        ],
+        "rejected_candidates": []
+      },
+      "per_image_csv": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp07_results/results/exp07/OccCondg_s3_val_per_image.csv",
+        "sha256": "66cd96374f3ac838921cb8a7c3193f1aa1c777ad6d67325f5b371004285bfda6"
+      },
+      "evaluation_summary": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp07_results/results/exp07/OccCondg_s3_val_summary.json",
+        "sha256": "ecbcc0fc94cee17fb49369ecc297a4c5613002bba42855df62c446b42c0e6d26",
+        "run_name": "OccCondg_s3",
+        "split": "val",
+        "n_images": 26,
+        "ckpt": "runs/OccCondg_s3/best_val.pth",
+        "head": "occ_conditioned",
+        "GT_LEAKAGE": false
+      },
+      "checkpoint": {
+        "path": "/kaggle/input/datasets/phpadmin123/exp07-occcond-ckpts/runs/OccCondg_s3/best_val.pth",
+        "sha256": "8f9a5712cecc7b01a3a645022e5dda0b9c25e752600b59d56a0bb7ff1397baf1"
+      }
+    },
+    "OccCondg_s4": {
+      "status": "PASS",
+      "issues": [],
+      "config": {
+        "status": "PASS",
+        "valid_candidates": [
+          {
+            "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp07_results/results/exp07/runs_meta/OccCondg_s4/run_config.json",
+            "sha256": "00ad3254a264acb3f4edc29bdd31d214f57deebd2daa29ea4d158bb8d7f66239",
+            "git_commit": "de402b5",
+            "run_name": "OccCondg__s4",
+            "split_hash": "675667edf3f35f16",
+            "errors": [],
+            "documented_defaults": []
+          }
+        ],
+        "rejected_candidates": []
+      },
+      "per_image_csv": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp07_results/results/exp07/OccCondg_s4_val_per_image.csv",
+        "sha256": "581452278d5d117c5952d63b60935d841b0233dd33f4d738b67feaa387f8358e"
+      },
+      "evaluation_summary": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp07_results/results/exp07/OccCondg_s4_val_summary.json",
+        "sha256": "82b8183761ebfa121ff5534ae2b83da434f2a9e752bfa46ff138295aa7a2c80f",
+        "run_name": "OccCondg_s4",
+        "split": "val",
+        "n_images": 26,
+        "ckpt": "runs/OccCondg_s4/best_val.pth",
+        "head": "occ_conditioned",
+        "GT_LEAKAGE": false
+      },
+      "checkpoint": {
+        "path": "/kaggle/input/datasets/phpadmin123/exp07-occcond-ckpts/runs/OccCondg_s4/best_val.pth",
+        "sha256": "810744f246c17a0d6dc1d7a70c6e13fca1a0f0a258644f4698dbf70a00389642"
+      }
+    },
+    "Dnone_s0": {
+      "status": "PASS",
+      "issues": [],
+      "config": {
+        "status": "PASS",
+        "valid_candidates": [
+          {
+            "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp04_results/results/exp04/runs_meta/Dnone_s0/run_config.json",
+            "sha256": "4ffb6bb7587d9daeafe4309f1ac58094a981f564e39bf8ef488cc01b517bfcb4",
+            "git_commit": "e0bdb6b",
+            "run_name": "Dnone__s0",
+            "split_hash": "675667edf3f35f16",
+            "errors": [],
+            "documented_defaults": []
+          }
+        ],
+        "rejected_candidates": []
+      },
+      "per_image_csv": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/Dnone_s0_val_per_image.csv",
+        "sha256": "6d1117104833595508e0dfb6a7dec34dcdde75ba2ad35167031a1812712fbd46"
+      },
+      "evaluation_summary": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/Dnone_s0_val_summary.json",
+        "sha256": "267df7bd729e0b43c0d483cacb4b4308d984c608a56dbeb49cfbe6c493f40ea2",
+        "run_name": "Dnone_s0",
+        "split": "val",
+        "n_images": 26,
+        "ckpt": "runs/Dnone_s0/best_val.pth",
+        "head": "bilinear",
+        "GT_LEAKAGE": false
+      },
+      "checkpoint": {
+        "path": "/kaggle/input/datasets/thothanh28/exp04-ckpts/runs/Dnone_s0/best_val.pth",
+        "sha256": "80066656248c69a2aca71f9eab31bd16733faa081caddd0e4589aba2d404de1d"
+      }
+    },
+    "Dnone_s1": {
+      "status": "PASS",
+      "issues": [],
+      "config": {
+        "status": "PASS",
+        "valid_candidates": [
+          {
+            "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp04_results/results/exp04/runs_meta/Dnone_s1/run_config.json",
+            "sha256": "de74d386a2047dbeb2a2288eb143b075b245b0a9e49aaf5f6f632e87ebae5836",
+            "git_commit": "e0bdb6b",
+            "run_name": "Dnone__s1",
+            "split_hash": "675667edf3f35f16",
+            "errors": [],
+            "documented_defaults": []
+          }
+        ],
+        "rejected_candidates": []
+      },
+      "per_image_csv": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/Dnone_s1_val_per_image.csv",
+        "sha256": "a0b327827a9c40616bdaa25c687cae7bb0d26dccb2be5a2016a0a69047d34713"
+      },
+      "evaluation_summary": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/Dnone_s1_val_summary.json",
+        "sha256": "3318b0b8b80eafbef16fab5150be0ff6c95d71798b003362f1e44a79cf596ef4",
+        "run_name": "Dnone_s1",
+        "split": "val",
+        "n_images": 26,
+        "ckpt": "runs/Dnone_s1/best_val.pth",
+        "head": "bilinear",
+        "GT_LEAKAGE": false
+      },
+      "checkpoint": {
+        "path": "/kaggle/input/datasets/thothanh28/exp04-ckpts/runs/Dnone_s1/best_val.pth",
+        "sha256": "db6fecfb4bd7205fcd6311157e96a5a1fd364ccedc0bbbf24ce46e8f07abb88f"
+      }
+    },
+    "Dnone_s2": {
+      "status": "PASS",
+      "issues": [],
+      "config": {
+        "status": "PASS",
+        "valid_candidates": [
+          {
+            "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp04_results/results/exp04/runs_meta/Dnone_s2/run_config.json",
+            "sha256": "671bd7b103c8d3898729d3dae95d0ec7e6b140e4c34a87be3f00d52c0077e77a",
+            "git_commit": "e0bdb6b",
+            "run_name": "Dnone__s2",
+            "split_hash": "675667edf3f35f16",
+            "errors": [],
+            "documented_defaults": []
+          }
+        ],
+        "rejected_candidates": []
+      },
+      "per_image_csv": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/Dnone_s2_val_per_image.csv",
+        "sha256": "37baca9515a55a7e1a71cd69e6fa84a317963d0fdc8e2d6e7fc7db304b58e4cf"
+      },
+      "evaluation_summary": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/Dnone_s2_val_summary.json",
+        "sha256": "ced88f2b8fdf821633316b9b835cb83cf5e2a42c58a6f702b9c36f385ed2adec",
+        "run_name": "Dnone_s2",
+        "split": "val",
+        "n_images": 26,
+        "ckpt": "runs/Dnone_s2/best_val.pth",
+        "head": "bilinear",
+        "GT_LEAKAGE": false
+      },
+      "checkpoint": {
+        "path": "/kaggle/input/datasets/thothanh28/exp04-ckpts/runs/Dnone_s2/best_val.pth",
+        "sha256": "a8e23ef2a6ee640acf749c5222fbae615f889f43c29d3fedbd8b826cf567f836"
+      }
+    },
+    "Dnone_s3": {
+      "status": "PASS",
+      "issues": [],
+      "config": {
+        "status": "PASS",
+        "valid_candidates": [
+          {
+            "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/runs_meta/Dnone_s3/run_config.json",
+            "sha256": "01b3c927bdedfad15acd0de8da4e7693724d8cc3d81779195fcca993c60cf2db",
+            "git_commit": "52a8843",
+            "run_name": "Dnone__s3",
+            "split_hash": "675667edf3f35f16",
+            "errors": [],
+            "documented_defaults": []
+          }
+        ],
+        "rejected_candidates": []
+      },
+      "per_image_csv": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/Dnone_s3_val_per_image.csv",
+        "sha256": "2335d7beef66f038d6dce49444b78caf7b261d386245e44490e154d25cc51e06"
+      },
+      "evaluation_summary": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/Dnone_s3_val_summary.json",
+        "sha256": "291ae2cfb8ce48a4b39b31a776dc8cd133fc0036bf2113841c9c37e82ba0bf79",
+        "run_name": "Dnone_s3",
+        "split": "val",
+        "n_images": 26,
+        "ckpt": "runs/Dnone_s3/best_val.pth",
+        "head": "bilinear",
+        "GT_LEAKAGE": false
+      },
+      "checkpoint": {
+        "path": "/kaggle/input/datasets/thothanh28/exp06-ckpts/runs/Dnone_s3/best_val.pth",
+        "sha256": "17597c5b0928035ac09a103c81819a04d903ac6f1156e96f72beffd23dcbc8ab"
+      }
+    },
+    "Dnone_s4": {
+      "status": "PASS",
+      "issues": [],
+      "config": {
+        "status": "PASS",
+        "valid_candidates": [
+          {
+            "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/runs_meta/Dnone_s4/run_config.json",
+            "sha256": "7856b545faaa47471c92fce541e178c6f4eb47ec272dfeb02bdf9082cb4263e3",
+            "git_commit": "52a8843",
+            "run_name": "Dnone__s4",
+            "split_hash": "675667edf3f35f16",
+            "errors": [],
+            "documented_defaults": []
+          }
+        ],
+        "rejected_candidates": []
+      },
+      "per_image_csv": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/Dnone_s4_val_per_image.csv",
+        "sha256": "edf902a8bd5cdf1933b4ddaa2edce07306633eafcfbf245c8e5b314337525148"
+      },
+      "evaluation_summary": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/Dnone_s4_val_summary.json",
+        "sha256": "210fe9176ff4ec8e1b072038905acd6b9bfe840bcde8352bb6f98078b833321d",
+        "run_name": "Dnone_s4",
+        "split": "val",
+        "n_images": 26,
+        "ckpt": "runs/Dnone_s4/best_val.pth",
+        "head": "bilinear",
+        "GT_LEAKAGE": false
+      },
+      "checkpoint": {
+        "path": "/kaggle/input/datasets/thothanh28/exp06-ckpts/runs/Dnone_s4/best_val.pth",
+        "sha256": "fafd05dcf7eed88eee7f8abab46b46d879fa4f87fdada2af5c4bfff61c97f8c1"
+      }
+    },
+    "LiteSent_s0": {
+      "status": "PASS_WITH_DOCUMENTED_DEFAULT",
+      "issues": [],
+      "config": {
+        "status": "PASS_WITH_DOCUMENTED_DEFAULT",
+        "valid_candidates": [
+          {
+            "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp01_results/results/exp01/runs_meta/LiteSent_s0/run_config.json",
+            "sha256": "2a9298158071a837dcd719c3a3ff3006a64ce86784daa28c663a135e7ae7ee47",
+            "git_commit": "ea354cd",
+            "run_name": "LiteSent__s0",
+            "split_hash": "675667edf3f35f16",
+            "errors": [],
+            "documented_defaults": [
+              "Legacy LiteSent_s0 config omits llr_source; documented LiteSent profile uses raw-band refinement."
+            ]
+          }
+        ],
+        "rejected_candidates": []
+      },
+      "per_image_csv": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/LiteSent_s0_val_per_image.csv",
+        "sha256": "f046480e994b0887b579a2a93bb6c6cadb3c0194d4494ad5125bc02a9bb5ea0c"
+      },
+      "evaluation_summary": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/LiteSent_s0_val_summary.json",
+        "sha256": "d9370dde825aab8fb2106f665a93a077a7368beeaf65f38e8a4a292f1b290150",
+        "run_name": "LiteSent_s0",
+        "split": "val",
+        "n_images": 26,
+        "ckpt": "runs/LiteSent_s0/best_val.pth",
+        "head": "bilinear",
+        "GT_LEAKAGE": false
+      },
+      "checkpoint": {
+        "path": "/kaggle/input/datasets/thothanh28/ccmc-ckpts/runs/LiteSent_s0/best_val.pth",
+        "sha256": "63b1c926f40623d533ee9a3423c011871f6258aa9e2ef2f1ec120ea88404a34a"
+      }
+    },
+    "LiteSent_s1": {
+      "status": "PASS",
+      "issues": [],
+      "config": {
+        "status": "PASS",
+        "valid_candidates": [
+          {
+            "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp04_results/results/exp04/runs_meta/LiteSent_s1/run_config.json",
+            "sha256": "cfe4fdd6f7d90216ac80950840ff93828b91508ca12ec3451613c19a631195c1",
+            "git_commit": "e0bdb6b",
+            "run_name": "LiteSent__s1",
+            "split_hash": "675667edf3f35f16",
+            "errors": [],
+            "documented_defaults": []
+          }
+        ],
+        "rejected_candidates": []
+      },
+      "per_image_csv": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/LiteSent_s1_val_per_image.csv",
+        "sha256": "6cd5eadafd791267a074fda707bcb4c70d6c16c09bcadaac899a70d02ffe449d"
+      },
+      "evaluation_summary": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/LiteSent_s1_val_summary.json",
+        "sha256": "858b4771256c1ea806b0d2d3ceb95a00d1108ac95aae36952461975b276e82d3",
+        "run_name": "LiteSent_s1",
+        "split": "val",
+        "n_images": 26,
+        "ckpt": "runs/LiteSent_s1/best_val.pth",
+        "head": "bilinear",
+        "GT_LEAKAGE": false
+      },
+      "checkpoint": {
+        "path": "/kaggle/input/datasets/thothanh28/exp04-ckpts/runs/LiteSent_s1/best_val.pth",
+        "sha256": "ef361a3f834272641a0a34aa560b234825c7ff4c44e333040f04b0092d58ab31"
+      }
+    },
+    "LiteSent_s2": {
+      "status": "PASS",
+      "issues": [],
+      "config": {
+        "status": "PASS",
+        "valid_candidates": [
+          {
+            "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp04_results/results/exp04/runs_meta/LiteSent_s2/run_config.json",
+            "sha256": "da1e538fa68fc532b7a410e41128f99cfb5ea2434ef6ef0348c3402d6ff0fe31",
+            "git_commit": "e0bdb6b",
+            "run_name": "LiteSent__s2",
+            "split_hash": "675667edf3f35f16",
+            "errors": [],
+            "documented_defaults": []
+          }
+        ],
+        "rejected_candidates": []
+      },
+      "per_image_csv": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/LiteSent_s2_val_per_image.csv",
+        "sha256": "057b6b04c442851818c876abe9e11400e4aa9ae21f1d545ab36453a5f3b7ec4b"
+      },
+      "evaluation_summary": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/LiteSent_s2_val_summary.json",
+        "sha256": "e39b29624383193ede0db937b1efe3324bcd633f13d91674dd9531737cbd061c",
+        "run_name": "LiteSent_s2",
+        "split": "val",
+        "n_images": 26,
+        "ckpt": "runs/LiteSent_s2/best_val.pth",
+        "head": "bilinear",
+        "GT_LEAKAGE": false
+      },
+      "checkpoint": {
+        "path": "/kaggle/input/datasets/thothanh28/exp04-ckpts/runs/LiteSent_s2/best_val.pth",
+        "sha256": "efcf6de6b3084d9acac8b17268102344b80ea9928ab0947459780149a528bde8"
+      }
+    },
+    "LiteSent_s3": {
+      "status": "PASS",
+      "issues": [],
+      "config": {
+        "status": "PASS",
+        "valid_candidates": [
+          {
+            "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/runs_meta/LiteSent_s3/run_config.json",
+            "sha256": "3e31d1eee915587c652622df216f4d6f8d47b555a0fbf9211dd10ed27fc068ab",
+            "git_commit": "52a8843",
+            "run_name": "LiteSent__s3",
+            "split_hash": "675667edf3f35f16",
+            "errors": [],
+            "documented_defaults": []
+          }
+        ],
+        "rejected_candidates": []
+      },
+      "per_image_csv": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/LiteSent_s3_val_per_image.csv",
+        "sha256": "77f760b5e77fd784eff8167aef035b6f0877c3a902f09ab0217d76eb100992d2"
+      },
+      "evaluation_summary": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/LiteSent_s3_val_summary.json",
+        "sha256": "af2c80fbaa476d19a44ce35585f74cadb9245335d741aef5352e0c1f0fdeee73",
+        "run_name": "LiteSent_s3",
+        "split": "val",
+        "n_images": 26,
+        "ckpt": "runs/LiteSent_s3/best_val.pth",
+        "head": "bilinear",
+        "GT_LEAKAGE": false
+      },
+      "checkpoint": {
+        "path": "/kaggle/input/datasets/thothanh28/exp06-ckpts/runs/LiteSent_s3/best_val.pth",
+        "sha256": "faa9ce62642270e03d1ef163986368e7f37ae36f1b3ef9ba287c62ead6df433f"
+      }
+    },
+    "LiteSent_s4": {
+      "status": "PASS",
+      "issues": [],
+      "config": {
+        "status": "PASS",
+        "valid_candidates": [
+          {
+            "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/runs_meta/LiteSent_s4/run_config.json",
+            "sha256": "5f5b018a53216c4620775553c7636f2a961ad89b5be0f2db64bbbda04056ce88",
+            "git_commit": "52a8843",
+            "run_name": "LiteSent__s4",
+            "split_hash": "675667edf3f35f16",
+            "errors": [],
+            "documented_defaults": []
+          }
+        ],
+        "rejected_candidates": []
+      },
+      "per_image_csv": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/LiteSent_s4_val_per_image.csv",
+        "sha256": "a8a422d1a606b560013d441fa93d263e444aecc324428f2645cfe2d96b5aff9d"
+      },
+      "evaluation_summary": {
+        "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp06_results/results/exp06/LiteSent_s4_val_summary.json",
+        "sha256": "756b26c8e27dc43221f9ba634e452feea7439f26e6d67eca527d9e4548093361",
+        "run_name": "LiteSent_s4",
+        "split": "val",
+        "n_images": 26,
+        "ckpt": "runs/LiteSent_s4/best_val.pth",
+        "head": "bilinear",
+        "GT_LEAKAGE": false
+      },
+      "checkpoint": {
+        "path": "/kaggle/input/datasets/thothanh28/exp06-ckpts/runs/LiteSent_s4/best_val.pth",
+        "sha256": "7762226f33f6b1e316a1bdd2f8da85bba4e03a7fa46faf22b5aa490f22fd5444"
+      }
+    }
+  },
+  "source_hash_checks": {
+    "src/nets/mcsd.py": {
+      "status": "PASS",
+      "expected_sha256": "ed2626dc6c992848ae9431764f31cf78a94a56c768d7694181cec7ab56a6163e",
+      "actual_sha256": "ed2626dc6c992848ae9431764f31cf78a94a56c768d7694181cec7ab56a6163e"
+    },
+    "src/train.py": {
+      "status": "PASS",
+      "expected_sha256": "ef68720c8c2b626c52c47c9e4b6de92cbeb60bf1b5f70f5f27d8bab58a8ab3ac",
+      "actual_sha256": "ef68720c8c2b626c52c47c9e4b6de92cbeb60bf1b5f70f5f27d8bab58a8ab3ac"
+    },
+    "src/evaluate_ccmc.py": {
+      "status": "PASS",
+      "expected_sha256": "9e47a85e65e55fb00bc48e9653a66c9eae9b3398bb47535387272b21c6eb24b4",
+      "actual_sha256": "9e47a85e65e55fb00bc48e9653a66c9eae9b3398bb47535387272b21c6eb24b4"
+    }
+  },
+  "comparison_count": 6,
+  "comparison_checks": {
+    "results/q2_audit/20261105T161337Z/cmp_OccCondg_vs_L0.json": {
+      "status": "PASS",
+      "resolved_path": "/kaggle/working/WeedsGalore_Ipr28/doc/q2_audit_20261105T161337Z/results/q2_audit/20261105T161337Z/cmp_OccCondg_vs_L0.json",
+      "sha256": "4cebcc3aa5f40771b9d97ffe30adb5a9f506ebeef1b44c9f2c8ef29599ace934",
+      "n_seeds": 5,
+      "n_images": 26,
+      "n_boot": 10000,
+      "seed_bootstrap": true
+    },
+    "results/q2_audit/20261105T161337Z/cmp_MCSDg_vs_L0.json": {
+      "status": "PASS",
+      "resolved_path": "/kaggle/working/WeedsGalore_Ipr28/doc/q2_audit_20261105T161337Z/results/q2_audit/20261105T161337Z/cmp_MCSDg_vs_L0.json",
+      "sha256": "636d42faa374cafe61d2f2f7f19bb65fda86d1bf243c7f84ec5eddd54b03c00f",
+      "n_seeds": 5,
+      "n_images": 26,
+      "n_boot": 10000,
+      "seed_bootstrap": true
+    },
+    "results/q2_audit/20261105T161337Z/cmp_MCSDg_vs_OccCondg.json": {
+      "status": "PASS",
+      "resolved_path": "/kaggle/working/WeedsGalore_Ipr28/doc/q2_audit_20261105T161337Z/results/q2_audit/20261105T161337Z/cmp_MCSDg_vs_OccCondg.json",
+      "sha256": "c382eda7ddb8b5649ba37dd7a7118a4fb6c9dd681441c2528d6c0aa814095195",
+      "n_seeds": 5,
+      "n_images": 26,
+      "n_boot": 10000,
+      "seed_bootstrap": true
+    },
+    "results/q2_audit/20261105T161337Z/cmp_PS_vs_L0.json": {
+      "status": "PASS",
+      "resolved_path": "/kaggle/working/WeedsGalore_Ipr28/doc/q2_audit_20261105T161337Z/results/q2_audit/20261105T161337Z/cmp_PS_vs_L0.json",
+      "sha256": "215d3a147b2dbcaddd087b92764438d8ddfc47d57e01dba2c667f3d2d94ebf24",
+      "n_seeds": 5,
+      "n_images": 26,
+      "n_boot": 10000,
+      "seed_bootstrap": true
+    },
+    "results/q2_audit/20261105T161337Z/cmp_Dnone_vs_L0.json": {
+      "status": "PASS",
+      "resolved_path": "/kaggle/working/WeedsGalore_Ipr28/doc/q2_audit_20261105T161337Z/results/q2_audit/20261105T161337Z/cmp_Dnone_vs_L0.json",
+      "sha256": "39c200598830022015e8128451e34f43890826ada55fc65c3bbd8e010e659359",
+      "n_seeds": 5,
+      "n_images": 26,
+      "n_boot": 10000,
+      "seed_bootstrap": true
+    },
+    "results/q2_audit/20261105T161337Z/cmp_LiteSent_vs_L0.json": {
+      "status": "PASS",
+      "resolved_path": "/kaggle/working/WeedsGalore_Ipr28/doc/q2_audit_20261105T161337Z/results/q2_audit/20261105T161337Z/cmp_LiteSent_vs_L0.json",
+      "sha256": "5151fdeb715e4f1b35a754c409cd7ad0f307a65ae54dbcadabeebf929f29c5c3",
+      "n_seeds": 5,
+      "n_images": 26,
+      "n_boot": 10000,
+      "seed_bootstrap": true
+    }
+  },
+  "a3_between_method_paired_instance_ids": "NOT_ESTABLISHED",
+  "a3_existing_instance_artifacts": [
+    {
+      "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp07_results/results/exp07/iteration_audit_MCSDg_s0_it1_vs_it5_small_instances.csv",
+      "sha256": "b44bf74170a4042a44d3a4adb1ad2711165b5041270505ccd2ae19c449478a57",
+      "scope": "MCSDg inference iteration 1 vs 5; not a MCSDg vs OccCondg comparison"
+    },
+    {
+      "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp07_results/results/exp07/iteration_audit_MCSDg_s1_it1_vs_it5_small_instances.csv",
+      "sha256": "363704c2b59377fc51f621686cd48e9d5063012535ec270437e3d9691e9697f6",
+      "scope": "MCSDg inference iteration 1 vs 5; not a MCSDg vs OccCondg comparison"
+    },
+    {
+      "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp07_results/results/exp07/iteration_audit_MCSDg_s2_it1_vs_it5_small_instances.csv",
+      "sha256": "c8ca0ee45a9d78fad69f26fc8eb1152efbb929f77ad3a0bb981d0aaaf73942cb",
+      "scope": "MCSDg inference iteration 1 vs 5; not a MCSDg vs OccCondg comparison"
+    },
+    {
+      "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp07_results/results/exp07/iteration_audit_MCSDg_s3_it1_vs_it5_small_instances.csv",
+      "sha256": "54695bc4339739592667b80e563a70fce6cb3c38b7b67f9934e4ad2dab99018d",
+      "scope": "MCSDg inference iteration 1 vs 5; not a MCSDg vs OccCondg comparison"
+    },
+    {
+      "path": "/kaggle/working/WeedsGalore_Ipr28/doc/exp07_results/results/exp07/iteration_audit_MCSDg_s4_it1_vs_it5_small_instances.csv",
+      "sha256": "72910c09c81846667104491061fbb87c21534a5637dad835a5442f5a6287cd11",
+      "scope": "MCSDg inference iteration 1 vs 5; not a MCSDg vs OccCondg comparison"
+    }
+  ],
+  "test_data_accessed_by_this_cell": false,
+  "model_inference_run": false,
+  "bootstrap_recomputed": false,
+  "note": "This cell reconciles existing configs, summaries, CSV hashes, checkpoint hashes and comparison JSONs only; it does not rerun evaluation or bootstrap."
+}

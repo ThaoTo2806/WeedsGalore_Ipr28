@@ -1,0 +1,26 @@
+{
+  "run_id": "20261105T161337Z",
+  "git_head": "f8397920d5a6eebdafcd72092d4a785c67f2435f",
+  "evaluation_split": "validation artifacts and synthetic tensors only",
+  "A0_source_audit": "SOURCE_CAPTURED_MANUAL_REVIEW_REQUIRED",
+  "A0_source_excerpt_review": "REVIEWED; PI approval is not implied",
+  "A1_synthetic_tests": "PASS",
+  "A2_original_recompute": "PARTIAL_CONFIG_PROVENANCE",
+  "A2_provenance_reconciliation": "PASS_PROVENANCE_RECONCILED_WITH_DOCUMENTED_DEFAULT",
+  "A2_bootstrap_rerun": false,
+  "A3_descriptive_occupancy_bins": "PASS_DESCRIPTIVE_BINS",
+  "A3_MCSDg_vs_OccCondg_paired_instance_analysis": "NOT_ESTABLISHED",
+  "A4_matched_profile_inventory": "PASS_PROFILE_INVENTORY",
+  "A4_profile_scope": "6 methods profiled; L0 and OccCondg profile absent",
+  "A5_new_baseline": "NOT_RUN",
+  "A6_factorial_ablation": "NOT_RUN",
+  "K8.3_WeedsGalore_test": "BLOCKED_ABORTED_RERUN_UNAUTHORIZED",
+  "WeedMap": "NOT_AUTHORIZED",
+  "test_data_accessed_by_closeout_cells": false,
+  "paper_claim_boundary": [
+    "Report Exp00-07 performance only as validation evidence.",
+    "Describe finite Sinkhorn as approximate marginal matching, not exact conservation.",
+    "Describe the MCSDg/OccCondg outcome as an observed trade-off, not a causal effect.",
+    "Do not claim first, SOTA, external-domain validation, or held-out gains."
+  ]
+}

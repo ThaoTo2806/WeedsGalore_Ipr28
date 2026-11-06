@@ -1,0 +1,80 @@
+{
+  "status": "PASS",
+  "scope": "synthetic decoder operators only; no full model, dataset, or checkpoint",
+  "device": "cuda",
+  "checks": [
+    {
+      "name": "output_shapes_and_probabilities",
+      "status": "PASS",
+      "details": {
+        "pixel_output_shapes": {
+          "OccCond-g": [
+            2,
+            3,
+            12,
+            20
+          ],
+          "MCSD-g": [
+            2,
+            3,
+            12,
+            20
+          ]
+        },
+        "q_min": 0.007760282605886459,
+        "q_max": 0.890304684638977
+      }
+    },
+    {
+      "name": "extreme_occupancy_and_finite_gradients",
+      "status": "PASS",
+      "details": {
+        "OccCond-g": {
+          "minimum_q": 9.357569379737571e-14,
+          "gradient_norm_logits": 2.544534895287942e-12,
+          "gradient_norm_scores": 1.1523168487112545e-12
+        },
+        "MCSD-g-5": {
+          "minimum_q": 9.357569379737571e-14,
+          "gradient_norm_logits": 1.293046290699873e-12,
+          "gradient_norm_scores": 2.3985137877560736e-13
+        }
+      }
+    },
+    {
+      "name": "sinkhorn_residuals_1_5_20",
+      "status": "PASS",
+      "details": {
+        "residuals": [
+          {
+            "iterations": 1,
+            "row_marginal_mae": 1.7571481466293335,
+            "row_marginal_max_abs": 4.465847969055176,
+            "column_marginal_max_abs": 1.1920928955078125e-07
+          },
+          {
+            "iterations": 5,
+            "row_marginal_mae": 0.10384190082550049,
+            "row_marginal_max_abs": 0.24626827239990234,
+            "column_marginal_max_abs": 2.384185791015625e-07
+          },
+          {
+            "iterations": 20,
+            "row_marginal_mae": 4.143019759794697e-05,
+            "row_marginal_max_abs": 0.00046443939208984375,
+            "column_marginal_max_abs": 2.384185791015625e-07
+          }
+        ]
+      }
+    },
+    {
+      "name": "occupancy_loss_gradient",
+      "status": "PASS",
+      "details": {
+        "loss": 1.4076703786849976,
+        "gradient_norm": 0.3599347770214081
+      }
+    }
+  ],
+  "test_data_accessed_by_this_cell": false
+}

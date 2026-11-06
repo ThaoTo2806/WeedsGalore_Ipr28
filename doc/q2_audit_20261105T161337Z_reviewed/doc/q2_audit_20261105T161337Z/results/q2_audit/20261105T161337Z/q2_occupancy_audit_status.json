@@ -1,0 +1,27 @@
+{
+  "status": "PASS_DESCRIPTIVE_BINS",
+  "summary_count": 10,
+  "missing_summaries": [],
+  "source_sha256": {
+    "doc/exp07_results/results/exp07/audit_MCSDg_s0_it5_marginal_summary.json": "bb95e13db8e47bdb86720bbad80e090e6e17e3a1fb11e3fd42dceca8bd8c0db0",
+    "doc/exp07_results/results/exp07/audit_MCSDg_s1_it5_marginal_summary.json": "6b8a3bd7d039d77a7ba72644926f1a87a811317c59b26a02c86a3ef7469d1814",
+    "doc/exp07_results/results/exp07/audit_MCSDg_s2_it5_marginal_summary.json": "0e9fcb203095a67689248b466f41319214dcddb816ac84bd63c0c34e4b7aba0c",
+    "doc/exp07_results/results/exp07/audit_MCSDg_s3_it5_marginal_summary.json": "6590578521556cc5a13995af0e74feaedb2644126c24e87134f7f344a59cd8cf",
+    "doc/exp07_results/results/exp07/audit_MCSDg_s4_it5_marginal_summary.json": "d98fa07c81a912e16bed232cd816e6e63af71b241ced59300949a23f13f99743",
+    "doc/exp07_results/results/exp07/audit_OccCondg_s0_it5_marginal_summary.json": "3d2ad57e55ca4e2a45df8e64916a9711b17b48ddc86687ea20c1bc7b782a25b9",
+    "doc/exp07_results/results/exp07/audit_OccCondg_s1_it5_marginal_summary.json": "0e2a2a876b710db8cb4a95d65972845a425e09e8d3aa5c94fcebde04189b2935",
+    "doc/exp07_results/results/exp07/audit_OccCondg_s2_it5_marginal_summary.json": "d157465f8fa21fd5038bf76c319cd45fa48b8715f0cf0f48f61691ab2b30dfd3",
+    "doc/exp07_results/results/exp07/audit_OccCondg_s3_it5_marginal_summary.json": "d4cd185836a61292d3b8d403763368b173c41554e4ca12649ea7160e58015001",
+    "doc/exp07_results/results/exp07/audit_OccCondg_s4_it5_marginal_summary.json": "259ae938ef1beb065d57c27bd50eee126d0cbbbeccd78f348c12db090ec0357e"
+  },
+  "paired_instance_artifact_candidates": [
+    "doc/exp07_results/results/exp07/iteration_audit_MCSDg_s1_it1_vs_it5_small_instances.csv",
+    "doc/exp07_results/results/exp07/iteration_audit_MCSDg_s3_it1_vs_it5_small_instances.csv",
+    "doc/exp07_results/results/exp07/iteration_audit_MCSDg_s0_it1_vs_it5_small_instances.csv",
+    "doc/exp07_results/results/exp07/iteration_audit_MCSDg_s2_it1_vs_it5_small_instances.csv",
+    "doc/exp07_results/results/exp07/iteration_audit_MCSDg_s4_it1_vs_it5_small_instances.csv"
+  ],
+  "paired_instance_id_analysis": "NOT_ESTABLISHED_BY_THIS_CELL; inspect candidate files before any claim",
+  "test_data_accessed_by_this_cell": false,
+  "interpretation": "q_out-q_pred is marginal residual; q_pred-q_GT is occupancy-head error. Do not merge these measures or claim causality."
+}
