@@ -386,6 +386,16 @@ import sys
 p0 = json.loads((OUT / 'e9_p0_llr_baseline_audit.json').read_text(encoding='utf-8'))
 p0_reuse = p0['status'] == 'REUSE_LITESENT_VALIDATION'
 run_files = {}
+
+def existing_validation_pair(prefix):
+    per_image = Path(str(prefix) + '_per_image.csv')
+    summary = Path(str(prefix) + '_summary.json')
+    if per_image.is_file() != summary.is_file():
+        raise RuntimeError(f'Partial validation artifacts; inspect manually: {prefix}')
+    if per_image.is_file():
+        return {'per_image.csv': per_image, 'summary.json': summary}
+    return None
+
 for seed in range(5):
     run_files[f'E9B0_s{seed}'] = {}
     if p0_reuse:
@@ -394,9 +404,13 @@ for seed in range(5):
         for suffix in ('per_image.csv', 'summary.json'):
             source = source_root / f'{source_run}_val_{suffix}'
             target = OUT / 'validation' / f'E9B0_s{seed}_val_{suffix}'
-            assert not target.exists(), f'Baseline copy already exists; inspect before rerunning: {target}'
             target.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(source, target)
+            if target.is_file():
+                assert target.stat().st_size == source.stat().st_size, (
+                    f'Existing baseline copy differs in size; inspect manually: {target}'
+                )
+            else:
+                shutil.copy2(source, target)
             run_files[f'E9B0_s{seed}'][suffix] = target
     else:
         run = f'E9B0_s{seed}'
@@ -404,21 +418,19 @@ for seed in range(5):
         ckpt = run_dir / 'best_val.pth'
         assert ckpt.is_file(), f'B0 checkpoint missing: {ckpt}'
         prefix = OUT / 'validation' / f'{run}_val'
-        assert not Path(str(prefix) + '_summary.json').exists(), (
-            f'Existing B0 evaluation found; inspect/reuse it instead of overwriting: {prefix}'
-        )
-        command = [
-            sys.executable, 'src/evaluate_ccmc.py', f'--dataset_path={DS}', '--split=val',
-            f'--ckpt={ckpt}', '--ccmc=False', '--segformer=True',
-            '--use_low_level_refine=True', '--llr_source=raw', '--head=bilinear',
-            f'--bins_json={BINS}', '--boundary_px=3', f'--run_name={run}',
-            f'--out_prefix={prefix}',
-        ]
-        subprocess.run(command, cwd=PROJECT, check=True)
-        run_files[run] = {
-            'per_image.csv': Path(str(prefix) + '_per_image.csv'),
-            'summary.json': Path(str(prefix) + '_summary.json'),
-        }
+        existing = existing_validation_pair(prefix)
+        if existing is None:
+            command = [
+                sys.executable, 'src/evaluate_ccmc.py', f'--dataset_path={DS}', '--split=val',
+                f'--ckpt={ckpt}', '--ccmc=False',
+                '--use_low_level_refine=True', '--llr_source=raw', '--head=bilinear',
+                f'--bins_json={BINS}', '--boundary_px=3', f'--run_name={run}',
+                f'--out_prefix={prefix}',
+            ]
+            subprocess.run(command, cwd=PROJECT, check=True)
+            existing = existing_validation_pair(prefix)
+            assert existing is not None, f'B0 evaluation did not create both artifacts: {prefix}'
+        run_files[run] = existing
 
 eval_arch = {
     'E9B1': ['--head=pixelshuffle2'],
@@ -431,22 +443,20 @@ for model, arch_flags in eval_arch.items():
         ckpt = OUT / 'runs' / run / 'best_val.pth'
         assert ckpt.is_file(), f'Checkpoint missing: {ckpt}'
         prefix = OUT / 'validation' / f'{run}_val'
-        assert not Path(str(prefix) + '_summary.json').exists(), (
-            f'Existing evaluation found; inspect/reuse it instead of overwriting: {prefix}'
-        )
-        command = [
-            sys.executable, 'src/evaluate_ccmc.py', f'--dataset_path={DS}', '--split=val',
-            f'--ckpt={ckpt}', '--ccmc=False', '--segformer=True',
-            '--use_low_level_refine=True', '--llr_source=raw', *arch_flags,
-            '--spectral_guide=False', '--occ_weight=0.3',
-            f'--bins_json={BINS}', '--boundary_px=3', f'--run_name={run}',
-            f'--out_prefix={prefix}',
-        ]
-        subprocess.run(command, cwd=PROJECT, check=True)
-        run_files[run] = {
-            'per_image.csv': Path(str(prefix) + '_per_image.csv'),
-            'summary.json': Path(str(prefix) + '_summary.json'),
-        }
+        existing = existing_validation_pair(prefix)
+        if existing is None:
+            command = [
+                sys.executable, 'src/evaluate_ccmc.py', f'--dataset_path={DS}', '--split=val',
+                f'--ckpt={ckpt}', '--ccmc=False',
+                '--use_low_level_refine=True', '--llr_source=raw', *arch_flags,
+                '--spectral_guide=False',
+                f'--bins_json={BINS}', '--boundary_px=3', f'--run_name={run}',
+                f'--out_prefix={prefix}',
+            ]
+            subprocess.run(command, cwd=PROJECT, check=True)
+            existing = existing_validation_pair(prefix)
+            assert existing is not None, f'Evaluation did not create both artifacts: {prefix}'
+        run_files[run] = existing
 
 contrasts = [('E9M1', 'E9B0'), ('E9M1', 'E9B1'),
              ('E9M2', 'E9B0'), ('E9M2', 'E9M1'), ('E9B1', 'E9B0')]
@@ -522,7 +532,7 @@ for label, head_flags in profiles.items():
     output = OUT / f'profile_{label}.json'
     assert not output.exists(), f'Profile already exists; do not overwrite: {output}'
     command = [
-        sys.executable, 'src/scripts/profile_model.py', '--ccmc=False', '--segformer=True',
+        sys.executable, 'src/scripts/profile_model.py', '--ccmc=False',
         '--in_channels=5', '--num_classes=3', '--use_low_level_refine=True',
         '--llr_source=raw', '--use_multiscale_fusion=True', '--spectral_guide=False',
         *head_flags, '--size=600', '--warmup=50', '--runs=300',
@@ -587,3 +597,37 @@ print('Evidence archive:', archive)
 ## Gửi lại để review
 
 Gửi `exp09_<run-id>_evidence.zip`, `e9_p0_llr_baseline_audit.json`, `e9_p3_validation_analysis.json`, `e9_p4_compute_summary.json`, logs lỗi (nếu có), cùng trạng thái từng run. Nếu P0 chọn `TRAIN_E9B0`, không bỏ B0 dù quota thiếu; đánh dấu `PARTIAL` và không kết luận M1 thắng baseline. Không mở test/Exp08.
+
+## Nhận xét kết quả Exp09 và quyết định chuyển sang Exp10
+
+### Trạng thái evidence
+
+Artifact `exp09_20261106T064320Z_evidence` xác nhận các điều kiện kiểm tra của Exp09 đã đạt: P0 cho phép tái sử dụng LLR baseline tương thích cho đủ 5 seed, P1 có `10 passed`, phân tích P3 dùng validation-only với 5 seed, 26 ảnh và bootstrap phân tầng theo ảnh, còn P4 dùng cùng điều kiện profile cho các kiến trúc. `test_accessed=false` và `inference_split_test_run=false`, do đó kết quả này không phải kết quả held-out test.
+
+| Mô hình                           |          mIoU | Diễn giải                                                     |
+| --------------------------------- | ------------: | ------------------------------------------------------------- |
+| SegFormer 5-band + LLR (bản Word) | 85,49 ± 0,30% | Kết quả test lịch sử, baseline chính của bài ứng dụng         |
+| E9-B0 — LLR tái lập               |       84,406% | Validation, 5 seed; đối chứng thực nghiệm của Exp09           |
+| E9-B1 — LLR + PixelShuffle        |       83,924% | Validation, 5 seed; thấp hơn B0 `-0,482 pp`                   |
+| E9-M1 — LLR + OccCond             |       84,519% | Validation, 5 seed; hơn B0 `+0,113 pp`                        |
+| E9-M2 — LLR + Sinkhorn            |       84,329% | Validation, 5 seed; thấp hơn M1 `-0,190 pp` và B0 `-0,077 pp` |
+| Mục tiêu phiên bản cải tiến       |       >86,00% | Chưa đạt và chưa được xác minh trên test                      |
+
+### Diễn giải thống kê
+
+M1 hơn B0 về điểm trung bình `0,113 pp`, nhưng CI95% của chênh lệch là `[-0,084; +0,317] pp`. Vì vậy H1 (`M1 - B0 > 0`) là `INCONCLUSIVE`, không đủ cơ sở để nói OccCond đã cải thiện LLR gốc một cách có thể khái quát. H2 (`M1 - B1 > 0`) đạt theo gate đã định trước, với chênh lệch `+0,595 pp` và CI95% `[+0,261; +1,024] pp`; kết quả này chỉ cho thấy occupancy conditioning bù được phần suy giảm của một head sub-cell không conditioning. Nó không chứng minh M1 vượt baseline LLR.
+
+Các kết quả phụ cũng không thay đổi kết luận chính. M1 có tín hiệu tốt hơn B0 ở Weed IoU (`+0,096 pp`) và Small-Weed Recall (điểm trung bình `+0,935 pp`), nhưng các khoảng tin cậy tương ứng vẫn bao gồm 0. M2 không cho thấy lợi ích so với M1 và làm tăng độ phức tạp tính toán. Do đó không nên tiếp tục tối ưu Sinkhorn, attention hoặc backbone trong lượt kế tiếp.
+
+### Quyết định viết paper
+
+1. Giữ kết quả `85,49 ± 0,30%` trên test lịch sử làm baseline chính của bản Word. Không thay thế, hạ thấp hoặc dùng kết quả validation Exp09 để phủ nhận con số này; hai kết quả có split và provenance khác nhau.
+2. Đưa Exp09 vào phần nghiên cứu tiếp nối/ablation. Cách viết đúng là: Exp09 kiểm tra khả năng giải mã sub-cell và tìm thấy tín hiệu cơ chế của occupancy conditioning, nhưng chưa xác nhận cải thiện so với LLR baseline và chưa đạt mục tiêu `>86%`.
+3. Không viết E9-M1 là mô hình đã vượt bản Word. Chênh lệch `+0,113 pp` chỉ là exploratory validation signal, không phải bằng chứng test độc lập.
+4. Chuyển sang Exp10 với giả thuyết hẹp hơn: giữ nguyên classifier + bilinear decoder của LLR, chỉ bổ sung một toán tử hiệu chỉnh residual trong từng ô H/2. Mục tiêu `>86%` là target nghiên cứu, không phải kết quả đã đạt.
+
+### Hàm ý cho Exp10
+
+Exp09 cho thấy việc thay toàn bộ đường dự đoán cuối bằng PixelShuffle có thể làm giảm chất lượng (`-0,482 pp`). Vì vậy Exp10 không được thay classifier gốc. Nhánh mới chỉ được phép điều chỉnh phân bố bằng chứng giữa bốn pixel con của cùng một ô; residual phải zero-mean theo bốn sub-cell và được khởi tạo nhỏ. Khi residual bằng 0, output phải tái tạo đúng output B0. Đây là điều kiện kỹ thuật quan trọng để claim “refinement” có ý nghĩa, thay vì chỉ là một decoder khác.
+
+Tên contribution đề xuất cho Exp10 là **Occupancy-Constrained Intra-Cell Residual Redistribution**. Tên này mô tả một toán tử tái phân bổ bằng chứng trong ô, không mô tả việc gộp hai model độc lập. Tuy nhiên residual refinement và occupancy conditioning đều có tiền lệ; novelty không được suy ra chỉ từ tên gọi. Cần chứng minh bằng ablation B0/B1/M1, zero-residual identity, cùng số seed, cùng protocol, cùng compute reporting và claim boundary rõ ràng. Runbook triển khai Exp10 nằm ở `README_EXP10_RESIDUAL_REFINEMENT.md`.
