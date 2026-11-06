@@ -12,6 +12,7 @@ from nets import (deeplabv3plus_resnet50, deeplabv3plus_resnet50_do,
                   SegFormer5Band, UNet, CCMCSegFormer)
 from nets.ccmc_sr import GT_MODES, aux_target
 from nets.mcsd import MCSDSegFormer, occupancy_loss
+from nets.llr_subcell import LLR_SUBCELL_HEADS, LLRSubcellSegFormer
 from pathlib import Path
 import hashlib
 import json
@@ -132,9 +133,9 @@ flags.DEFINE_boolean('learn_lambda', True, 'learn lambda (bounded in (0,1)) or k
 flags.DEFINE_float('lam_lr', 0.0, 'separate Adam lr for the lambda logits (0 = same as --lr)')
 flags.DEFINE_float('aux_weight', 0.3, 'weight of the prior aux BCE loss (learned_veg/learned_weed)')
 # --- MCSD: mass-conserving sub-cell decoding (src/nets/mcsd.py) ---
-flags.DEFINE_enum('head', 'bilinear', ['bilinear', 'mcsd', 'pixelshuffle', 'occ_conditioned'],
-                  'prediction head of SegFormer5Band without LLR: bilinear (L0), mcsd (proposed), '
-                  'pixelshuffle (unconditioned control), occ_conditioned (no Sinkhorn)')
+flags.DEFINE_enum('head', 'bilinear', ['bilinear', 'mcsd', 'pixelshuffle', 'occ_conditioned',
+                                       *LLR_SUBCELL_HEADS],
+                  'prediction head; *2 heads replace bilinear on the raw-LLR H/2 feature')
 flags.DEFINE_integer('sinkhorn_iters', 5, 'Sinkhorn iterations per cell (mcsd)')
 flags.DEFINE_float('mcsd_tau', 1.0, 'temperature of the placement scores (mcsd)')
 flags.DEFINE_boolean('spectral_guide', False, 'add a full-resolution placement prior from the raw bands')
@@ -259,7 +260,21 @@ def main(_):
                                 num_workers=FLAGS.num_workers, collate_fn=None, drop_last=False)
 
     # Network
-    if FLAGS.head != 'bilinear':
+    if FLAGS.head in LLR_SUBCELL_HEADS:
+        if (FLAGS.ccmc or not FLAGS.segformer or not FLAGS.use_low_level_refine
+            or FLAGS.llr_source != 'raw' or FLAGS.spectral_guide):
+            raise SystemExit('LLR 2x2 heads require --ccmc=False --segformer=True '
+                     '--use_low_level_refine=True --llr_source=raw --spectral_guide=False')
+        net = LLRSubcellSegFormer(
+            num_classes=FLAGS.num_classes,
+            in_channels=FLAGS.in_channels,
+            use_multiscale_fusion=FLAGS.use_multiscale_fusion,
+            pretrained_backbone=FLAGS.pretrained_backbone,
+            head=FLAGS.head,
+            sinkhorn_iters=FLAGS.sinkhorn_iters,
+            tau=FLAGS.mcsd_tau,
+        )
+    elif FLAGS.head != 'bilinear':
         if FLAGS.ccmc or FLAGS.use_low_level_refine:
             raise SystemExit('--head=mcsd/pixelshuffle needs --ccmc=False --use_low_level_refine=False')
         net = MCSDSegFormer(num_classes=FLAGS.num_classes, in_channels=FLAGS.in_channels,
