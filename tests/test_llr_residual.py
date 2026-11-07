@@ -105,7 +105,7 @@ def test_separate_segmentation_and_auxiliary_gradients():
     segmentation_loss = F.cross_entropy(output, labels)
     gradients = torch.autograd.grad(
         segmentation_loss, (m1.placement.weight, m1.occupancy.weight, m1.alpha_logit),
-        allow_unused=True,
+        allow_unused=True, retain_graph=True,
     )
     assert gradients[0] is not None and gradients[0].abs().sum() > 0
     assert gradients[1] is not None and gradients[1].abs().sum() > 0
@@ -119,7 +119,7 @@ def test_separate_segmentation_and_auxiliary_gradients():
 
     b1 = build_head('llr_residual2').train()
     b1_output, b1_extras = b1(x, return_aux=True)
-    F.cross_entropy(b1_output, labels).backward()
+    F.cross_entropy(b1_output, labels).backward(retain_graph=True)
     assert b1.occupancy.weight.grad is None
     b1.zero_grad(set_to_none=True)
     occupancy_loss(b1_extras['occ_logits'], labels, 3).backward()

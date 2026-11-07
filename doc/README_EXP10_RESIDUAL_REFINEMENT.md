@@ -156,16 +156,26 @@ for path in tracked:
     digest = hashlib.sha256(path.read_bytes()).hexdigest()
     source_hashes[str(path.relative_to(PROJECT))] = digest
 
-required_text = {
-    'src/nets/llr_subcell.py': ['LLRResidualSubcellSegFormer'],
-    'src/train.py': ['llr_residual_occ2', 'beta', 'residual_alpha_init'],
-    'src/ccmc_common.py': ['llr_residual_occ2'],
-    'src/evaluate_ccmc.py': ['llr_residual_occ2'],
+source_text = {
+    relative: (PROJECT / relative).read_text(encoding='utf-8')
+    for relative in source_hashes
 }
-for relative, texts in required_text.items():
-    content = (PROJECT / relative).read_text(encoding='utf-8')
-    for text in texts:
-        assert text in content, f'Implementation contract missing {text} in {relative}'
+assert 'class LLRResidualSubcellSegFormer' in source_text['src/nets/llr_subcell.py']
+assert "LLR_RESIDUAL_HEADS = ('llr_residual2', 'llr_residual_occ2')" in source_text[
+    'src/nets/llr_subcell.py']
+assert 'beta=0.5' in source_text['src/nets/llr_subcell.py']
+assert 'residual_alpha_init=0.02' in source_text['src/nets/llr_subcell.py']
+
+# The train/evaluate modules register the names through *LLR_RESIDUAL_HEADS;
+# checking the shared tuple avoids a brittle literal-string assertion.
+for relative in ('src/train.py', 'src/ccmc_common.py'):
+    content = source_text[relative]
+    assert 'LLR_RESIDUAL_HEADS' in content, f'Residual head registry missing in {relative}'
+    assert 'LLRResidualSubcellSegFormer' in content, (
+        f'Residual model integration missing in {relative}')
+assert 'DEFINE_float(\'beta\'' in source_text['src/train.py']
+assert 'DEFINE_float(\'residual_alpha_init\'' in source_text['src/train.py']
+assert 'define_model_flags' in source_text['src/evaluate_ccmc.py']
 
 report = {
     'status': 'PASS_SOURCE_CONTRACT',
