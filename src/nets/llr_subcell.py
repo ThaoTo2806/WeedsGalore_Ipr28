@@ -104,6 +104,7 @@ class LLRResidualSubcellSegFormer(SegFormer5Band):
         self.num_classes = num_classes
         self.beta = beta
         self.subcell_scale = 2
+        self.branch_scale = 1.0
         self.occupancy = nn.Conv2d(decoder_dim, num_classes, kernel_size=1)
         self.placement = nn.Conv2d(decoder_dim, num_classes * 4, kernel_size=1)
         nn.init.normal_(self.placement.weight, mean=0.0, std=1e-3)
@@ -114,6 +115,9 @@ class LLRResidualSubcellSegFormer(SegFormer5Band):
     @property
     def alpha(self):
         return torch.sigmoid(self.alpha_logit)
+
+    def set_branch_scale(self, value):
+        self.branch_scale = float(value)
 
     def forward(self, x, return_aux=False):
         features = self.decode_features(x, self.encoder(x))
@@ -139,7 +143,7 @@ class LLRResidualSubcellSegFormer(SegFormer5Band):
         residual = F.pixel_shuffle(
             residual.reshape(batch, self.num_classes * scale * scale, height, width), scale
         )
-        output = base + self.alpha * residual
+        output = base + self.branch_scale * self.alpha * residual
         extras = {
             'occ_logits': occupancy_logits,
             'base_logits': base,
