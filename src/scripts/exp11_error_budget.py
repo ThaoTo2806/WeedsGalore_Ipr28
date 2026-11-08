@@ -78,6 +78,22 @@ def _component_flip_mask(label, pred):
     return result
 
 
+def _prediction_component_vote(pred):
+    """Return a no-GT component probe based only on predicted vegetation components.
+
+    A connected component already has one predicted class, so this majority vote is
+    intentionally a conservative no-op probe. It is not an oracle correction.
+    """
+    repaired = pred.copy()
+    for cls in (1, 2):
+        count, components = cv2.connectedComponents((pred == cls).astype(np.uint8), 8)
+        for component_id in range(1, count):
+            selected = components == component_id
+            majority = np.bincount(pred[selected], minlength=NUM_CLASSES).argmax()
+            repaired[selected] = majority
+    return repaired
+
+
 def _partition(label, pred, primary_radius, small_area_px, instance_map):
     error = pred != label
     categories = {}
@@ -139,7 +155,7 @@ def _evaluate(net, dataset, device, edges, return_predictions=False):
             instance_map = load_instance_map(FLAGS.dataset_path, name)
             row = image_stats( pred, label,
                                weed_instances(label, instance_map)[0], edges,
-                               boundary_px=3)
+                               boundary_ratio=0.02, boundary_px=3)
             row['name'] = name
             rows.append(row)
             predictions.append((name, label, pred, instance_map))
@@ -172,7 +188,8 @@ def main(_):
     baseline = {'mIoU': aggregate_miou(base_confusion),
                 'IoU_bg': class_iou(0), 'IoU_crop': class_iou(1),
                 'IoU_weed': class_iou(2)}
-    records = {}
+    partition_records = {}
+    sensitivity_records = {}
     per_image = []
     for name, label, pred, instance_map in predictions:
         categories, error = _partition(label, pred, FLAGS.primary_radius,
@@ -182,37 +199,44 @@ def main(_):
             row[category] = _repair_confusion(label, pred, mask)
         per_image.append(row)
         for category, mask in categories.items():
-            records.setdefault(category, {'pixels': 0, 'ceiling_deltas': []})
-            records[category]['pixels'] += int(mask.sum())
-            records[category]['ceiling_deltas'].append(
+            partition_records.setdefault(category, {'pixels': 0, 'ceiling_deltas': []})
+            partition_records[category]['pixels'] += int(mask.sum())
+            partition_records[category]['ceiling_deltas'].append(
                 aggregate_miou(_repair_confusion(label, pred, mask)) - aggregate_miou(_confusion(label, pred)))
 
-    for category, record in records.items():
+    for category, record in partition_records.items():
         record['error_pixel_share'] = record['pixels'] / max(sum(np.count_nonzero(pred != label)
                                                                for _, label, pred, _ in predictions), 1)
         record['ceiling_delta_mIoU'] = float(np.mean(record.pop('ceiling_deltas')))
     for radius in (int(value) for value in FLAGS.radii):
-        mask_deltas = []
+        sensitivity_records[f'boundary_r{radius}'] = {'confusions': [], 'deltas': []}
         for _, label, pred, _ in predictions:
             mask = (pred != label) & _boundary_mask(label, radius)
-            mask_deltas.append(aggregate_miou(_repair_confusion(label, pred, mask)) - aggregate_miou(_confusion(label, pred)))
-        records[f'boundary_r{radius}'] = {
-            'error_pixel_share': None,
-            'ceiling_delta_mIoU': float(np.mean(mask_deltas)),
-        }
+            repaired = _repair_confusion(label, pred, mask)
+            sensitivity_records[f'boundary_r{radius}']['confusions'].append(repaired)
+            sensitivity_records[f'boundary_r{radius}']['deltas'].append(
+                aggregate_miou(repaired) - aggregate_miou(_confusion(label, pred)))
+        sensitivity_records[f'boundary_r{radius}']['ceiling_delta_mIoU'] = float(
+            np.mean(sensitivity_records[f'boundary_r{radius}'].pop('deltas')))
+        sensitivity_records[f'boundary_r{radius}']['error_pixel_share'] = None
 
-    component_vote_delta = None
+    prediction_component_delta = None
+    gt_component_vote_delta = None
     if FLAGS.component_vote:
-        deltas = []
+        prediction_deltas = []
+        oracle_deltas = []
         for _, label, pred, _ in predictions:
-            repaired = pred.copy()
+            repaired = _prediction_component_vote(pred)
+            prediction_deltas.append(aggregate_miou(_confusion(label, repaired)) - aggregate_miou(_confusion(label, pred)))
+            repaired_oracle = pred.copy()
             components = _gt_components(label)
             for component_id in range(1, components.max() + 1):
                 selected = components == component_id
                 majority = np.bincount(pred[selected], minlength=3).argmax()
-                repaired[selected] = majority
-            deltas.append(aggregate_miou(_confusion(label, repaired)) - aggregate_miou(_confusion(label, pred)))
-        component_vote_delta = float(np.mean(deltas))
+                repaired_oracle[selected] = majority
+            oracle_deltas.append(aggregate_miou(_confusion(label, repaired_oracle)) - aggregate_miou(_confusion(label, pred)))
+        prediction_component_delta = float(np.mean(prediction_deltas))
+        gt_component_vote_delta = float(np.mean(oracle_deltas))
 
     activity = {'branch_scale_supported': hasattr(net, 'set_branch_scale'),
                 'delta_mIoU_when_branch_zero': None}
@@ -226,21 +250,47 @@ def main(_):
 
     prefix = Path(FLAGS.out_prefix)
     prefix.parent.mkdir(parents=True, exist_ok=True)
+    sensitivity_npz = {
+        f'boundary_sensitivity_{radius}': np.stack(record['confusions'])
+        for radius, record in ((key.rsplit('boundary_r', 1)[-1], value)
+                               for key, value in sensitivity_records.items())
+    }
+    sensitivity_json = {
+        key: {'error_pixel_share': record['error_pixel_share'],
+              'ceiling_delta_mIoU': record['ceiling_delta_mIoU']}
+        for key, record in sensitivity_records.items()
+    }
     report = {
         'run_name': FLAGS.run_name, 'split': FLAGS.split, 'n_images': len(predictions),
         'aggregator': 'global_confusion_sum', 'baseline': baseline,
-        'categories': records, 'partition_order': ['boundary_r2', 'small_weed',
-                                                     'component_flip', 'background_fp', 'other'],
-        'component_vote': {'delta_mIoU': component_vote_delta}, 'activity': activity,
+        'partition_categories': partition_records,
+        'boundary_sensitivity': sensitivity_json,
+        'partition_order': ['boundary_r2', 'small_weed', 'component_flip',
+                            'background_fp', 'other'],
+        'component_vote': {
+            'prediction_component_probe_delta_mIoU': prediction_component_delta,
+            'gt_component_vote_oracle_delta_mIoU': gt_component_vote_delta,
+            'uses_ground_truth': False,
+            'uses_ground_truth_for_oracle_only': True,
+        },
+        'activity': activity,
         'per_image_npz': str(prefix.with_name(prefix.name + '_budget_per_image.npz')),
         'test_accessed': False,
     }
     prefix.with_name(prefix.name + '_budget.json').write_text(json.dumps(report, indent=2), encoding='utf-8')
+    npz_payload = {
+        category: np.stack([row[category] for row in per_image])
+        for category in ['base_confusion', *partition_records]
+        if category in per_image[0]
+    }
+    npz_payload.update(sensitivity_npz)
+    npz_payload['image_names'] = np.asarray([row['name'] for row in per_image])
     np.savez_compressed(prefix.with_name(prefix.name + '_budget_per_image.npz'),
-                        **{category: np.stack([row[category] for row in per_image])
-                           for category in ['base_confusion', *records] if category in per_image[0]})
+                        **npz_payload)
     print(json.dumps({'run_name': FLAGS.run_name, 'mIoU': baseline['mIoU'],
-                      'categories': list(records), 'activity': activity}, indent=2))
+                      'partition_categories': list(partition_records),
+                      'boundary_sensitivity': list(sensitivity_records),
+                      'activity': activity}, indent=2))
 
 
 if __name__ == '__main__':
