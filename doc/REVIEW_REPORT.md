@@ -729,3 +729,43 @@ This closeout does **not** support claims about WeedsGalore test mIoU, Small-Wee
 ### 11.4 Final decision for this session
 
 Stop Kaggle work at this state. Do not delete the marker, do not rerun Cell D, and do not describe the attempt as a completed test. Any future run requires an explicitly approved protocol deviation, a new immutable manifest/marker, and preservation of this aborted-attempt record.
+
+## 12. Exp10 — LLR residual refinement (review 08/11/2026)
+
+Artifact: [doc/exp10/kaggle/working/WeedsGalore_Ipr28/results/exp10/20261108T062634Z](exp10/kaggle/working/WeedsGalore_Ipr28/results/exp10/20261108T062634Z). E10-P0 passed the source contract, E10-P2 completed all 15 runs (B0/B1/M1 x seeds 0-4), and E10-P3 evaluated validation only on 26 images with paired seed bootstrap (`n_boot=10000`, `cluster=image`). `test_accessed=false`; no held-out test inference was run.
+
+### 12.1 Kết quả chính
+
+| Mô hình                                  | mIoU validation, 5 seed | Vai trò                     |
+| ---------------------------------------- | ----------------------: | --------------------------- |
+| E10-B0 — LLR + bilinear                  |                  84,42% | Baseline bắt buộc của Exp10 |
+| E10-B1 — LLR + residual, không occupancy |                  84,51% | Kiểm tra residual đơn thuần |
+| E10-M1 — LLR + occupancy-guided residual |                  84,48% | Phương pháp chính           |
+| Mục tiêu cải tiến                        |                 >86,00% | Chưa đạt trên validation    |
+
+Các giá trị trên là trung bình của 5 seed từ các summary validation. M1 không phải mô hình tốt nhất theo điểm trung bình: B1 đạt `84,51%`, M1 đạt `84,48%`, còn B0 đạt `84,42%`.
+
+### 12.2 So sánh paired và gate
+
+| Contrast        | Delta mIoU |               CI95% | Gate           |
+| --------------- | ---------: | ------------------: | -------------- |
+| E10-M1 − E10-B0 | `+0,06 pp` | `[-0,29; +0,27] pp` | `INCONCLUSIVE` |
+| E10-M1 − E10-B1 | `-0,03 pp` | `[-0,30; +0,20] pp` | `INCONCLUSIVE` |
+| E10-B1 − E10-B0 | `+0,08 pp` | `[-0,12; +0,25] pp` | `INCONCLUSIVE` |
+
+Theo GO/NO-GO report, `IMPROVED_VS_LLR=INCONCLUSIVE` và `TARGET_86_REACHED=FAIL`. H1 không có CI95% lower bound lớn hơn 0; H2 cũng không đạt. Vì vậy không có bằng chứng đủ chắc chắn rằng occupancy guidance cải thiện LLR, cũng không có bằng chứng rằng residual branch đơn thuần đã tạo lợi ích mIoU ổn định.
+
+### 12.3 Diễn giải cơ chế
+
+M1 có một số tín hiệu phụ thuận chiều so với B0: Small-Weed Recall tăng khoảng `+0,39 pp`, `cov_small` tăng `+0,23 pp`, Weed IoU tăng `+0,13 pp` và PrecisionWeed tăng `+0,76 pp`. Tuy nhiên tất cả CI95% của các chênh lệch này đều bao gồm 0. So với B1, M1 tăng Small-Weed Recall khoảng `+1,71 pp` và `cov_small` `+1,65 pp`, nhưng CI cũng bao gồm 0; mIoU M1 lại thấp hơn B1 `-0,03 pp`. Đây chỉ là tín hiệu exploratory, chưa chứng minh occupancy-guided residual mang lại lợi ích thực chất.
+
+Kết quả B1/M1 cho thấy giữ classifier LLR gốc và thêm residual không gây sụt giảm lớn, nhưng cơ chế hiện tại chưa tạo được bước nhảy đáng kể. Đặc biệt, công thức `g_c(q)=1+0.5(3q_c-1)` là một cơ chế hợp lệ về mặt implementation nhưng không tự nó chứng minh novelty hoặc hiệu quả Q2. Kết quả âm tính/inconclusive này phải được giữ nguyên trong audit; không chọn M1 post hoc chỉ vì một metric phụ tăng.
+
+### 12.4 Quyết định viết paper và trạng thái tiếp theo
+
+1. Giữ `85,49 ± 0,30%` test lịch sử của bản Word làm baseline chính; không thay bằng các số validation Exp10.
+2. Báo Exp10 là nghiên cứu residual refinement chưa xác nhận cải thiện mIoU. Không viết M1 vượt E10-B0, vượt E10-B1 hoặc vượt baseline Word.
+3. Không mở test chỉ để tìm một con số vượt `86%`. Với kết quả hiện tại, `TARGET_86_REACHED=FAIL`, còn `IMPROVED_VS_LLR=INCONCLUSIVE`.
+4. Exp10 hiện là **DONE / NO CONFIRMED IMPROVEMENT**, không phải PASS phương pháp. Nếu tiếp tục, cần một thay đổi phương pháp được đăng ký trước và kiểm tra cơ chế mới; không quét beta, seed hoặc checkpoint post hoc trên validation.
+
+Các artifact chính: [e10_go_no_go.json](exp10/kaggle/working/WeedsGalore_Ipr28/results/exp10/20261108T062634Z/e10_go_no_go.json), [e10_p3_validation_manifest.json](exp10/kaggle/working/WeedsGalore_Ipr28/results/exp10/20261108T062634Z/e10_p3_validation_manifest.json), [cmp_E10M1_vs_E10B0.json](exp10/kaggle/working/WeedsGalore_Ipr28/results/exp10/20261108T062634Z/cmp_E10M1_vs_E10B0.json), [cmp_E10M1_vs_E10B1.json](exp10/kaggle/working/WeedsGalore_Ipr28/results/exp10/20261108T062634Z/cmp_E10M1_vs_E10B1.json).

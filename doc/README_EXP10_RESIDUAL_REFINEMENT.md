@@ -278,9 +278,9 @@ import sys
 
 runs = {}
 architectures = {
-    'E10B0': ['--head=bilinear', '--occ_weight=0.0'],
-    'E10B1': ['--head=llr_residual2', '--occ_weight=0.3', '--beta=0.5', '--residual_alpha_init=0.02'],
-    'E10M1': ['--head=llr_residual_occ2', '--occ_weight=0.3', '--beta=0.5', '--residual_alpha_init=0.02'],
+    'E10B0': ['--head=bilinear'],
+    'E10B1': ['--head=llr_residual2', '--beta=0.5', '--residual_alpha_init=0.02'],
+    'E10M1': ['--head=llr_residual_occ2', '--beta=0.5', '--residual_alpha_init=0.02'],
 }
 for model, flags in architectures.items():
     for seed in range(5):
@@ -290,7 +290,7 @@ for model, flags in architectures.items():
         prefix = OUT / 'validation' / f'{run}_val'
         command = [
             sys.executable, 'src/evaluate_ccmc.py', f'--dataset_path={DS}', '--split=val',
-            f'--ckpt={ckpt}', '--ccmc=False', '--segformer=True',
+            f'--ckpt={ckpt}', '--ccmc=False',
             '--use_low_level_refine=True', '--llr_source=raw', '--spectral_guide=False',
             *flags, f'--bins_json={BINS}', '--boundary_px=3', f'--run_name={run}',
             f'--out_prefix={prefix}',
