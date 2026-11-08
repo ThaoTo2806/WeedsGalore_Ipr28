@@ -26,6 +26,7 @@ from ccmc_metrics import (BIN_NAMES, image_stats, load_bins, load_instance_map,
                           metrics_from_sums, stat_columns, weed_instances)
 from datasets import WeedsGaloreDataset
 from nets.ccmc_sr import GT_MODES, corrupt_weed_labels, occupancy
+from nets.sc_llr import SC_LLR_HEADS
 
 FLAGS = flags.FLAGS
 flags.DEFINE_string('dataset_path', 'weedsgalore-dataset', 'dataset directory')
@@ -59,6 +60,10 @@ def main(_):
         FLAGS.ccmc = False  # MCSD / pixelshuffle heads are SegFormer5Band-based, no prior
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     net = load_checkpoint(build_model(FLAGS), FLAGS.ckpt, device).to(device).eval()
+    if FLAGS.sc_alpha_override >= 0:
+        if FLAGS.head not in SC_LLR_HEADS:
+            raise SystemExit('--sc_alpha_override only applies to SC-LLR heads')
+        net.set_alpha_override(FLAGS.sc_alpha_override)
     edges, bins_meta = load_bins(FLAGS.bins_json)
 
     override = None if FLAGS.prior_override == 'none' else FLAGS.prior_override
@@ -127,6 +132,7 @@ def main(_):
                'bin_edges_px': edges.tolist(), 'bins_source': bins_meta.get('source'),
                'boundary_px': FLAGS.boundary_px, 'head': FLAGS.head,
                'lambdas': net.encoder.lambdas() if FLAGS.ccmc else [],
+               'sc_alpha_override': FLAGS.sc_alpha_override if FLAGS.sc_alpha_override >= 0 else None,
                'metrics': metrics_from_sums(sums)}
     cm = np.array([[sums[f'cm_{g}{p}'] for p in range(3)] for g in range(3)], dtype=float)
     summary['confusion_row_norm'] = (cm / cm.sum(1, keepdims=True).clip(min=1)).round(4).tolist()

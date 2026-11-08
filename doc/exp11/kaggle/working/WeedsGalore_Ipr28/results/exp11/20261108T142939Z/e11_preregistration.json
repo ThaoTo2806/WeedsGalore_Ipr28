@@ -1,0 +1,49 @@
+{
+  "activity_min_abs_delta_pp": 0.05,
+  "bootstrap": {
+    "cluster": "image",
+    "n_boot": 10000,
+    "seed": 0,
+    "seed_bootstrap": true
+  },
+  "boundary_radii_px": [
+    1,
+    2,
+    3
+  ],
+  "component_vote_min_delta_pp": 0.5,
+  "crop_guard_ci_lower_pp": -1.0,
+  "dataset_path": "/kaggle/input/notebooks/thanhthao28/exp123/weedsgalore-dataset",
+  "evaluation_split": "val",
+  "experiment": "exp11",
+  "git_commit": "81138c988bc7cd66ce1698fdf8c00ccc4f7d9754",
+  "partition_order": [
+    "boundary_r2",
+    "small_weed",
+    "component_flip",
+    "background_fp",
+    "other"
+  ],
+  "primary_boundary_radius_px": 2,
+  "rho_max": 0.5,
+  "sc_llr": {
+    "alpha_init": 0.1,
+    "alpha_lr": 0.01,
+    "embed_dim": 16,
+    "guide_dim": 8,
+    "occ_weight": 0.0,
+    "radius": 1
+  },
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "small_weed_area_px": 45,
+  "split_hash_expected": "675667edf3f35f16",
+  "target_miou": 86.0,
+  "target_scope": "VALIDATION_ONLY",
+  "test_access": false
+}

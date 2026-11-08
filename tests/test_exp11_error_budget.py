@@ -17,7 +17,7 @@ def test_perfect_prediction_has_zero_miou_error_ceiling():
 
 def test_aggregate_miou_matches_hand_calculation():
     confusion = np.array([[8, 2, 0], [1, 6, 3], [0, 2, 8]])
-    expected = np.mean([80.0 / 91.0, 6.0 / 13.0, 8.0 / 13.0]) * 100.0
+    expected = np.mean([8.0 / 11.0, 6.0 / 14.0, 8.0 / 13.0]) * 100.0
     assert abs(aggregate_miou(confusion) - expected) < 1e-10
 
 

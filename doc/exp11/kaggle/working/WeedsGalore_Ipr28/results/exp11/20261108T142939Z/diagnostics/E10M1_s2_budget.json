@@ -1,0 +1,72 @@
+{
+  "run_name": "E10M1_s2",
+  "split": "val",
+  "n_images": 26,
+  "aggregator": "global_confusion_sum",
+  "baseline": {
+    "mIoU": 84.52313178748828,
+    "IoU_bg": 98.38616172384458,
+    "IoU_crop": 77.20946952190212,
+    "IoU_weed": 77.97376411671817
+  },
+  "partition_categories": {
+    "boundary_r2": {
+      "pixels": 133838,
+      "error_pixel_share": 0.8229347926338119,
+      "ceiling_delta_mIoU": 16.108886152777785
+    },
+    "small_weed": {
+      "pixels": 1,
+      "error_pixel_share": 6.148737971531343e-06,
+      "ceiling_delta_mIoU": 0.0007343218152901552
+    },
+    "component_flip": {
+      "pixels": 231,
+      "error_pixel_share": 0.0014203584714237404,
+      "ceiling_delta_mIoU": 0.01157457537480374
+    },
+    "background_fp": {
+      "pixels": 21035,
+      "error_pixel_share": 0.1293387032311618,
+      "ceiling_delta_mIoU": 2.266778574014263
+    },
+    "other": {
+      "pixels": 7530,
+      "error_pixel_share": 0.04629999692563101,
+      "ceiling_delta_mIoU": 0.21529729914303067
+    }
+  },
+  "boundary_sensitivity": {
+    "boundary_r1": {
+      "error_pixel_share": null,
+      "ceiling_delta_mIoU": 14.575704466071961
+    },
+    "boundary_r2": {
+      "error_pixel_share": null,
+      "ceiling_delta_mIoU": 16.108886152777785
+    },
+    "boundary_r3": {
+      "error_pixel_share": null,
+      "ceiling_delta_mIoU": 16.523028963514623
+    }
+  },
+  "partition_order": [
+    "boundary_r2",
+    "small_weed",
+    "component_flip",
+    "background_fp",
+    "other"
+  ],
+  "component_vote": {
+    "prediction_component_probe_delta_mIoU": 0.0,
+    "gt_component_vote_oracle_delta_mIoU": 5.735400095714277,
+    "uses_ground_truth": false,
+    "uses_ground_truth_for_oracle_only": true
+  },
+  "activity": {
+    "branch_scale_supported": true,
+    "delta_mIoU_when_branch_zero": -0.026994638441550478
+  },
+  "per_image_npz": "/kaggle/working/WeedsGalore_Ipr28/results/exp11/20261108T142939Z/diagnostics/E10M1_s2_budget_per_image.npz",
+  "test_accessed": false
+}

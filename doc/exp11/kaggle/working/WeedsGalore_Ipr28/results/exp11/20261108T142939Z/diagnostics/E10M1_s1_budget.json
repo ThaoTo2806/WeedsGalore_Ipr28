@@ -1,0 +1,72 @@
+{
+  "run_name": "E10M1_s1",
+  "split": "val",
+  "n_images": 26,
+  "aggregator": "global_confusion_sum",
+  "baseline": {
+    "mIoU": 84.29141937796923,
+    "IoU_bg": 98.41902287192482,
+    "IoU_crop": 76.7512812706145,
+    "IoU_weed": 77.7039539913684
+  },
+  "partition_categories": {
+    "boundary_r2": {
+      "pixels": 135502,
+      "error_pixel_share": 0.8396247459475537,
+      "ceiling_delta_mIoU": 17.0433724557489
+    },
+    "small_weed": {
+      "pixels": 1,
+      "error_pixel_share": 6.196401130223566e-06,
+      "ceiling_delta_mIoU": 0.0007401408253899105
+    },
+    "component_flip": {
+      "pixels": 1475,
+      "error_pixel_share": 0.00913969166707976,
+      "ceiling_delta_mIoU": 0.08053140599161096
+    },
+    "background_fp": {
+      "pixels": 17543,
+      "error_pixel_share": 0.10870346502751202,
+      "ceiling_delta_mIoU": 1.9386995647275422
+    },
+    "other": {
+      "pixels": 6863,
+      "error_pixel_share": 0.04252590095672434,
+      "ceiling_delta_mIoU": 0.21824915663529781
+    }
+  },
+  "boundary_sensitivity": {
+    "boundary_r1": {
+      "error_pixel_share": null,
+      "ceiling_delta_mIoU": 15.255234364020838
+    },
+    "boundary_r2": {
+      "error_pixel_share": null,
+      "ceiling_delta_mIoU": 17.0433724557489
+    },
+    "boundary_r3": {
+      "error_pixel_share": null,
+      "ceiling_delta_mIoU": 17.528896212900975
+    }
+  },
+  "partition_order": [
+    "boundary_r2",
+    "small_weed",
+    "component_flip",
+    "background_fp",
+    "other"
+  ],
+  "component_vote": {
+    "prediction_component_probe_delta_mIoU": 0.0,
+    "gt_component_vote_oracle_delta_mIoU": 5.910635819420993,
+    "uses_ground_truth": false,
+    "uses_ground_truth_for_oracle_only": true
+  },
+  "activity": {
+    "branch_scale_supported": true,
+    "delta_mIoU_when_branch_zero": -0.04070040426100263
+  },
+  "per_image_npz": "/kaggle/working/WeedsGalore_Ipr28/results/exp11/20261108T142939Z/diagnostics/E10M1_s1_budget_per_image.npz",
+  "test_accessed": false
+}

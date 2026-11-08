@@ -1,0 +1,110 @@
+{
+  "status": "PASS",
+  "rows": [
+    {
+      "run": "E10B0_s0",
+      "budget_mIoU": 84.41845476667287,
+      "summary_mIoU": 84.41845476667287,
+      "abs_diff": 0.0,
+      "status": "PASS"
+    },
+    {
+      "run": "E10B0_s1",
+      "budget_mIoU": 84.44590673943557,
+      "summary_mIoU": 84.44590673943557,
+      "abs_diff": 0.0,
+      "status": "PASS"
+    },
+    {
+      "run": "E10B0_s2",
+      "budget_mIoU": 84.33249355469466,
+      "summary_mIoU": 84.33249355469466,
+      "abs_diff": 0.0,
+      "status": "PASS"
+    },
+    {
+      "run": "E10B0_s3",
+      "budget_mIoU": 84.40419845045228,
+      "summary_mIoU": 84.40419845045228,
+      "abs_diff": 0.0,
+      "status": "PASS"
+    },
+    {
+      "run": "E10B0_s4",
+      "budget_mIoU": 84.50604401157516,
+      "summary_mIoU": 84.50604401157516,
+      "abs_diff": 0.0,
+      "status": "PASS"
+    },
+    {
+      "run": "E10B1_s0",
+      "budget_mIoU": 84.51515418383461,
+      "summary_mIoU": 84.51515418383461,
+      "abs_diff": 0.0,
+      "status": "PASS"
+    },
+    {
+      "run": "E10B1_s1",
+      "budget_mIoU": 84.44631502430342,
+      "summary_mIoU": 84.44631502430342,
+      "abs_diff": 0.0,
+      "status": "PASS"
+    },
+    {
+      "run": "E10B1_s2",
+      "budget_mIoU": 84.57319918039737,
+      "summary_mIoU": 84.57319918039737,
+      "abs_diff": 0.0,
+      "status": "PASS"
+    },
+    {
+      "run": "E10B1_s3",
+      "budget_mIoU": 84.4794933161346,
+      "summary_mIoU": 84.4794933161346,
+      "abs_diff": 0.0,
+      "status": "PASS"
+    },
+    {
+      "run": "E10B1_s4",
+      "budget_mIoU": 84.51517385885965,
+      "summary_mIoU": 84.51517385885965,
+      "abs_diff": 0.0,
+      "status": "PASS"
+    },
+    {
+      "run": "E10M1_s0",
+      "budget_mIoU": 84.48147291033003,
+      "summary_mIoU": 84.48147291033003,
+      "abs_diff": 0.0,
+      "status": "PASS"
+    },
+    {
+      "run": "E10M1_s1",
+      "budget_mIoU": 84.29141937796923,
+      "summary_mIoU": 84.29141937796923,
+      "abs_diff": 0.0,
+      "status": "PASS"
+    },
+    {
+      "run": "E10M1_s2",
+      "budget_mIoU": 84.52313178748828,
+      "summary_mIoU": 84.52313178748828,
+      "abs_diff": 0.0,
+      "status": "PASS"
+    },
+    {
+      "run": "E10M1_s3",
+      "budget_mIoU": 84.54451423632271,
+      "summary_mIoU": 84.54451423632271,
+      "abs_diff": 0.0,
+      "status": "PASS"
+    },
+    {
+      "run": "E10M1_s4",
+      "budget_mIoU": 84.5608090357073,
+      "summary_mIoU": 84.5608090357073,
+      "abs_diff": 0.0,
+      "status": "PASS"
+    }
+  ]
+}

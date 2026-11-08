@@ -262,6 +262,9 @@ for rel in required:
     assert path.is_file(), f'Thiếu file đã cam kết: {rel}'
     source_hashes[rel] = hashlib.sha256(path.read_bytes()).hexdigest()
 assert 'def aggregate_miou' in (PROJECT / required[0]).read_text(encoding='utf-8')
+assert "EXP11_ERROR_BUDGET_VERSION = '20261108-v2'" in (
+    PROJECT / required[0]).read_text(encoding='utf-8'), \
+    'Kaggle source is stale; sync the commit containing the current error-budget script'
 assert "'test'" in (PROJECT / required[0]).read_text(encoding='utf-8') or '"test"' in (
     PROJECT / required[0]).read_text(encoding='utf-8'), 'Script phải có chốt chặn split test'
 assert 'def set_branch_scale' in (PROJECT / 'src' / 'nets' / 'llr_subcell.py').read_text(

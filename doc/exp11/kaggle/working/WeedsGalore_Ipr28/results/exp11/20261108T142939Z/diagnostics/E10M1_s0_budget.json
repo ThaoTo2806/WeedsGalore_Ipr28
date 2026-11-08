@@ -1,0 +1,72 @@
+{
+  "run_name": "E10M1_s0",
+  "split": "val",
+  "n_images": 26,
+  "aggregator": "global_confusion_sum",
+  "baseline": {
+    "mIoU": 84.48147291033003,
+    "IoU_bg": 98.41602959799724,
+    "IoU_crop": 77.33256335883874,
+    "IoU_weed": 77.69582577415413
+  },
+  "partition_categories": {
+    "boundary_r2": {
+      "pixels": 134540,
+      "error_pixel_share": 0.8372330362921292,
+      "ceiling_delta_mIoU": 17.32487152422013
+    },
+    "small_weed": {
+      "pixels": 2,
+      "error_pixel_share": 1.244586050679544e-05,
+      "ceiling_delta_mIoU": 0.0012472564344933473
+    },
+    "component_flip": {
+      "pixels": 346,
+      "error_pixel_share": 0.0021531338676756113,
+      "ceiling_delta_mIoU": 0.021159927758017824
+    },
+    "background_fp": {
+      "pixels": 18740,
+      "error_pixel_share": 0.11661771294867328,
+      "ceiling_delta_mIoU": 1.6297955552871495
+    },
+    "other": {
+      "pixels": 7068,
+      "error_pixel_share": 0.04398367103101508,
+      "ceiling_delta_mIoU": 0.23304176593804946
+    }
+  },
+  "boundary_sensitivity": {
+    "boundary_r1": {
+      "error_pixel_share": null,
+      "ceiling_delta_mIoU": 15.733233809037953
+    },
+    "boundary_r2": {
+      "error_pixel_share": null,
+      "ceiling_delta_mIoU": 17.32487152422013
+    },
+    "boundary_r3": {
+      "error_pixel_share": null,
+      "ceiling_delta_mIoU": 17.722109600158532
+    }
+  },
+  "partition_order": [
+    "boundary_r2",
+    "small_weed",
+    "component_flip",
+    "background_fp",
+    "other"
+  ],
+  "component_vote": {
+    "prediction_component_probe_delta_mIoU": 0.0,
+    "gt_component_vote_oracle_delta_mIoU": 6.618530338211433,
+    "uses_ground_truth": false,
+    "uses_ground_truth_for_oracle_only": true
+  },
+  "activity": {
+    "branch_scale_supported": true,
+    "delta_mIoU_when_branch_zero": -0.027298896384152727
+  },
+  "per_image_npz": "/kaggle/working/WeedsGalore_Ipr28/results/exp11/20261108T142939Z/diagnostics/E10M1_s0_budget_per_image.npz",
+  "test_accessed": false
+}

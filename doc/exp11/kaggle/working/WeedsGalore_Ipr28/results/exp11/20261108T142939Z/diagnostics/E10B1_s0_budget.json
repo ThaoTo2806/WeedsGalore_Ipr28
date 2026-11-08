@@ -1,0 +1,72 @@
+{
+  "run_name": "E10B1_s0",
+  "split": "val",
+  "n_images": 26,
+  "aggregator": "global_confusion_sum",
+  "baseline": {
+    "mIoU": 84.51515418383461,
+    "IoU_bg": 98.38171533804775,
+    "IoU_crop": 77.49683287315251,
+    "IoU_weed": 77.66691434030358
+  },
+  "partition_categories": {
+    "boundary_r2": {
+      "pixels": 134732,
+      "error_pixel_share": 0.8272466046123241,
+      "ceiling_delta_mIoU": 16.477796188873437
+    },
+    "small_weed": {
+      "pixels": 1,
+      "error_pixel_share": 6.139941547756465e-06,
+      "ceiling_delta_mIoU": 0.0007096998969821847
+    },
+    "component_flip": {
+      "pixels": 268,
+      "error_pixel_share": 0.0016455043347987327,
+      "ceiling_delta_mIoU": 0.016366619967023155
+    },
+    "background_fp": {
+      "pixels": 19521,
+      "error_pixel_share": 0.11985779895375397,
+      "ceiling_delta_mIoU": 2.0348154471095965
+    },
+    "other": {
+      "pixels": 8346,
+      "error_pixel_share": 0.05124395215757546,
+      "ceiling_delta_mIoU": 0.23540687050706693
+    }
+  },
+  "boundary_sensitivity": {
+    "boundary_r1": {
+      "error_pixel_share": null,
+      "ceiling_delta_mIoU": 14.892596525501423
+    },
+    "boundary_r2": {
+      "error_pixel_share": null,
+      "ceiling_delta_mIoU": 16.477796188873437
+    },
+    "boundary_r3": {
+      "error_pixel_share": null,
+      "ceiling_delta_mIoU": 16.877827746396154
+    }
+  },
+  "partition_order": [
+    "boundary_r2",
+    "small_weed",
+    "component_flip",
+    "background_fp",
+    "other"
+  ],
+  "component_vote": {
+    "prediction_component_probe_delta_mIoU": 0.0,
+    "gt_component_vote_oracle_delta_mIoU": 5.90939930590829,
+    "uses_ground_truth": false,
+    "uses_ground_truth_for_oracle_only": true
+  },
+  "activity": {
+    "branch_scale_supported": true,
+    "delta_mIoU_when_branch_zero": -0.022793673537876202
+  },
+  "per_image_npz": "/kaggle/working/WeedsGalore_Ipr28/results/exp11/20261108T142939Z/diagnostics/E10B1_s0_budget_per_image.npz",
+  "test_accessed": false
+}

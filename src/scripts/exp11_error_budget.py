@@ -7,11 +7,17 @@ implements ``set_branch_scale``. It never reads test data and never trains.
 
 import json
 from pathlib import Path
+import sys
 
 import cv2
 import numpy as np
 import torch
 from absl import app, flags
+
+# Allow direct execution as ``python src/scripts/exp11_error_budget.py``.
+SRC_ROOT = Path(__file__).resolve().parents[1]
+if str(SRC_ROOT) not in sys.path:
+    sys.path.insert(0, str(SRC_ROOT))
 
 from ccmc_common import build_model, define_model_flags, load_checkpoint
 from ccmc_metrics import (NUM_CLASSES, WEED, area_bin, image_stats, load_bins,
@@ -19,6 +25,7 @@ from ccmc_metrics import (NUM_CLASSES, WEED, area_bin, image_stats, load_bins,
 from datasets import WeedsGaloreDataset
 
 FLAGS = flags.FLAGS
+EXP11_ERROR_BUDGET_VERSION = '20261108-v2'
 flags.DEFINE_string('dataset_path', None, 'WeedsGalore dataset root')
 flags.DEFINE_enum('split', 'val', ['train', 'val', 'test'], 'evaluation split')
 flags.DEFINE_string('ckpt', None, 'checkpoint path')

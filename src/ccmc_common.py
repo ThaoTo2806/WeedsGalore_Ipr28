@@ -7,6 +7,7 @@ from nets import CCMCSegFormer, SegFormer5Band
 from nets.mcsd import MCSDSegFormer
 from nets.llr_subcell import (LLR_RESIDUAL_HEADS, LLR_SUBCELL_HEADS,
                                LLRResidualSubcellSegFormer, LLRSubcellSegFormer)
+from nets.sc_llr import SC_LLR_HEADS, SCLLRSegFormer
 
 
 def define_model_flags():
@@ -26,16 +27,31 @@ def define_model_flags():
     flags.DEFINE_list('ccmc_stages', ['2', '3'], 'modulated stages (1-based)')
     flags.DEFINE_float('ccmc_eps', 0.1, 'eps floor')
     flags.DEFINE_enum('head', 'bilinear', ['bilinear', 'mcsd', 'pixelshuffle', 'occ_conditioned',
-                                           *LLR_SUBCELL_HEADS, *LLR_RESIDUAL_HEADS],
+                                           *LLR_SUBCELL_HEADS, *LLR_RESIDUAL_HEADS, *SC_LLR_HEADS],
                       'prediction head')
     flags.DEFINE_integer('sinkhorn_iters', 5, 'Sinkhorn iterations (mcsd)')
     flags.DEFINE_float('mcsd_tau', 1.0, 'placement temperature (mcsd)')
     flags.DEFINE_boolean('spectral_guide', False, 'raw-band placement prior (mcsd)')
     flags.DEFINE_float('beta', 0.5, 'fixed occupancy guidance strength for LLR residual heads')
     flags.DEFINE_float('residual_alpha_init', 0.02, 'initial sigmoid gate for LLR residual heads')
+    flags.DEFINE_integer('sc_radius', 1, 'SC-LLR local radius')
+    flags.DEFINE_integer('sc_guide_dim', 8, 'SC-LLR spectral embedding size')
+    flags.DEFINE_integer('sc_embed_dim', 16, 'SC-LLR semantic embedding size')
+    flags.DEFINE_float('sc_alpha_init', 0.1, 'SC-LLR initial gate')
+    flags.DEFINE_float('sc_alpha_lr', 0.01, 'SC-LLR gate learning rate')
+    flags.DEFINE_float('sc_alpha_override', -1.0, 'SC-LLR evaluation gate override')
 
 
 def build_model(F):
+    if F.head in SC_LLR_HEADS:
+        if F.ccmc or not F.use_low_level_refine or F.llr_source != 'raw' or F.spectral_guide:
+            raise ValueError('SC-LLR requires raw non-CCMC LLR and spectral_guide=False')
+        return SCLLRSegFormer(
+            num_classes=F.num_classes, in_channels=F.in_channels,
+            use_multiscale_fusion=F.use_multiscale_fusion, head=F.head,
+            sc_radius=F.sc_radius, sc_guide_dim=F.sc_guide_dim,
+            sc_embed_dim=F.sc_embed_dim, sc_alpha_init=F.sc_alpha_init,
+            pretrained_backbone=True)
     if F.head in LLR_RESIDUAL_HEADS:
         if F.ccmc or not F.use_low_level_refine or F.llr_source != 'raw' or F.spectral_guide:
             raise ValueError('LLR residual heads require --ccmc=False --use_low_level_refine=True '

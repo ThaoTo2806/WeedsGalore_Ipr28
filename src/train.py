@@ -14,6 +14,7 @@ from nets.ccmc_sr import GT_MODES, aux_target
 from nets.mcsd import MCSDSegFormer, occupancy_loss
 from nets.llr_subcell import (LLR_RESIDUAL_HEADS, LLR_SUBCELL_HEADS,
                                LLRResidualSubcellSegFormer, LLRSubcellSegFormer)
+from nets.sc_llr import SC_LLR_HEADS, SCLLRSegFormer
 from pathlib import Path
 import hashlib
 import json
@@ -135,7 +136,7 @@ flags.DEFINE_float('lam_lr', 0.0, 'separate Adam lr for the lambda logits (0 = s
 flags.DEFINE_float('aux_weight', 0.3, 'weight of the prior aux BCE loss (learned_veg/learned_weed)')
 # --- MCSD: mass-conserving sub-cell decoding (src/nets/mcsd.py) ---
 flags.DEFINE_enum('head', 'bilinear', ['bilinear', 'mcsd', 'pixelshuffle', 'occ_conditioned',
-                                       *LLR_SUBCELL_HEADS, *LLR_RESIDUAL_HEADS],
+                                       *LLR_SUBCELL_HEADS, *LLR_RESIDUAL_HEADS, *SC_LLR_HEADS],
                   'prediction head; *2 heads replace bilinear on the raw-LLR H/2 feature')
 flags.DEFINE_integer('sinkhorn_iters', 5, 'Sinkhorn iterations per cell (mcsd)')
 flags.DEFINE_float('mcsd_tau', 1.0, 'temperature of the placement scores (mcsd)')
@@ -143,6 +144,11 @@ flags.DEFINE_boolean('spectral_guide', False, 'add a full-resolution placement p
 flags.DEFINE_float('occ_weight', 0.3, 'weight of the cell-occupancy soft-CE loss (mcsd/pixelshuffle)')
 flags.DEFINE_float('beta', 0.5, 'fixed occupancy guidance strength for LLR residual heads')
 flags.DEFINE_float('residual_alpha_init', 0.02, 'initial sigmoid gate for LLR residual heads')
+flags.DEFINE_integer('sc_radius', 1, 'SC-LLR local radius')
+flags.DEFINE_integer('sc_guide_dim', 8, 'SC-LLR spectral embedding size')
+flags.DEFINE_integer('sc_embed_dim', 16, 'SC-LLR semantic embedding size')
+flags.DEFINE_float('sc_alpha_init', 0.1, 'SC-LLR initial gate')
+flags.DEFINE_float('sc_alpha_lr', 0.01, 'SC-LLR gate learning rate')
 flags.DEFINE_string('run_name', '', 'run id written to run_config.json (e.g. L3__seed0)')
 flags.DEFINE_boolean('resume', False, 'resume from <out_dir>/last.pth if it exists')
 flags.DEFINE_boolean('detect_anomaly', False, 'torch.autograd anomaly detection (very slow, debug only)')
@@ -263,7 +269,21 @@ def main(_):
                                 num_workers=FLAGS.num_workers, collate_fn=None, drop_last=False)
 
     # Network
-    if FLAGS.head in LLR_RESIDUAL_HEADS:
+    if FLAGS.head in SC_LLR_HEADS:
+        if (FLAGS.ccmc or not FLAGS.segformer or not FLAGS.use_low_level_refine
+            or FLAGS.llr_source != 'raw' or FLAGS.spectral_guide):
+            raise SystemExit('SC-LLR requires --ccmc=False --segformer=True '
+                             '--use_low_level_refine=True --llr_source=raw --spectral_guide=False')
+        if FLAGS.occ_weight > 0:
+            raise SystemExit('SC-LLR has no occupancy loss; use --occ_weight=0.0')
+        net = SCLLRSegFormer(
+            num_classes=FLAGS.num_classes, in_channels=FLAGS.in_channels,
+            pretrained_backbone=FLAGS.pretrained_backbone,
+            use_multiscale_fusion=FLAGS.use_multiscale_fusion, head=FLAGS.head,
+            sc_radius=FLAGS.sc_radius, sc_guide_dim=FLAGS.sc_guide_dim,
+            sc_embed_dim=FLAGS.sc_embed_dim, sc_alpha_init=FLAGS.sc_alpha_init,
+        )
+    elif FLAGS.head in LLR_RESIDUAL_HEADS:
         if (FLAGS.ccmc or not FLAGS.segformer or not FLAGS.use_low_level_refine
             or FLAGS.llr_source != 'raw' or FLAGS.spectral_guide):
             raise SystemExit('LLR residual heads require --ccmc=False --segformer=True '
@@ -354,6 +374,14 @@ def main(_):
         other = [p for p in net.parameters() if id(p) not in lam_ids]
         optimizer = torch.optim.Adam([{'params': other},
                                       {'params': lam_params, 'lr': FLAGS.lam_lr}], lr=FLAGS.lr)
+    elif FLAGS.head in SC_LLR_HEADS and FLAGS.sc_alpha_lr > 0:
+        alpha_params = [net.sc_llr.alpha_logit]
+        alpha_ids = {id(parameter) for parameter in alpha_params}
+        other_params = [parameter for parameter in net.parameters()
+                        if id(parameter) not in alpha_ids]
+        optimizer = torch.optim.Adam(
+            [{'params': other_params, 'lr': FLAGS.lr},
+             {'params': alpha_params, 'lr': FLAGS.sc_alpha_lr}])
     else:
         optimizer = torch.optim.Adam(net.parameters(), lr=FLAGS.lr)
 
@@ -371,7 +399,7 @@ def main(_):
     Path(FLAGS.out_dir).mkdir(parents=True, exist_ok=True)
 
     use_aux = FLAGS.ccmc and FLAGS.prior_mode in ('learned_veg', 'learned_weed') and FLAGS.aux_weight > 0
-    use_occ = FLAGS.head != 'bilinear' and FLAGS.occ_weight > 0
+    use_occ = FLAGS.head not in ('bilinear', *SC_LLR_HEADS) and FLAGS.occ_weight > 0
     bce = torch.nn.BCEWithLogitsLoss()
     run_config = {'run_name': FLAGS.run_name, 'split_hash': split_hash(), 'env': environment_info(),
                   'flags': FLAGS.flag_values_dict(),
@@ -414,6 +442,7 @@ def main(_):
         net.train()
         train_iter = iter(train_dataloader)
         epoch_aux, epoch_seg, epoch_steps = 0.0, 0.0, 0
+        epoch_sc_entropy = 0.0
         for i, data in enumerate(train_iter):
             features, unique_labels, binary_labels = data
             if FLAGS.num_classes == 3:
@@ -443,6 +472,8 @@ def main(_):
                 occ_loss = occupancy_loss(extras['occ_logits'], labels, FLAGS.num_classes)
                 loss = loss + FLAGS.occ_weight * occ_loss
                 epoch_aux += occ_loss.item()
+            if FLAGS.head in SC_LLR_HEADS and extras:
+                epoch_sc_entropy += float(extras.get('sc_weight_entropy', 0.0))
             epoch_steps += 1
             loss.backward()
             optimizer.step()
@@ -512,6 +543,9 @@ def main(_):
                   'train_aux_loss': epoch_aux / max(epoch_steps, 1) if (use_aux or use_occ) else None,
                   'lambdas': lambdas, 'best_val_miou': best_val_miou, 'best_epoch': best_epoch,
                   'epoch_time_s': time.time() - epoch_start}
+        if FLAGS.head in SC_LLR_HEADS:
+            record['sc_alpha'] = float(torch.sigmoid(net.sc_llr.alpha_logit).item())
+            record['sc_weight_entropy'] = epoch_sc_entropy / max(epoch_steps, 1)
         with open(history_path, 'a') as f:
             f.write(json.dumps(record) + '\n')
         if lambdas:
