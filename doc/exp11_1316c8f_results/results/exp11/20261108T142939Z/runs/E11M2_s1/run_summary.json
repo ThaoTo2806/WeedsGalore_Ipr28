@@ -1,0 +1,7 @@
+{
+  "run_name": "E11M2_s1",
+  "best_val_miou": 84.30858612060547,
+  "best_epoch": 68,
+  "final_lambdas": [],
+  "split_hash": "675667edf3f35f16"
+}

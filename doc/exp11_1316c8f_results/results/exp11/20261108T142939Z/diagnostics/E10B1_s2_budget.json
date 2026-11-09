@@ -1,0 +1,72 @@
+{
+  "run_name": "E10B1_s2",
+  "split": "val",
+  "n_images": 26,
+  "aggregator": "global_confusion_sum",
+  "baseline": {
+    "mIoU": 84.57319918039737,
+    "IoU_bg": 98.4456488980965,
+    "IoU_crop": 77.21462861714895,
+    "IoU_weed": 78.05932002594669
+  },
+  "partition_categories": {
+    "boundary_r2": {
+      "pixels": 130928,
+      "error_pixel_share": 0.8270825831801442,
+      "ceiling_delta_mIoU": 16.48434420079089
+    },
+    "small_weed": {
+      "pixels": 1,
+      "error_pixel_share": 6.317079487811195e-06,
+      "ceiling_delta_mIoU": 0.0007344018230493423
+    },
+    "component_flip": {
+      "pixels": 338,
+      "error_pixel_share": 0.002135172866880184,
+      "ceiling_delta_mIoU": 0.014078407511031142
+    },
+    "background_fp": {
+      "pixels": 18678,
+      "error_pixel_share": 0.1179904106733375,
+      "ceiling_delta_mIoU": 1.9195149965377507
+    },
+    "other": {
+      "pixels": 8356,
+      "error_pixel_share": 0.052785516200150345,
+      "ceiling_delta_mIoU": 0.2522343034304342
+    }
+  },
+  "boundary_sensitivity": {
+    "boundary_r1": {
+      "error_pixel_share": null,
+      "ceiling_delta_mIoU": 14.99152275053614
+    },
+    "boundary_r2": {
+      "error_pixel_share": null,
+      "ceiling_delta_mIoU": 16.48434420079089
+    },
+    "boundary_r3": {
+      "error_pixel_share": null,
+      "ceiling_delta_mIoU": 16.875691893370774
+    }
+  },
+  "partition_order": [
+    "boundary_r2",
+    "small_weed",
+    "component_flip",
+    "background_fp",
+    "other"
+  ],
+  "component_vote": {
+    "prediction_component_probe_delta_mIoU": 0.0,
+    "gt_component_vote_oracle_delta_mIoU": 6.945331581946348,
+    "uses_ground_truth": false,
+    "uses_ground_truth_for_oracle_only": true
+  },
+  "activity": {
+    "branch_scale_supported": true,
+    "delta_mIoU_when_branch_zero": -0.027858028864301332
+  },
+  "per_image_npz": "/kaggle/working/WeedsGalore_Ipr28/results/exp11/20261108T142939Z/diagnostics/E10B1_s2_budget_per_image.npz",
+  "test_accessed": false
+}

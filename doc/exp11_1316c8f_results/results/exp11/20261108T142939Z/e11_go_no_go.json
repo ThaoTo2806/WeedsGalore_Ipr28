@@ -1,0 +1,37 @@
+{
+  "IMPROVED_VS_LLR": "INCONCLUSIVE",
+  "SPECTRAL_GUIDANCE_VALUE": "INCONCLUSIVE",
+  "MECHANISM_ACTIVE": "YES",
+  "TARGET_86_REACHED": "FAIL",
+  "target_scope": "VALIDATION_ONLY",
+  "primary": {
+    "H1_M1_vs_B0": "INCONCLUSIVE",
+    "H2_M1_vs_B1": "INCONCLUSIVE",
+    "H3_M1_vs_M2": "INCONCLUSIVE"
+  },
+  "alpha_final_by_arm": {
+    "E11B1": [
+      0.008425991050899029,
+      0.007818111218512058,
+      0.00780452648177743,
+      0.008799659088253975,
+      0.0067772031761705875
+    ],
+    "E11M2": [
+      0.6455725431442261,
+      0.5097442865371704,
+      0.583196759223938,
+      0.703590452671051,
+      0.6106939315795898
+    ],
+    "E11M1": [
+      0.6974931359291077,
+      0.5660352110862732,
+      0.6612532138824463,
+      0.7373389601707458,
+      0.6835702657699585
+    ]
+  },
+  "test_accessed": false,
+  "interpretation": "Ch\u1ec9 H1 PASS k\u00e8m Crop guard m\u1edbi h\u1ed7 tr\u1ee3 c\u1ea3i thi\u1ec7n \u0111\u00e3 ki\u1ec3m ch\u1ee9ng so v\u1edbi LLR. SPECTRAL_GUIDANCE_VALUE c\u1ea7n c\u1ea3 H2 v\u00e0 H3 PASS. Mean validation > 86 kh\u00f4ng ph\u1ea3i claim test."
+}

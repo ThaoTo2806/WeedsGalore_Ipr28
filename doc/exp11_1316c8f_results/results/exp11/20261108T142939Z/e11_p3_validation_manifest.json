@@ -1,0 +1,31 @@
+{
+  "evaluation_split": "val",
+  "test_accessed": false,
+  "runs": {
+    "E11B0_s0": "/kaggle/working/WeedsGalore_Ipr28/results/exp11/20261108T142939Z/validation/E11B0_s0_val",
+    "E11B0_s1": "/kaggle/working/WeedsGalore_Ipr28/results/exp11/20261108T142939Z/validation/E11B0_s1_val",
+    "E11B0_s2": "/kaggle/working/WeedsGalore_Ipr28/results/exp11/20261108T142939Z/validation/E11B0_s2_val",
+    "E11B0_s3": "/kaggle/working/WeedsGalore_Ipr28/results/exp11/20261108T142939Z/validation/E11B0_s3_val",
+    "E11B0_s4": "/kaggle/working/WeedsGalore_Ipr28/results/exp11/20261108T142939Z/validation/E11B0_s4_val",
+    "E11B1_s0": "/kaggle/working/WeedsGalore_Ipr28/results/exp11/20261108T142939Z/validation/E11B1_s0_val",
+    "E11B1_s1": "/kaggle/working/WeedsGalore_Ipr28/results/exp11/20261108T142939Z/validation/E11B1_s1_val",
+    "E11B1_s2": "/kaggle/working/WeedsGalore_Ipr28/results/exp11/20261108T142939Z/validation/E11B1_s2_val",
+    "E11B1_s3": "/kaggle/working/WeedsGalore_Ipr28/results/exp11/20261108T142939Z/validation/E11B1_s3_val",
+    "E11B1_s4": "/kaggle/working/WeedsGalore_Ipr28/results/exp11/20261108T142939Z/validation/E11B1_s4_val",
+    "E11M2_s0": "/kaggle/working/WeedsGalore_Ipr28/results/exp11/20261108T142939Z/validation/E11M2_s0_val",
+    "E11M2_s1": "/kaggle/working/WeedsGalore_Ipr28/results/exp11/20261108T142939Z/validation/E11M2_s1_val",
+    "E11M2_s2": "/kaggle/working/WeedsGalore_Ipr28/results/exp11/20261108T142939Z/validation/E11M2_s2_val",
+    "E11M2_s3": "/kaggle/working/WeedsGalore_Ipr28/results/exp11/20261108T142939Z/validation/E11M2_s3_val",
+    "E11M2_s4": "/kaggle/working/WeedsGalore_Ipr28/results/exp11/20261108T142939Z/validation/E11M2_s4_val",
+    "E11M1_s0": "/kaggle/working/WeedsGalore_Ipr28/results/exp11/20261108T142939Z/validation/E11M1_s0_val",
+    "E11M1_s1": "/kaggle/working/WeedsGalore_Ipr28/results/exp11/20261108T142939Z/validation/E11M1_s1_val",
+    "E11M1_s2": "/kaggle/working/WeedsGalore_Ipr28/results/exp11/20261108T142939Z/validation/E11M1_s2_val",
+    "E11M1_s3": "/kaggle/working/WeedsGalore_Ipr28/results/exp11/20261108T142939Z/validation/E11M1_s3_val",
+    "E11M1_s4": "/kaggle/working/WeedsGalore_Ipr28/results/exp11/20261108T142939Z/validation/E11M1_s4_val",
+    "E11M1zero_s0": "/kaggle/working/WeedsGalore_Ipr28/results/exp11/20261108T142939Z/validation/E11M1zero_s0_val",
+    "E11M1zero_s1": "/kaggle/working/WeedsGalore_Ipr28/results/exp11/20261108T142939Z/validation/E11M1zero_s1_val",
+    "E11M1zero_s2": "/kaggle/working/WeedsGalore_Ipr28/results/exp11/20261108T142939Z/validation/E11M1zero_s2_val",
+    "E11M1zero_s3": "/kaggle/working/WeedsGalore_Ipr28/results/exp11/20261108T142939Z/validation/E11M1zero_s3_val",
+    "E11M1zero_s4": "/kaggle/working/WeedsGalore_Ipr28/results/exp11/20261108T142939Z/validation/E11M1zero_s4_val"
+  }
+}

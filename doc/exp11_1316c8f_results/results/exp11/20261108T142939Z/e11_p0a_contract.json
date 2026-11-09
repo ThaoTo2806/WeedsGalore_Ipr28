@@ -1,0 +1,86 @@
+{
+  "status": "PASS_SOURCE_AND_CKPT_CONTRACT",
+  "source_sha256": {
+    "src/scripts/exp11_error_budget.py": "7fe0136fdc02ae66d19da55126b1308e55b0bed86557c2c0a3a06d3271c1c4c6",
+    "src/scripts/exp11_route_decision.py": "c87d75aa9f90d7488d220a230e173465261552e1d9bc50eb28f6a2c67c9e4893",
+    "tests/test_exp11_error_budget.py": "d2e5e05aa04f3402807700171e9a081b265e3c8c60ac26c1c9759204e8a48991"
+  },
+  "checkpoints": {
+    "E10B0_s0": {
+      "path": "/kaggle/input/notebooks/thanhthao28/exp123/WeedsGalore_Ipr28/results/exp10/20261108T062634Z/runs/E10B0_s0/best_val.pth",
+      "sha256": "b9202147caf332a1566248294a303cfb15fe00bb3a732e5b87459194c65a413b",
+      "validation_summary": "/kaggle/input/notebooks/thanhthao28/exp123/WeedsGalore_Ipr28/results/exp10/20261108T062634Z/validation/E10B0_s0_val_summary.json"
+    },
+    "E10B0_s1": {
+      "path": "/kaggle/input/notebooks/thanhthao28/exp123/WeedsGalore_Ipr28/results/exp10/20261108T062634Z/runs/E10B0_s1/best_val.pth",
+      "sha256": "3ff7c7bc5fc9e0c339eb2907fa825a753b79a776a84ab7312c6bb0ebfbf1649e",
+      "validation_summary": "/kaggle/input/notebooks/thanhthao28/exp123/WeedsGalore_Ipr28/results/exp10/20261108T062634Z/validation/E10B0_s1_val_summary.json"
+    },
+    "E10B0_s2": {
+      "path": "/kaggle/input/notebooks/thanhthao28/exp123/WeedsGalore_Ipr28/results/exp10/20261108T062634Z/runs/E10B0_s2/best_val.pth",
+      "sha256": "01a51184154864b11041c992e852ce2a805a4ff9c0b3b1a03ac52d8bc8427327",
+      "validation_summary": "/kaggle/input/notebooks/thanhthao28/exp123/WeedsGalore_Ipr28/results/exp10/20261108T062634Z/validation/E10B0_s2_val_summary.json"
+    },
+    "E10B0_s3": {
+      "path": "/kaggle/input/notebooks/thanhthao28/exp123/WeedsGalore_Ipr28/results/exp10/20261108T062634Z/runs/E10B0_s3/best_val.pth",
+      "sha256": "35eb14f594f5a484bda6492c4d33f216b8ba6b62474ce4993b507f63892ebbf4",
+      "validation_summary": "/kaggle/input/notebooks/thanhthao28/exp123/WeedsGalore_Ipr28/results/exp10/20261108T062634Z/validation/E10B0_s3_val_summary.json"
+    },
+    "E10B0_s4": {
+      "path": "/kaggle/input/notebooks/thanhthao28/exp123/WeedsGalore_Ipr28/results/exp10/20261108T062634Z/runs/E10B0_s4/best_val.pth",
+      "sha256": "6d6e8561c192a281f7b87ddd1daf36d21f61488525cbb28521cce629d371cc0d",
+      "validation_summary": "/kaggle/input/notebooks/thanhthao28/exp123/WeedsGalore_Ipr28/results/exp10/20261108T062634Z/validation/E10B0_s4_val_summary.json"
+    },
+    "E10B1_s0": {
+      "path": "/kaggle/input/notebooks/thanhthao28/exp123/WeedsGalore_Ipr28/results/exp10/20261108T062634Z/runs/E10B1_s0/best_val.pth",
+      "sha256": "211d8023e0a07e4f60117be381481e37bb06aeaa57d09a0fefb4c8c7974182d4",
+      "validation_summary": "/kaggle/input/notebooks/thanhthao28/exp123/WeedsGalore_Ipr28/results/exp10/20261108T062634Z/validation/E10B1_s0_val_summary.json"
+    },
+    "E10B1_s1": {
+      "path": "/kaggle/input/notebooks/thanhthao28/exp123/WeedsGalore_Ipr28/results/exp10/20261108T062634Z/runs/E10B1_s1/best_val.pth",
+      "sha256": "d6b5165be974850618f76e907dee20a36cf66bd3b0d1ac60b8e27ba15f89391a",
+      "validation_summary": "/kaggle/input/notebooks/thanhthao28/exp123/WeedsGalore_Ipr28/results/exp10/20261108T062634Z/validation/E10B1_s1_val_summary.json"
+    },
+    "E10B1_s2": {
+      "path": "/kaggle/input/notebooks/thanhthao28/exp123/WeedsGalore_Ipr28/results/exp10/20261108T062634Z/runs/E10B1_s2/best_val.pth",
+      "sha256": "5a02fb36933ea55ad31b680d3187ad36c8f620ae60c8b4a3707a72bd71968511",
+      "validation_summary": "/kaggle/input/notebooks/thanhthao28/exp123/WeedsGalore_Ipr28/results/exp10/20261108T062634Z/validation/E10B1_s2_val_summary.json"
+    },
+    "E10B1_s3": {
+      "path": "/kaggle/input/notebooks/thanhthao28/exp123/WeedsGalore_Ipr28/results/exp10/20261108T062634Z/runs/E10B1_s3/best_val.pth",
+      "sha256": "826ffe8b40c8c900937b79e225db2a0d35302c67184003bbe24276bcb022ea94",
+      "validation_summary": "/kaggle/input/notebooks/thanhthao28/exp123/WeedsGalore_Ipr28/results/exp10/20261108T062634Z/validation/E10B1_s3_val_summary.json"
+    },
+    "E10B1_s4": {
+      "path": "/kaggle/input/notebooks/thanhthao28/exp123/WeedsGalore_Ipr28/results/exp10/20261108T062634Z/runs/E10B1_s4/best_val.pth",
+      "sha256": "5f9d7bb130b46b961d468b3be5025cc896c4699a196dc65364b88a4bd6b41f78",
+      "validation_summary": "/kaggle/input/notebooks/thanhthao28/exp123/WeedsGalore_Ipr28/results/exp10/20261108T062634Z/validation/E10B1_s4_val_summary.json"
+    },
+    "E10M1_s0": {
+      "path": "/kaggle/input/notebooks/thanhthao28/exp123/WeedsGalore_Ipr28/results/exp10/20261108T062634Z/runs/E10M1_s0/best_val.pth",
+      "sha256": "19dbbe2b4ed568aed35a6cae2868b1705cd03b39b3e14c571924b005ce8ff194",
+      "validation_summary": "/kaggle/input/notebooks/thanhthao28/exp123/WeedsGalore_Ipr28/results/exp10/20261108T062634Z/validation/E10M1_s0_val_summary.json"
+    },
+    "E10M1_s1": {
+      "path": "/kaggle/input/notebooks/thanhthao28/exp123/WeedsGalore_Ipr28/results/exp10/20261108T062634Z/runs/E10M1_s1/best_val.pth",
+      "sha256": "a03e0576aa36d350ac96e7d12371c813f1dcb731f33016e2201170023498572f",
+      "validation_summary": "/kaggle/input/notebooks/thanhthao28/exp123/WeedsGalore_Ipr28/results/exp10/20261108T062634Z/validation/E10M1_s1_val_summary.json"
+    },
+    "E10M1_s2": {
+      "path": "/kaggle/input/notebooks/thanhthao28/exp123/WeedsGalore_Ipr28/results/exp10/20261108T062634Z/runs/E10M1_s2/best_val.pth",
+      "sha256": "9a7cf296439aee656a987897bef672a9bb30596b4da7035fd62e736b48940d64",
+      "validation_summary": "/kaggle/input/notebooks/thanhthao28/exp123/WeedsGalore_Ipr28/results/exp10/20261108T062634Z/validation/E10M1_s2_val_summary.json"
+    },
+    "E10M1_s3": {
+      "path": "/kaggle/input/notebooks/thanhthao28/exp123/WeedsGalore_Ipr28/results/exp10/20261108T062634Z/runs/E10M1_s3/best_val.pth",
+      "sha256": "156db7e4b7b729ba14ce90f162762b5e41dfac63d68008edf14192cccca3a0c3",
+      "validation_summary": "/kaggle/input/notebooks/thanhthao28/exp123/WeedsGalore_Ipr28/results/exp10/20261108T062634Z/validation/E10M1_s3_val_summary.json"
+    },
+    "E10M1_s4": {
+      "path": "/kaggle/input/notebooks/thanhthao28/exp123/WeedsGalore_Ipr28/results/exp10/20261108T062634Z/runs/E10M1_s4/best_val.pth",
+      "sha256": "b5d245d9026c6c084da81184a9186e9413911496bd4c6d42dc8882246071d37a",
+      "validation_summary": "/kaggle/input/notebooks/thanhthao28/exp123/WeedsGalore_Ipr28/results/exp10/20261108T062634Z/validation/E10M1_s4_val_summary.json"
+    }
+  },
+  "test_accessed": false
+}

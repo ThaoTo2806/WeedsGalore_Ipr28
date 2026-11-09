@@ -1,0 +1,10 @@
+{
+  "status": "PASS_SC_LLR_CONTRACT",
+  "source_sha256": {
+    "src/nets/sc_llr.py": "6a180a2114dbb463a460b79bff6014cd5f5ea4d2f3a5cfcc26641b8d3f3970fa",
+    "tests/test_sc_llr.py": "d4008d3b4bcd585af5858da16b995dfc0a120e9d4f1677d4da5a38b7a58b74c5",
+    "src/train.py": "9f1841e0be3d95d41d46c09bf8bb1822c11113680cf1f46a60810ed4a211bbce",
+    "src/ccmc_common.py": "f1e0bb95a3c73913ec45b6f455012a5e1b5ccb4c1d71b3c5ba0abba2c936f6d6",
+    "src/evaluate_ccmc.py": "7825218b9f90290feecd6d01ff58a1d477d1b6699b59794a7c57fdbd0111ddd1"
+  }
+}
