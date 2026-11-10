@@ -26,7 +26,8 @@ from ccmc_metrics import (BIN_NAMES, image_stats, load_bins, load_instance_map,
                           metrics_from_sums, stat_columns, weed_instances)
 from datasets import WeedsGaloreDataset
 from nets.ccmc_sr import GT_MODES, corrupt_weed_labels, occupancy
-from nets.sc_llr import SC_LLR_HEADS
+from exp12_utils import predict_labels
+import exp12_config
 
 FLAGS = flags.FLAGS
 flags.DEFINE_string('dataset_path', 'weedsgalore-dataset', 'dataset directory')
@@ -48,6 +49,11 @@ flags.DEFINE_integer('boundary_px', 3, 'fixed Boundary IoU width in pixels. Rati
                      '~17 px on 600x600, wider than most weeds (BIoU == IoU), so 3 px is used')
 flags.DEFINE_integer('min_bin_n', 20, 'bins with fewer instances are flagged exploratory')
 define_model_flags()
+flags.DEFINE_string('arm_id', '', 'Exp12 registered arm (empty for legacy evaluation)')
+flags.DEFINE_string('exp12_arms', 'configs/exp12/exp12_arms.json', 'Exp12 arm registry')
+flags.DEFINE_float('input_scale', 1.0, 'Input inference resolution multiplier')
+flags.DEFINE_enum('tta', 'none', ['none', 'hflip', 'flips', 'd4'], 'Single-network test-time transforms')
+flags.DEFINE_float('weed_bias', 0.0, 'Registered Weed log-probability bias control')
 
 
 def main(_):
@@ -56,14 +62,23 @@ def main(_):
                          'the configuration is frozen on validation (single final run).')
     if FLAGS.num_classes != 3:
         raise SystemExit('CCMC-SR evaluation expects num_classes=3')
+    if FLAGS.arm_id:
+        arms = exp12_config.load_json(FLAGS.exp12_arms)
+        problems = exp12_config.verify_eval(FLAGS.flag_values_dict(), arms, FLAGS.arm_id)
+        if problems:
+            raise SystemExit('Exp12 EVAL config mismatch: ' + '; '.join(problems))
+        if FLAGS.split == 'test' and FLAGS.weed_bias != 0.0:
+            raise SystemExit('Weed-bias probe is validation-only, never evaluate it on test')
+    elif FLAGS.tta != 'none' or FLAGS.input_scale != 1.0 or FLAGS.weed_bias != 0.0:
+        raise SystemExit('Non-default Exp12 TTA/scale/bias requires a registered --arm_id')
+    if FLAGS.input_scale <= 0:
+        raise SystemExit('input_scale must be positive')
+    if FLAGS.ccmc and (FLAGS.tta != 'none' or FLAGS.input_scale != 1.0):
+        raise SystemExit('Nontrivial Exp12 TTA/scale is not supported for CCMC prior models')
     if FLAGS.head != 'bilinear':
         FLAGS.ccmc = False  # MCSD / pixelshuffle heads are SegFormer5Band-based, no prior
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     net = load_checkpoint(build_model(FLAGS), FLAGS.ckpt, device).to(device).eval()
-    if FLAGS.sc_alpha_override >= 0:
-        if FLAGS.head not in SC_LLR_HEADS:
-            raise SystemExit('--sc_alpha_override only applies to SC-LLR heads')
-        net.set_alpha_override(FLAGS.sc_alpha_override)
     edges, bins_meta = load_bins(FLAGS.bins_json)
 
     override = None if FLAGS.prior_override == 'none' else FLAGS.prior_override
@@ -91,8 +106,14 @@ def main(_):
                 logits, extras = net(x, prior_mask=prior_mask, prior_override=override,
                                      return_aux=True)
             else:
-                logits = net(x)
-            pred = logits.argmax(1)[0].cpu().numpy()
+                if FLAGS.arm_id:
+                    pred = predict_labels(net, x, scale=FLAGS.input_scale, tta=FLAGS.tta,
+                                          weed_bias=FLAGS.weed_bias)[0].cpu().numpy()
+                else:
+                    logits = net(x)
+                    pred = logits.argmax(1)[0].cpu().numpy()
+            if FLAGS.ccmc:
+                pred = logits.argmax(1)[0].cpu().numpy()
             label = np.asarray(binary_label)
             inst, src = weed_instances(label, load_instance_map(FLAGS.dataset_path, name))
             sources[src] = sources.get(src, 0) + 1
@@ -131,11 +152,15 @@ def main(_):
                'GT_LEAKAGE': bool(uses_gt), 'instance_source': sources,
                'bin_edges_px': edges.tolist(), 'bins_source': bins_meta.get('source'),
                'boundary_px': FLAGS.boundary_px, 'head': FLAGS.head,
+               'arm_id': FLAGS.arm_id, 'input_scale': FLAGS.input_scale,
+               'tta': FLAGS.tta, 'weed_bias': FLAGS.weed_bias,
                'lambdas': net.encoder.lambdas() if FLAGS.ccmc else [],
-               'sc_alpha_override': FLAGS.sc_alpha_override if FLAGS.sc_alpha_override >= 0 else None,
                'metrics': metrics_from_sums(sums)}
     cm = np.array([[sums[f'cm_{g}{p}'] for p in range(3)] for g in range(3)], dtype=float)
     summary['confusion_row_norm'] = (cm / cm.sum(1, keepdims=True).clip(min=1)).round(4).tolist()
+    weed_tp = float(cm[2, 2]); weed_pred = float(cm[:, 2].sum()); weed_gt = float(cm[2].sum())
+    summary['weed_precision_percent'] = 100.0 * weed_tp / weed_pred if weed_pred else None
+    summary['weed_pred_gt_mass_ratio'] = weed_pred / weed_gt if weed_gt else None
     if 'pq_n' in sums:
         summary['prior_quality'] = {
             f'mae_{k}': sums[f'pq_abs_{k}'] / sums['pq_n'] for k in ('weed', 'veg')}

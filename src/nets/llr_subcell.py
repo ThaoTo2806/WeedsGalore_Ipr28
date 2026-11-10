@@ -22,7 +22,7 @@ class LLRSubcellSegFormer(SegFormer5Band):
 
     def __init__(self, num_classes=3, in_channels=5, use_multiscale_fusion=True,
                  pretrained_backbone=True, head='occ_conditioned2', sinkhorn_iters=5,
-                 tau=1.0, decoder_dim=128, encoder=None):
+                 tau=1.0, decoder_dim=128, encoder=None, backbone='b0'):
         if head not in LLR_SUBCELL_HEADS:
             raise ValueError(f'head must be one of {LLR_SUBCELL_HEADS}')
         super().__init__(
@@ -34,6 +34,7 @@ class LLRSubcellSegFormer(SegFormer5Band):
             use_multiscale_fusion=use_multiscale_fusion,
             encoder=encoder,
             llr_source='raw',
+            backbone=backbone,
         )
         self.head = head
         self.num_classes = num_classes
@@ -83,7 +84,7 @@ class LLRResidualSubcellSegFormer(SegFormer5Band):
 
     def __init__(self, num_classes=3, in_channels=5, use_multiscale_fusion=True,
                  pretrained_backbone=True, head='llr_residual_occ2', beta=0.5,
-                 residual_alpha_init=0.02, decoder_dim=128, encoder=None):
+                 residual_alpha_init=0.02, decoder_dim=128, encoder=None, backbone='b0'):
         if head not in LLR_RESIDUAL_HEADS:
             raise ValueError(f'head must be one of {LLR_RESIDUAL_HEADS}')
         if not 0.0 <= beta < 1.0:
@@ -99,6 +100,7 @@ class LLRResidualSubcellSegFormer(SegFormer5Band):
             use_multiscale_fusion=use_multiscale_fusion,
             encoder=encoder,
             llr_source='raw',
+            backbone=backbone,
         )
         self.head = head
         self.num_classes = num_classes

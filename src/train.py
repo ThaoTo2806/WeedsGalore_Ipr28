@@ -15,7 +15,11 @@ from nets.mcsd import MCSDSegFormer, occupancy_loss
 from nets.llr_subcell import (LLR_RESIDUAL_HEADS, LLR_SUBCELL_HEADS,
                                LLRResidualSubcellSegFormer, LLRSubcellSegFormer)
 from nets.sc_llr import SC_LLR_HEADS, SCLLRSegFormer
+import exp12_config
+from exp12_sched import ema_decay_at, lr_factor
+from exp12_utils import clean_state, ema_update, predict_labels, rescale_batch
 from pathlib import Path
+import copy
 import hashlib
 import json
 import platform
@@ -76,6 +80,7 @@ def soft_dice_loss(logits, labels, num_classes, ignore_index=-1, class_weights=N
 
 
 FLAGS = flags.FLAGS
+_ABSL_FLAGS = set(FLAGS)  # flags defined before this file's own (used by the Exp12 config check)
 
 flags.DEFINE_string('dataset_path', 'weedsgalore-dataset', 'dataset directory')
 flags.DEFINE_integer('dataset_size_train', 104, 'dataset size of train set')
@@ -149,10 +154,23 @@ flags.DEFINE_integer('sc_guide_dim', 8, 'SC-LLR spectral embedding size')
 flags.DEFINE_integer('sc_embed_dim', 16, 'SC-LLR semantic embedding size')
 flags.DEFINE_float('sc_alpha_init', 0.1, 'SC-LLR initial gate')
 flags.DEFINE_float('sc_alpha_lr', 0.01, 'SC-LLR gate learning rate')
+# --- Exp12 (doc/README_EXP12_PLAN_TEST86_Q2_v3.md) ---
+flags.DEFINE_enum('backbone', 'b0', ['b0', 'b1', 'b2'], 'MiT encoder (official nvidia/mit-b*); SegFormer5Band family only')
+flags.DEFINE_float('input_scale', 1.0, 'input scale: images bilinear, labels nearest; validation logits are resized '
+                   'back to the original size (pure interpolation: adds no spatial information)')
+flags.DEFINE_enum('lr_schedule', 'const', ['const', 'cosine'], 'const = legacy; cosine = FSP warmup + cosine decay')
+flags.DEFINE_integer('warmup_epochs', 0, 'linear warmup epochs (cosine schedule)')
+flags.DEFINE_float('min_lr_ratio', 0.0, 'final lr as a fraction of --lr (cosine schedule)')
+flags.DEFINE_float('ema_decay', 0.0, 'EMA of weights (0 = off); final_ema.pth is written at the end')
+flags.DEFINE_integer('grad_accum_steps', 1, 'microbatches per optimizer step; must be preregistered when !=1')
+flags.DEFINE_string('arm_id', '', 'registered arm in exp12_arms.json; when set, flags are verified against the registry')
+flags.DEFINE_string('exp12_common_config', 'configs/exp12/exp12_common_config.json', 'frozen common config')
+flags.DEFINE_string('exp12_arms', 'configs/exp12/exp12_arms.json', 'registered arm configs')
 flags.DEFINE_string('run_name', '', 'run id written to run_config.json (e.g. L3__seed0)')
 flags.DEFINE_boolean('resume', False, 'resume from <out_dir>/last.pth if it exists')
 flags.DEFINE_boolean('detect_anomaly', False, 'torch.autograd anomaly detection (very slow, debug only)')
 flags.DEFINE_boolean('measure_stats', True, 'print params/THOP FLOPs/latency before training')
+TRAIN_FLAGS = sorted(set(FLAGS) - _ABSL_FLAGS)
 
 
 def split_hash():
@@ -238,6 +256,27 @@ def measure_model_stats(model, device, in_channels, input_size=(512, 512)):
 
 
 def main(_):
+    exp12_info = None
+    if FLAGS.grad_accum_steps < 1:
+        raise SystemExit('--grad_accum_steps must be >=1')
+    if FLAGS.arm_id and FLAGS.grad_accum_steps != 1:
+        raise SystemExit('Gradient accumulation needs an explicit batch/accumulation arm registration and protocol deviation; not yet supported by the frozen Exp12 common config')
+    if FLAGS.backbone != 'b0' and (FLAGS.ccmc or FLAGS.head in SC_LLR_HEADS or FLAGS.unet):
+        raise SystemExit('--backbone b1/b2 needs the SegFormer5Band family (no CCMC-SR, SC-LLR or U-Net)')
+    if FLAGS.input_scale <= 0 or (FLAGS.input_scale != 1.0 and FLAGS.ccmc):
+        raise SystemExit('--input_scale must be > 0 and is not supported with --ccmc=True')
+    if FLAGS.arm_id:
+        common = exp12_config.load_json(FLAGS.exp12_common_config)
+        arms = exp12_config.load_json(FLAGS.exp12_arms)
+        defaults = {name: FLAGS[name].default for name in TRAIN_FLAGS}
+        errors = exp12_config.verify_flags(FLAGS.flag_values_dict(), common, arms, FLAGS.arm_id,
+                                           defaults, TRAIN_FLAGS)
+        if errors:
+            raise SystemExit('Exp12 configuration check FAILED:\n  ' + '\n  '.join(errors))
+        exp12_info = {'arm_id': FLAGS.arm_id,
+                      'common_sha256': exp12_config.sha256_file(FLAGS.exp12_common_config),
+                      'arms_sha256': exp12_config.sha256_file(FLAGS.exp12_arms)}
+        print('Exp12 configuration check passed:', exp12_info)
     random.seed(FLAGS.seed)
     np.random.seed(FLAGS.seed)
     torch.manual_seed(FLAGS.seed)
@@ -296,6 +335,7 @@ def main(_):
             head=FLAGS.head,
             beta=FLAGS.beta,
             residual_alpha_init=FLAGS.residual_alpha_init,
+            backbone=FLAGS.backbone,
         )
     elif FLAGS.head in LLR_SUBCELL_HEADS:
         if (FLAGS.ccmc or not FLAGS.segformer or not FLAGS.use_low_level_refine
@@ -310,6 +350,7 @@ def main(_):
             head=FLAGS.head,
             sinkhorn_iters=FLAGS.sinkhorn_iters,
             tau=FLAGS.mcsd_tau,
+            backbone=FLAGS.backbone,
         )
     elif FLAGS.head != 'bilinear':
         if FLAGS.ccmc or FLAGS.use_low_level_refine:
@@ -317,7 +358,7 @@ def main(_):
         net = MCSDSegFormer(num_classes=FLAGS.num_classes, in_channels=FLAGS.in_channels,
                             use_multiscale_fusion=FLAGS.use_multiscale_fusion, head=FLAGS.head,
                             sinkhorn_iters=FLAGS.sinkhorn_iters, tau=FLAGS.mcsd_tau,
-                            spectral_guide=FLAGS.spectral_guide)
+                            spectral_guide=FLAGS.spectral_guide, backbone=FLAGS.backbone)
     elif FLAGS.ccmc:
         net = CCMCSegFormer(num_classes=FLAGS.num_classes, in_channels=FLAGS.in_channels,
                             use_low_level_refine=FLAGS.use_low_level_refine,
@@ -334,7 +375,7 @@ def main(_):
                              in_channels=FLAGS.in_channels,
                              use_low_level_refine=FLAGS.use_low_level_refine,
                              use_multiscale_fusion=FLAGS.use_multiscale_fusion,
-                             llr_source=FLAGS.llr_source)
+                             llr_source=FLAGS.llr_source, backbone=FLAGS.backbone)
     elif FLAGS.dlv3p_do:
         net = deeplabv3plus_resnet50_do(num_classes=FLAGS.num_classes, pretrained_backbone=FLAGS.pretrained_backbone)  # probabilistic DeepLabv3+
     elif FLAGS.use_attention:
@@ -356,6 +397,11 @@ def main(_):
     is_oracle = FLAGS.ccmc and FLAGS.prior_mode in GT_MODES
     if FLAGS.measure_stats and not is_oracle:
         measure_model_stats(net, device, in_channels=FLAGS.in_channels)
+    ema_model = None
+    if FLAGS.ema_decay > 0:
+        ema_model = copy.deepcopy(net).eval()
+        for parameter in ema_model.parameters():
+            parameter.requires_grad_(False)
 
     # Loss criterion
     class_weights = None
@@ -385,6 +431,11 @@ def main(_):
     else:
         optimizer = torch.optim.Adam(net.parameters(), lr=FLAGS.lr)
 
+    base_lrs = [group['lr'] for group in optimizer.param_groups]
+    steps_per_epoch = len(train_dataloader)
+    total_steps = FLAGS.epochs * steps_per_epoch
+    warmup_steps = FLAGS.warmup_epochs * steps_per_epoch
+
     # Metric
     evaluator = MulticlassJaccardIndex(num_classes=FLAGS.num_classes, average=None, ignore_index=FLAGS.ignore_index).to(device)
     val_evaluator = MulticlassJaccardIndex(
@@ -404,7 +455,7 @@ def main(_):
     run_config = {'run_name': FLAGS.run_name, 'split_hash': split_hash(), 'env': environment_info(),
                   'flags': FLAGS.flag_values_dict(),
                   'num_params': sum(p.numel() for p in net.parameters()),
-                  'uses_gt_prior': is_oracle, 'aux_loss': use_aux}
+                  'uses_gt_prior': is_oracle, 'aux_loss': use_aux, 'exp12': exp12_info}
     with open(f'{FLAGS.out_dir}/run_config.json', 'w') as f:
         json.dump(run_config, f, indent=2, default=str)
     history_path = f'{FLAGS.out_dir}/history.jsonl'
@@ -426,6 +477,8 @@ def main(_):
         random.setstate(state['python_rng'])
         start_epoch, tot_iter = state['epoch'] + 1, state['tot_iter']
         best_val_miou, best_epoch = state['best_val_miou'], state['best_epoch']
+        if ema_model is not None and state.get('ema') is not None:
+            ema_model.load_state_dict(state['ema'])
         print(f'Resumed from {last_path} at epoch {start_epoch} (best {best_val_miou:.2f}% @ {best_epoch})')
 
     def forward_train(features, labels, binary_labels):
@@ -435,6 +488,24 @@ def main(_):
             return net(features), None
         prior_mask = binary_labels if is_oracle else None
         return net(features, prior_mask=prior_mask, return_aux=True)
+
+    def run_validation(model):
+        model.eval()
+        val_evaluator.reset()
+        with torch.no_grad():
+            for features, unique_labels, binary_labels in val_dataloader:
+                labels = binary_labels if FLAGS.num_classes == 3 else unique_labels
+                features, labels = features.to(device), labels.to(device)
+                if FLAGS.ccmc:
+                    # Oracle (C2/C3) models read GT of the val image: label leakage, diagnostic only.
+                    prior_mask = binary_labels.to(device) if is_oracle else None
+                    predictions = model(features, prior_mask=prior_mask).argmax(dim=1)
+                else:  # predictions are always at the ORIGINAL resolution (labels are not rescaled)
+                    predictions = predict_labels(model, features, scale=FLAGS.input_scale)
+                val_evaluator.update(predictions, labels)
+        return val_evaluator.compute() * 100
+
+    last_val_miou = last_ema_miou = None
 
     # Train
     for epoch in range(start_epoch, FLAGS.epochs):
@@ -451,6 +522,7 @@ def main(_):
                 labels = unique_labels
             features, labels = features.to(device), labels.to(device)  # NCHW
             binary_labels = binary_labels.to(device)
+            features, labels, binary_labels = rescale_batch(features, labels, binary_labels, FLAGS.input_scale)
 
             optimizer.zero_grad()
             out, extras = forward_train(features, labels, binary_labels)
@@ -476,7 +548,12 @@ def main(_):
                 epoch_sc_entropy += float(extras.get('sc_weight_entropy', 0.0))
             epoch_steps += 1
             loss.backward()
+            factor = lr_factor(tot_iter, total_steps, warmup_steps, FLAGS.lr_schedule, FLAGS.min_lr_ratio)
+            for group, base_lr in zip(optimizer.param_groups, base_lrs):
+                group['lr'] = base_lr * factor
             optimizer.step()
+            if ema_model is not None:
+                ema_update(ema_model, net, ema_decay_at(tot_iter, FLAGS.ema_decay))
 
             accum_loss += loss.item()
             accum_iter += 1
@@ -507,25 +584,18 @@ def main(_):
                 torch.save(net.state_dict(), f'{FLAGS.out_dir}/{str(epoch)}.pth')
                 torch.save(optimizer.state_dict(), f'{FLAGS.out_dir}/optimizer.pth')
 
-        net.eval()
-        val_evaluator.reset()
-        with torch.no_grad():
-            for features, unique_labels, binary_labels in val_dataloader:
-                labels = binary_labels if FLAGS.num_classes == 3 else unique_labels
-                features, labels = features.to(device), labels.to(device)
-                if FLAGS.ccmc:
-                    # Oracle (C2/C3) models read GT of the val image: label leakage, diagnostic only.
-                    prior_mask = binary_labels.to(device) if is_oracle else None
-                    predictions = net(features, prior_mask=prior_mask).argmax(dim=1)
-                else:
-                    predictions = net(features).argmax(dim=1)
-                val_evaluator.update(predictions, labels)
-
-        val_scores = val_evaluator.compute() * 100
+        val_scores = run_validation(net)
+        ema_scores = run_validation(ema_model) if ema_model is not None else None
         val_miou = val_scores.mean().item()
+        ema_miou = ema_scores.mean().item() if ema_scores is not None else None
+        last_val_miou, last_ema_miou = val_miou, ema_miou
+        if ema_miou is not None:
+            print(f'Epoch: {epoch}, EMA Val mIoU: {ema_miou:.2f}%')
         print(f'Epoch: {epoch}, Val mIoU: {val_miou:.2f}% | ' +
               ' '.join(f'c{c}={s:.2f}' for c, s in enumerate(val_scores.tolist())))
         writer.add_scalar('val_miou (%)', val_miou, epoch + 1)
+        if ema_miou is not None:
+            writer.add_scalar('val_miou_ema (%)', ema_miou, epoch + 1)
         writer.add_scalar('val_iou_bg (%)', val_scores[0], epoch + 1)
         writer.add_scalar('val_iou_crop (%)', val_scores[1], epoch + 1)
         for weed_idx, weed_iou in enumerate(val_scores[2:], start=2):
@@ -542,7 +612,11 @@ def main(_):
                   'train_seg_loss': epoch_seg / max(epoch_steps, 1),
                   'train_aux_loss': epoch_aux / max(epoch_steps, 1) if (use_aux or use_occ) else None,
                   'lambdas': lambdas, 'best_val_miou': best_val_miou, 'best_epoch': best_epoch,
-                  'epoch_time_s': time.time() - epoch_start}
+                  'epoch_time_s': time.time() - epoch_start,
+                  'lr': optimizer.param_groups[0]['lr'],
+                  'val_miou_ema': ema_miou,
+                  'val_iou_ema': ema_scores.tolist() if ema_scores is not None else None,
+                  'max_mem_gb': (torch.cuda.max_memory_allocated() / 1e9) if torch.cuda.is_available() else None}
         if FLAGS.head in SC_LLR_HEADS:
             record['sc_alpha'] = float(torch.sigmoid(net.sc_llr.alpha_logit).item())
             record['sc_weight_entropy'] = epoch_sc_entropy / max(epoch_steps, 1)
@@ -552,12 +626,20 @@ def main(_):
             print(f'lambdas (stages {FLAGS.ccmc_stages}): ' + ', '.join(f'{v:.4f}' for v in lambdas))
 
         torch.save({'model': net.state_dict(), 'optimizer': optimizer.state_dict(), 'epoch': epoch,
+                    'ema': ema_model.state_dict() if ema_model is not None else None,
                     'tot_iter': tot_iter, 'best_val_miou': best_val_miou, 'best_epoch': best_epoch,
                     'data_generator': data_generator.get_state(), 'torch_rng': torch.get_rng_state(),
                     'cuda_rng': torch.cuda.get_rng_state_all() if torch.cuda.is_available() else None,
                     'numpy_rng': np.random.get_state(), 'python_rng': random.getstate()}, last_path)
 
+    # FSP: report the FINAL checkpoint (EMA when enabled); best_val.pth is kept only for legacy comparisons.
+    torch.save(clean_state(net), f'{FLAGS.out_dir}/final.pth')
+    if ema_model is not None:
+        torch.save(clean_state(ema_model), f'{FLAGS.out_dir}/final_ema.pth')
     summary = {'run_name': FLAGS.run_name, 'best_val_miou': best_val_miou, 'best_epoch': best_epoch,
+               'final_val_miou': last_val_miou, 'final_ema_val_miou': last_ema_miou,
+               'final_checkpoint': 'final_ema.pth' if ema_model is not None else 'final.pth',
+               'exp12': exp12_info,
                'final_lambdas': net.encoder.lambdas() if FLAGS.ccmc else [],
                'split_hash': run_config['split_hash']}
     with open(f'{FLAGS.out_dir}/run_summary.json', 'w') as f:

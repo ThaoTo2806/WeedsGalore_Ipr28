@@ -1,0 +1,762 @@
+{
+  "version": "exp12-v3",
+  "description": "Registered per-arm differences (backbone, head, resolution, FSP, TTA, seeds). Locked before any run.",
+  "notes": {
+    "S0/S1/S2": "S0=bilinear without LLR (SCI reference); S1=OccCond-g; S2=MCSD-g (same flags as Exp05-Exp07, no LLR)",
+    "seeds": "0-4 development, 5-9 confirmation; the stage cell decides which are run",
+    "FSP": "warmup 5 epochs, cosine to 1% of lr, EMA decay 0.99 per step, report the final EMA checkpoint",
+    "new_LLR_arms": "L12_* appended for distinct LLR experiment; do not conflate with S0/S1/S2 without LLR; register exact intended SCI hypothesis before running."
+  },
+  "rp_bias_grid": [
+    -0.5,
+    0.25,
+    0.5,
+    0.75,
+    1.0,
+    1.5
+  ],
+  "arms": {
+    "P_B0_LLR": {
+      "branch": "PERF",
+      "stage": "E12.1/E12.2/E12.4/E12.6",
+      "flags": {
+        "backbone": "b0",
+        "head": "bilinear",
+        "use_low_level_refine": true,
+        "llr_source": "raw",
+        "input_scale": 1.0,
+        "lr_schedule": "cosine",
+        "warmup_epochs": 5,
+        "min_lr_ratio": 0.01,
+        "ema_decay": 0.99
+      },
+      "seeds": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "allowed_tta": [
+        "none",
+        "hflip",
+        "flips",
+        "d4"
+      ]
+    },
+    "P_B0_LLR_X15": {
+      "branch": "PERF",
+      "stage": "E12.1/E12.2/E12.4/E12.6",
+      "flags": {
+        "backbone": "b0",
+        "head": "bilinear",
+        "use_low_level_refine": true,
+        "llr_source": "raw",
+        "input_scale": 1.5,
+        "lr_schedule": "cosine",
+        "warmup_epochs": 5,
+        "min_lr_ratio": 0.01,
+        "ema_decay": 0.99
+      },
+      "seeds": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "allowed_tta": [
+        "none",
+        "hflip",
+        "flips",
+        "d4"
+      ]
+    },
+    "P_B1_LLR": {
+      "branch": "PERF",
+      "stage": "E12.1/E12.2/E12.4/E12.6",
+      "flags": {
+        "backbone": "b1",
+        "head": "bilinear",
+        "use_low_level_refine": true,
+        "llr_source": "raw",
+        "input_scale": 1.0,
+        "lr_schedule": "cosine",
+        "warmup_epochs": 5,
+        "min_lr_ratio": 0.01,
+        "ema_decay": 0.99
+      },
+      "seeds": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "allowed_tta": [
+        "none",
+        "hflip",
+        "flips",
+        "d4"
+      ]
+    },
+    "P_B1_LLR_X15": {
+      "branch": "PERF",
+      "stage": "E12.1/E12.2/E12.4/E12.6",
+      "flags": {
+        "backbone": "b1",
+        "head": "bilinear",
+        "use_low_level_refine": true,
+        "llr_source": "raw",
+        "input_scale": 1.5,
+        "lr_schedule": "cosine",
+        "warmup_epochs": 5,
+        "min_lr_ratio": 0.01,
+        "ema_decay": 0.99
+      },
+      "seeds": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "allowed_tta": [
+        "none",
+        "hflip",
+        "flips",
+        "d4"
+      ]
+    },
+    "P_B2_LLR": {
+      "branch": "PERF",
+      "stage": "E12.1/E12.2/E12.4/E12.6",
+      "flags": {
+        "backbone": "b2",
+        "head": "bilinear",
+        "use_low_level_refine": true,
+        "llr_source": "raw",
+        "input_scale": 1.0,
+        "lr_schedule": "cosine",
+        "warmup_epochs": 5,
+        "min_lr_ratio": 0.01,
+        "ema_decay": 0.99
+      },
+      "seeds": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "allowed_tta": [
+        "none",
+        "hflip",
+        "flips",
+        "d4"
+      ]
+    },
+    "P_B2_LLR_X15": {
+      "branch": "PERF",
+      "stage": "E12.1/E12.2/E12.4/E12.6",
+      "flags": {
+        "backbone": "b2",
+        "head": "bilinear",
+        "use_low_level_refine": true,
+        "llr_source": "raw",
+        "input_scale": 1.5,
+        "lr_schedule": "cosine",
+        "warmup_epochs": 5,
+        "min_lr_ratio": 0.01,
+        "ema_decay": 0.99
+      },
+      "seeds": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "allowed_tta": [
+        "none",
+        "hflip",
+        "flips",
+        "d4"
+      ]
+    },
+    "S0_B0": {
+      "branch": "SCI",
+      "stage": "E12.3/E12.6S",
+      "flags": {
+        "backbone": "b0",
+        "head": "bilinear",
+        "use_low_level_refine": false,
+        "llr_source": "raw",
+        "input_scale": 1.0,
+        "lr_schedule": "cosine",
+        "warmup_epochs": 5,
+        "min_lr_ratio": 0.01,
+        "ema_decay": 0.99
+      },
+      "seeds": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "allowed_tta": [
+        "none",
+        "hflip",
+        "flips",
+        "d4"
+      ]
+    },
+    "S1_B0": {
+      "branch": "SCI",
+      "stage": "E12.3/E12.6S",
+      "flags": {
+        "backbone": "b0",
+        "head": "occ_conditioned",
+        "use_low_level_refine": false,
+        "llr_source": "raw",
+        "input_scale": 1.0,
+        "spectral_guide": true,
+        "mcsd_tau": 1.0,
+        "occ_weight": 0.3,
+        "sinkhorn_iters": 5,
+        "lr_schedule": "cosine",
+        "warmup_epochs": 5,
+        "min_lr_ratio": 0.01,
+        "ema_decay": 0.99
+      },
+      "seeds": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "allowed_tta": [
+        "none",
+        "hflip",
+        "flips",
+        "d4"
+      ]
+    },
+    "S2_B0": {
+      "branch": "SCI",
+      "stage": "E12.3/E12.6S",
+      "flags": {
+        "backbone": "b0",
+        "head": "mcsd",
+        "use_low_level_refine": false,
+        "llr_source": "raw",
+        "input_scale": 1.0,
+        "spectral_guide": true,
+        "mcsd_tau": 1.0,
+        "occ_weight": 0.3,
+        "sinkhorn_iters": 5,
+        "lr_schedule": "cosine",
+        "warmup_epochs": 5,
+        "min_lr_ratio": 0.01,
+        "ema_decay": 0.99
+      },
+      "seeds": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "allowed_tta": [
+        "none",
+        "hflip",
+        "flips",
+        "d4"
+      ]
+    },
+    "S0_B1": {
+      "branch": "SCI",
+      "stage": "E12.3/E12.6S",
+      "flags": {
+        "backbone": "b1",
+        "head": "bilinear",
+        "use_low_level_refine": false,
+        "llr_source": "raw",
+        "input_scale": 1.0,
+        "lr_schedule": "cosine",
+        "warmup_epochs": 5,
+        "min_lr_ratio": 0.01,
+        "ema_decay": 0.99
+      },
+      "seeds": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "allowed_tta": [
+        "none",
+        "hflip",
+        "flips",
+        "d4"
+      ]
+    },
+    "S1_B1": {
+      "branch": "SCI",
+      "stage": "E12.3/E12.6S",
+      "flags": {
+        "backbone": "b1",
+        "head": "occ_conditioned",
+        "use_low_level_refine": false,
+        "llr_source": "raw",
+        "input_scale": 1.0,
+        "spectral_guide": true,
+        "mcsd_tau": 1.0,
+        "occ_weight": 0.3,
+        "sinkhorn_iters": 5,
+        "lr_schedule": "cosine",
+        "warmup_epochs": 5,
+        "min_lr_ratio": 0.01,
+        "ema_decay": 0.99
+      },
+      "seeds": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "allowed_tta": [
+        "none",
+        "hflip",
+        "flips",
+        "d4"
+      ]
+    },
+    "S2_B1": {
+      "branch": "SCI",
+      "stage": "E12.3/E12.6S",
+      "flags": {
+        "backbone": "b1",
+        "head": "mcsd",
+        "use_low_level_refine": false,
+        "llr_source": "raw",
+        "input_scale": 1.0,
+        "spectral_guide": true,
+        "mcsd_tau": 1.0,
+        "occ_weight": 0.3,
+        "sinkhorn_iters": 5,
+        "lr_schedule": "cosine",
+        "warmup_epochs": 5,
+        "min_lr_ratio": 0.01,
+        "ema_decay": 0.99
+      },
+      "seeds": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "allowed_tta": [
+        "none",
+        "hflip",
+        "flips",
+        "d4"
+      ]
+    },
+    "L12_B0_REF": {
+      "branch": "SCI_LLR_EXPLORATORY",
+      "stage": "E12.3 / E12.3b (ONLY after protocol approval)",
+      "flags": {
+        "backbone": "b0",
+        "head": "bilinear",
+        "use_low_level_refine": true,
+        "llr_source": "raw",
+        "input_scale": 1.0,
+        "lr_schedule": "cosine",
+        "warmup_epochs": 5,
+        "min_lr_ratio": 0.01,
+        "ema_decay": 0.99
+      },
+      "seeds": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "allowed_tta": [
+        "none",
+        "hflip",
+        "flips",
+        "d4"
+      ],
+      "note": "New 2x2 sub-cell on RAW LLR; not same as historical 1/4-resolution OccCond-g or MCSD-g."
+    },
+    "L12_B0_OCC2": {
+      "branch": "SCI_LLR_EXPLORATORY",
+      "stage": "E12.3 / E12.3b (ONLY after protocol approval)",
+      "flags": {
+        "backbone": "b0",
+        "head": "occ_conditioned2",
+        "use_low_level_refine": true,
+        "llr_source": "raw",
+        "input_scale": 1.0,
+        "lr_schedule": "cosine",
+        "warmup_epochs": 5,
+        "min_lr_ratio": 0.01,
+        "ema_decay": 0.99,
+        "spectral_guide": false,
+        "mcsd_tau": 1.0,
+        "occ_weight": 0.3,
+        "sinkhorn_iters": 5
+      },
+      "seeds": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "allowed_tta": [
+        "none",
+        "hflip",
+        "flips",
+        "d4"
+      ],
+      "note": "New 2x2 sub-cell on RAW LLR; not same as historical 1/4-resolution OccCond-g or MCSD-g."
+    },
+    "L12_B0_MCSD2": {
+      "branch": "SCI_LLR_EXPLORATORY",
+      "stage": "E12.3 / E12.3b (ONLY after protocol approval)",
+      "flags": {
+        "backbone": "b0",
+        "head": "mcsd2",
+        "use_low_level_refine": true,
+        "llr_source": "raw",
+        "input_scale": 1.0,
+        "lr_schedule": "cosine",
+        "warmup_epochs": 5,
+        "min_lr_ratio": 0.01,
+        "ema_decay": 0.99,
+        "spectral_guide": false,
+        "mcsd_tau": 1.0,
+        "occ_weight": 0.3,
+        "sinkhorn_iters": 5
+      },
+      "seeds": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "allowed_tta": [
+        "none",
+        "hflip",
+        "flips",
+        "d4"
+      ],
+      "note": "New 2x2 sub-cell on RAW LLR; not same as historical 1/4-resolution OccCond-g or MCSD-g."
+    },
+    "L12_B1_REF": {
+      "branch": "SCI_LLR_EXPLORATORY",
+      "stage": "E12.3 / E12.3b (ONLY after protocol approval)",
+      "flags": {
+        "backbone": "b1",
+        "head": "bilinear",
+        "use_low_level_refine": true,
+        "llr_source": "raw",
+        "input_scale": 1.0,
+        "lr_schedule": "cosine",
+        "warmup_epochs": 5,
+        "min_lr_ratio": 0.01,
+        "ema_decay": 0.99
+      },
+      "seeds": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "allowed_tta": [
+        "none",
+        "hflip",
+        "flips",
+        "d4"
+      ],
+      "note": "New 2x2 sub-cell on RAW LLR; not same as historical 1/4-resolution OccCond-g or MCSD-g."
+    },
+    "L12_B1_OCC2": {
+      "branch": "SCI_LLR_EXPLORATORY",
+      "stage": "E12.3 / E12.3b (ONLY after protocol approval)",
+      "flags": {
+        "backbone": "b1",
+        "head": "occ_conditioned2",
+        "use_low_level_refine": true,
+        "llr_source": "raw",
+        "input_scale": 1.0,
+        "lr_schedule": "cosine",
+        "warmup_epochs": 5,
+        "min_lr_ratio": 0.01,
+        "ema_decay": 0.99,
+        "spectral_guide": false,
+        "mcsd_tau": 1.0,
+        "occ_weight": 0.3,
+        "sinkhorn_iters": 5
+      },
+      "seeds": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "allowed_tta": [
+        "none",
+        "hflip",
+        "flips",
+        "d4"
+      ],
+      "note": "New 2x2 sub-cell on RAW LLR; not same as historical 1/4-resolution OccCond-g or MCSD-g."
+    },
+    "L12_B1_MCSD2": {
+      "branch": "SCI_LLR_EXPLORATORY",
+      "stage": "E12.3 / E12.3b (ONLY after protocol approval)",
+      "flags": {
+        "backbone": "b1",
+        "head": "mcsd2",
+        "use_low_level_refine": true,
+        "llr_source": "raw",
+        "input_scale": 1.0,
+        "lr_schedule": "cosine",
+        "warmup_epochs": 5,
+        "min_lr_ratio": 0.01,
+        "ema_decay": 0.99,
+        "spectral_guide": false,
+        "mcsd_tau": 1.0,
+        "occ_weight": 0.3,
+        "sinkhorn_iters": 5
+      },
+      "seeds": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "allowed_tta": [
+        "none",
+        "hflip",
+        "flips",
+        "d4"
+      ],
+      "note": "New 2x2 sub-cell on RAW LLR; not same as historical 1/4-resolution OccCond-g or MCSD-g."
+    },
+    "L12_B2_REF": {
+      "branch": "SCI_LLR_EXPLORATORY",
+      "stage": "E12.3 / E12.3b (ONLY after protocol approval)",
+      "flags": {
+        "backbone": "b2",
+        "head": "bilinear",
+        "use_low_level_refine": true,
+        "llr_source": "raw",
+        "input_scale": 1.0,
+        "lr_schedule": "cosine",
+        "warmup_epochs": 5,
+        "min_lr_ratio": 0.01,
+        "ema_decay": 0.99
+      },
+      "seeds": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "allowed_tta": [
+        "none",
+        "hflip",
+        "flips",
+        "d4"
+      ],
+      "note": "New 2x2 sub-cell on RAW LLR; not same as historical 1/4-resolution OccCond-g or MCSD-g."
+    },
+    "L12_B2_OCC2": {
+      "branch": "SCI_LLR_EXPLORATORY",
+      "stage": "E12.3 / E12.3b (ONLY after protocol approval)",
+      "flags": {
+        "backbone": "b2",
+        "head": "occ_conditioned2",
+        "use_low_level_refine": true,
+        "llr_source": "raw",
+        "input_scale": 1.0,
+        "lr_schedule": "cosine",
+        "warmup_epochs": 5,
+        "min_lr_ratio": 0.01,
+        "ema_decay": 0.99,
+        "spectral_guide": false,
+        "mcsd_tau": 1.0,
+        "occ_weight": 0.3,
+        "sinkhorn_iters": 5
+      },
+      "seeds": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "allowed_tta": [
+        "none",
+        "hflip",
+        "flips",
+        "d4"
+      ],
+      "note": "New 2x2 sub-cell on RAW LLR; not same as historical 1/4-resolution OccCond-g or MCSD-g."
+    },
+    "L12_B2_MCSD2": {
+      "branch": "SCI_LLR_EXPLORATORY",
+      "stage": "E12.3 / E12.3b (ONLY after protocol approval)",
+      "flags": {
+        "backbone": "b2",
+        "head": "mcsd2",
+        "use_low_level_refine": true,
+        "llr_source": "raw",
+        "input_scale": 1.0,
+        "lr_schedule": "cosine",
+        "warmup_epochs": 5,
+        "min_lr_ratio": 0.01,
+        "ema_decay": 0.99,
+        "spectral_guide": false,
+        "mcsd_tau": 1.0,
+        "occ_weight": 0.3,
+        "sinkhorn_iters": 5
+      },
+      "seeds": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "allowed_tta": [
+        "none",
+        "hflip",
+        "flips",
+        "d4"
+      ],
+      "note": "New 2x2 sub-cell on RAW LLR; not same as historical 1/4-resolution OccCond-g or MCSD-g."
+    }
+  }
+}

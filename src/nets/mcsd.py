@@ -69,10 +69,10 @@ class MCSDSegFormer(SegFormer5Band):
     """
 
     def __init__(self, num_classes=3, in_channels=5, use_multiscale_fusion=True,
-                 head='mcsd', sinkhorn_iters=5, tau=1.0, spectral_guide=False, decoder_dim=128):
+                 head='mcsd', sinkhorn_iters=5, tau=1.0, spectral_guide=False, decoder_dim=128, backbone='b0'):
         super().__init__(num_classes=num_classes, decoder_dim=decoder_dim, pretrained_backbone=True,
                          in_channels=in_channels, use_low_level_refine=False,
-                         use_multiscale_fusion=use_multiscale_fusion)
+                         use_multiscale_fusion=use_multiscale_fusion, backbone=backbone)
         if head not in HEADS:
             raise ValueError(f'head must be one of {HEADS}')
         self.head = head

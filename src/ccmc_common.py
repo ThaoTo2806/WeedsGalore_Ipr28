@@ -38,20 +38,25 @@ def define_model_flags():
     flags.DEFINE_integer('sc_guide_dim', 8, 'SC-LLR spectral embedding size')
     flags.DEFINE_integer('sc_embed_dim', 16, 'SC-LLR semantic embedding size')
     flags.DEFINE_float('sc_alpha_init', 0.1, 'SC-LLR initial gate')
-    flags.DEFINE_float('sc_alpha_lr', 0.01, 'SC-LLR gate learning rate')
-    flags.DEFINE_float('sc_alpha_override', -1.0, 'SC-LLR evaluation gate override')
+    flags.DEFINE_float('sc_alpha_lr', 0.01, 'SC-LLR gate learning rate (training only)')
+    flags.DEFINE_float('sc_alpha_override', -1.0, 'EVAL ONLY: fix SC gate in [0,1]; -1 keeps the checkpoint gate')
+    flags.DEFINE_enum('backbone', 'b0', ['b0', 'b1', 'b2'], 'MiT encoder size (official nvidia/mit-b*)')
 
 
 def build_model(F):
+    if F.backbone != 'b0' and (F.ccmc or F.head in SC_LLR_HEADS):
+        raise ValueError('--backbone b1/b2 is only implemented for the SegFormer5Band family '
+                         '(not CCMC-SR and not SC-LLR)')
     if F.head in SC_LLR_HEADS:
         if F.ccmc or not F.use_low_level_refine or F.llr_source != 'raw' or F.spectral_guide:
-            raise ValueError('SC-LLR requires raw non-CCMC LLR and spectral_guide=False')
+            raise ValueError('SC-LLR requires non-CCMC raw LLR, spectral_guide=False')
         return SCLLRSegFormer(
             num_classes=F.num_classes, in_channels=F.in_channels,
             use_multiscale_fusion=F.use_multiscale_fusion, head=F.head,
             sc_radius=F.sc_radius, sc_guide_dim=F.sc_guide_dim,
             sc_embed_dim=F.sc_embed_dim, sc_alpha_init=F.sc_alpha_init,
-            pretrained_backbone=True)
+            pretrained_backbone=True,
+        )
     if F.head in LLR_RESIDUAL_HEADS:
         if F.ccmc or not F.use_low_level_refine or F.llr_source != 'raw' or F.spectral_guide:
             raise ValueError('LLR residual heads require --ccmc=False --use_low_level_refine=True '
@@ -60,7 +65,7 @@ def build_model(F):
             num_classes=F.num_classes, in_channels=F.in_channels,
             use_multiscale_fusion=F.use_multiscale_fusion, head=F.head,
             beta=F.beta, residual_alpha_init=F.residual_alpha_init,
-            pretrained_backbone=True,
+            pretrained_backbone=True, backbone=F.backbone,
         )
     if F.head in LLR_SUBCELL_HEADS:
         if F.ccmc or not F.use_low_level_refine or F.llr_source != 'raw' or F.spectral_guide:
@@ -70,13 +75,13 @@ def build_model(F):
             num_classes=F.num_classes, in_channels=F.in_channels,
             use_multiscale_fusion=F.use_multiscale_fusion, head=F.head,
             sinkhorn_iters=F.sinkhorn_iters, tau=F.mcsd_tau,
-            pretrained_backbone=True,
+            pretrained_backbone=True, backbone=F.backbone,
         )
     if F.head != 'bilinear':
         return MCSDSegFormer(num_classes=F.num_classes, in_channels=F.in_channels,
                              use_multiscale_fusion=F.use_multiscale_fusion, head=F.head,
                              sinkhorn_iters=F.sinkhorn_iters, tau=F.mcsd_tau,
-                             spectral_guide=F.spectral_guide)
+                             spectral_guide=F.spectral_guide, backbone=F.backbone)
     if F.ccmc:
         return CCMCSegFormer(num_classes=F.num_classes, in_channels=F.in_channels,
                              use_low_level_refine=F.use_low_level_refine,
@@ -88,7 +93,7 @@ def build_model(F):
                           in_channels=F.in_channels,
                           use_low_level_refine=F.use_low_level_refine,
                           use_multiscale_fusion=F.use_multiscale_fusion,
-                          llr_source=F.llr_source)
+                          llr_source=F.llr_source, backbone=F.backbone)
 
 
 def load_checkpoint(net, path, device):

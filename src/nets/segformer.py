@@ -2,6 +2,9 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
+# Official MiT checkpoints (hidden sizes b0: 32/64/160/256, b1 and b2: 64/128/320/512)
+BACKBONES = {'b0': 'nvidia/mit-b0', 'b1': 'nvidia/mit-b1', 'b2': 'nvidia/mit-b2'}
+
 
 class OverlapPatchEmbed(nn.Module):
   def __init__(self, in_channels, embed_dim, kernel_size=3, stride=2):
@@ -81,6 +84,7 @@ class TransformerBlock(nn.Module):
 class MiTEncoder(nn.Module):
   def __init__(self, in_channels=5):
     super(MiTEncoder, self).__init__()
+    self.dims = (32, 64, 160, 256)
     self.stem = OverlapPatchEmbed(in_channels, 32, kernel_size=7, stride=2)
     self.embed1 = OverlapPatchEmbed(32, 32, stride=2)
     self.embed2 = OverlapPatchEmbed(32, 64, stride=2)
@@ -131,6 +135,7 @@ class PretrainedMiTEncoder(nn.Module):
       pretrained.encoder.patch_embeddings[0].proj = adapted_projection
     self.encoder = pretrained.encoder
     self.config = pretrained.config
+    self.dims = tuple(self.config.hidden_sizes)  # stage widths, used by the decoder
 
   def forward(self, x):
     outputs = self.encoder(x, output_hidden_states=True, return_dict=True)
@@ -191,19 +196,28 @@ class LowLevelRefine(nn.Module):
 class SegFormer5Band(nn.Module):
   def __init__(self, num_classes=3, decoder_dim=128, pretrained_backbone=False,
                low_level_channels=48, in_channels=5, use_low_level_refine=True,
-               use_multiscale_fusion=True, encoder=None, llr_source='raw'):
+               use_multiscale_fusion=True, encoder=None, llr_source='raw', backbone='b0'):
     super(SegFormer5Band, self).__init__()
+    if backbone not in BACKBONES:
+      raise ValueError(f'backbone must be one of {sorted(BACKBONES)}')
+    self.backbone_name = backbone
     if encoder is not None:
       self.encoder = encoder
+    elif pretrained_backbone:
+      self.encoder = PretrainedMiTEncoder(model_name=BACKBONES[backbone], in_channels=in_channels)
     else:
-      self.encoder = (PretrainedMiTEncoder(in_channels=in_channels)
-                      if pretrained_backbone else MiTEncoder(in_channels=in_channels))
-    self.linear1 = nn.Conv2d(32, decoder_dim, 1, bias=False)
+      if backbone != 'b0':
+        raise ValueError('the from-scratch MiTEncoder only implements b0')
+      self.encoder = MiTEncoder(in_channels=in_channels)
+    # stage widths of the encoder (default b0 keeps checkpoints and fake test encoders compatible)
+    dims = tuple(getattr(self.encoder, 'dims', (32, 64, 160, 256)))
+    self.encoder_dims = dims
+    self.linear1 = nn.Conv2d(dims[0], decoder_dim, 1, bias=False)
     self.use_multiscale_fusion = use_multiscale_fusion
     if use_multiscale_fusion:
-      self.linear2 = nn.Conv2d(64, decoder_dim, 1, bias=False)
-      self.linear3 = nn.Conv2d(160, decoder_dim, 1, bias=False)
-      self.linear4 = nn.Conv2d(256, decoder_dim, 1, bias=False)
+      self.linear2 = nn.Conv2d(dims[1], decoder_dim, 1, bias=False)
+      self.linear3 = nn.Conv2d(dims[2], decoder_dim, 1, bias=False)
+      self.linear4 = nn.Conv2d(dims[3], decoder_dim, 1, bias=False)
       self.fuse = nn.Sequential(
         nn.Conv2d(decoder_dim * 4, decoder_dim, 1, bias=False),
         nn.BatchNorm2d(decoder_dim),
@@ -225,7 +239,7 @@ class SegFormer5Band(nn.Module):
         self.low_level = LowLevelRefine(in_channels=in_channels, out_channels=low_level_channels)
       elif llr_source == 'f1':
         self.low_level = nn.Sequential(
-          nn.Conv2d(32, low_level_channels, kernel_size=1, bias=False),
+          nn.Conv2d(dims[0], low_level_channels, kernel_size=1, bias=False),
           nn.BatchNorm2d(low_level_channels),
           nn.ReLU(inplace=True),
         )
