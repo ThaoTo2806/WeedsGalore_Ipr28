@@ -1,0 +1,149 @@
+{
+  "version": "exp13-v1",
+  "description": "Exp13 arms. Common flags = exp12_common_config.json. Frozen before any run.",
+  "rp_bias_grid": [
+    -0.5,
+    0.25,
+    0.5,
+    0.75,
+    1.0,
+    1.5
+  ],
+  "arms": {
+    "P_B2_LLR": {
+      "branch": "PERF",
+      "stage": "E12.1/E12.2/E12.4/E12.6",
+      "flags": {
+        "backbone": "b2",
+        "head": "bilinear",
+        "use_low_level_refine": true,
+        "llr_source": "raw",
+        "input_scale": 1.0,
+        "lr_schedule": "cosine",
+        "warmup_epochs": 5,
+        "min_lr_ratio": 0.01,
+        "ema_decay": 0.99
+      },
+      "seeds": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "allowed_tta": [
+        "none",
+        "hflip",
+        "flips",
+        "d4"
+      ]
+    },
+    "P13_B3_LLR": {
+      "branch": "PERF",
+      "stage": "E13",
+      "flags": {
+        "backbone": "b3",
+        "head": "bilinear",
+        "lr_schedule": "cosine",
+        "warmup_epochs": 5,
+        "min_lr_ratio": 0.01,
+        "ema_decay": 0.99,
+        "use_low_level_refine": true,
+        "llr_source": "raw",
+        "input_scale": 1.0
+      },
+      "seeds": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "allowed_tta": [
+        "none",
+        "hflip",
+        "flips",
+        "d4"
+      ],
+      "note": "Backbone-only control for B3."
+    },
+    "P13_B2_VCF": {
+      "branch": "SCI",
+      "stage": "E13",
+      "flags": {
+        "backbone": "b2",
+        "head": "vcf",
+        "lr_schedule": "cosine",
+        "warmup_epochs": 5,
+        "min_lr_ratio": 0.01,
+        "ema_decay": 0.99,
+        "use_low_level_refine": true,
+        "llr_source": "raw",
+        "input_scale": 1.0
+      },
+      "seeds": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "allowed_tta": [
+        "none",
+        "hflip",
+        "flips",
+        "d4"
+      ],
+      "note": "VCF head, same backbone as reference P_B2_LLR."
+    },
+    "P13_B3_VCF": {
+      "branch": "PERF+SCI",
+      "stage": "E13",
+      "flags": {
+        "backbone": "b3",
+        "head": "vcf",
+        "lr_schedule": "cosine",
+        "warmup_epochs": 5,
+        "min_lr_ratio": 0.01,
+        "ema_decay": 0.99,
+        "use_low_level_refine": true,
+        "llr_source": "raw",
+        "input_scale": 1.0
+      },
+      "seeds": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "allowed_tta": [
+        "none",
+        "hflip",
+        "flips",
+        "d4"
+      ],
+      "note": "VCF head on B3."
+    }
+  }
+}
