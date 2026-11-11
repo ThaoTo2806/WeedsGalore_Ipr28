@@ -1,0 +1,92 @@
+{
+  "A": "P_B2_LLR_d4",
+  "B": "P_B2_LLR_none",
+  "files_A": [
+    "/kaggle/working/WeedsGalore_Ipr28/results/exp12/P_B2_LLR/seed0/ci_d4_per_image.csv",
+    "/kaggle/working/WeedsGalore_Ipr28/results/exp12/P_B2_LLR/seed1/ci_d4_per_image.csv",
+    "/kaggle/working/WeedsGalore_Ipr28/results/exp12/P_B2_LLR/seed2/ci_d4_per_image.csv",
+    "/kaggle/working/WeedsGalore_Ipr28/results/exp12/P_B2_LLR/seed3/ci_d4_per_image.csv",
+    "/kaggle/working/WeedsGalore_Ipr28/results/exp12/P_B2_LLR/seed4/ci_d4_per_image.csv"
+  ],
+  "files_B": [
+    "/kaggle/working/WeedsGalore_Ipr28/results/exp12/P_B2_LLR/seed0/ci_none_per_image.csv",
+    "/kaggle/working/WeedsGalore_Ipr28/results/exp12/P_B2_LLR/seed1/ci_none_per_image.csv",
+    "/kaggle/working/WeedsGalore_Ipr28/results/exp12/P_B2_LLR/seed2/ci_none_per_image.csv",
+    "/kaggle/working/WeedsGalore_Ipr28/results/exp12/P_B2_LLR/seed3/ci_none_per_image.csv",
+    "/kaggle/working/WeedsGalore_Ipr28/results/exp12/P_B2_LLR/seed4/ci_none_per_image.csv"
+  ],
+  "n_seeds": 5,
+  "cluster": "image",
+  "n_clusters": 26,
+  "n_images": 26,
+  "n_boot": 10000,
+  "seed_bootstrap": true,
+  "metrics": {
+    "mIoU": {
+      "A_per_seed": [
+        84.9370768524529,
+        84.8729905340814,
+        84.86896724790319,
+        84.83238432641383,
+        84.09584163621658
+      ],
+      "B_per_seed": [
+        84.54009036345597,
+        84.43782696971756,
+        84.25317381017031,
+        84.27345140763315,
+        83.55484413969103
+      ],
+      "A_mean": 84.72145211941357,
+      "B_mean": 84.2118773381336,
+      "A_seed_std": 0.351750288197307,
+      "B_seed_std": 0.3859943051708418,
+      "delta": 0.5095747812799658,
+      "ci95": [
+        0.2201913661034446,
+        0.7665224802167189
+      ],
+      "p_delta_le_0": 0.0,
+      "per_seed_delta": [
+        0.3969864889969301,
+        0.4351635643638332,
+        0.6157934377328758,
+        0.558932918780684,
+        0.5409974965255486
+      ]
+    },
+    "IoU_crop": {
+      "A_per_seed": [
+        78.16791302959335,
+        78.18476596511243,
+        78.26449084320436,
+        78.12912334406502,
+        76.76519843962575
+      ],
+      "B_per_seed": [
+        77.47751621577818,
+        77.3654215305659,
+        77.15951209875882,
+        77.1766919264756,
+        75.79000696599329
+      ],
+      "A_mean": 77.90229832432018,
+      "B_mean": 76.99382974751435,
+      "A_seed_std": 0.637567309748958,
+      "B_seed_std": 0.6859503553702759,
+      "delta": 0.9084685768058307,
+      "ci95": [
+        0.34560333662545667,
+        1.5155530096666023
+      ],
+      "p_delta_le_0": 0.0,
+      "per_seed_delta": [
+        0.6903968138151697,
+        0.8193444345465366,
+        1.104978744445532,
+        0.9524314175894233,
+        0.9751914736324636
+      ]
+    }
+  }
+}
