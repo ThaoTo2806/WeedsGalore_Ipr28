@@ -16,6 +16,7 @@ from nets.llr_subcell import (LLR_RESIDUAL_HEADS, LLR_SUBCELL_HEADS,
                                LLRResidualSubcellSegFormer, LLRSubcellSegFormer)
 from nets.sc_llr import SC_LLR_HEADS, SCLLRSegFormer
 import exp12_config
+from exp14_ascd import ascd_loss
 from exp12_sched import ema_decay_at, lr_factor
 from exp12_utils import clean_state, ema_update, predict_labels, rescale_batch
 from pathlib import Path
@@ -105,6 +106,12 @@ flags.DEFINE_boolean('use_attention', False, 'set True to insert a CBAM attentio
 flags.DEFINE_boolean('pretrained_backbone', True, 'set True to use pretrained ResNet50 backbone')
 flags.DEFINE_string('ckpt_resnet', 'ckpts/resnet50-19c8e357.pth', 'ckpt path for pretrained backbone')
 flags.DEFINE_integer('batch_size', 2, 'batch size')
+flags.DEFINE_float('ascd_weight', 0.0, 'Train-only ASCD weight')
+flags.DEFINE_float('ascd_hard_alpha', 1.0, 'Wrong CW class probability weighting')
+flags.DEFINE_float('ascd_spectral_alpha', 1.0, 'Spectral confusion weighting')
+flags.DEFINE_float('ascd_spectral_temperature', 1.0, 'Spectral confusion temperature')
+flags.DEFINE_integer('ascd_interface_radius', 3, 'Crop-Weed interface radius')
+flags.DEFINE_bool('amp', False, 'CUDA AMP')
 flags.DEFINE_integer('num_workers', 4, 'number of subprocesses')
 flags.DEFINE_integer('seed', 0, 'random seed for model initialization, shuffling, and augmentation')
 flags.DEFINE_float('lr', 0.001, 'Learning rate')
@@ -436,6 +443,8 @@ def main(_):
     total_steps = FLAGS.epochs * steps_per_epoch
     warmup_steps = FLAGS.warmup_epochs * steps_per_epoch
 
+    scaler = torch.amp.GradScaler('cuda', enabled=FLAGS.amp)
+
     # Metric
     evaluator = MulticlassJaccardIndex(num_classes=FLAGS.num_classes, average=None, ignore_index=FLAGS.ignore_index).to(device)
     val_evaluator = MulticlassJaccardIndex(
@@ -525,7 +534,8 @@ def main(_):
             features, labels, binary_labels = rescale_batch(features, labels, binary_labels, FLAGS.input_scale)
 
             optimizer.zero_grad()
-            out, extras = forward_train(features, labels, binary_labels)
+            with torch.autocast(device_type='cuda', dtype=torch.float16, enabled=FLAGS.amp):
+                out, extras = forward_train(features, labels, binary_labels)
             ce_loss = criterion(out, labels.long())
             if FLAGS.use_dice_loss:
                 dice_loss = soft_dice_loss(out, labels, num_classes=FLAGS.num_classes,
@@ -547,11 +557,23 @@ def main(_):
             if FLAGS.head in SC_LLR_HEADS and extras:
                 epoch_sc_entropy += float(extras.get('sc_weight_entropy', 0.0))
             epoch_steps += 1
-            loss.backward()
+            # EXP14_ASCD_TRAIN_ONLY
+            if FLAGS.ascd_weight > 0:
+                if FLAGS.num_classes != 3 or FLAGS.head != "bilinear" or not FLAGS.segformer:
+                    raise ValueError("ASCD requires 3-class bilinear SegFormer")
+                aux_ascd = ascd_loss(out, labels, features,
+                    hard_alpha=FLAGS.ascd_hard_alpha,
+                    spectral_alpha=FLAGS.ascd_spectral_alpha,
+                    spectral_temperature=FLAGS.ascd_spectral_temperature,
+                    interface_radius=FLAGS.ascd_interface_radius,
+                    ignore_index=FLAGS.ignore_index)
+                loss = loss + FLAGS.ascd_weight * aux_ascd
+            scaler.scale(loss).backward()
             factor = lr_factor(tot_iter, total_steps, warmup_steps, FLAGS.lr_schedule, FLAGS.min_lr_ratio)
             for group, base_lr in zip(optimizer.param_groups, base_lrs):
                 group['lr'] = base_lr * factor
-            optimizer.step()
+            scaler.step(optimizer)
+            scaler.update()
             if ema_model is not None:
                 ema_update(ema_model, net, ema_decay_at(tot_iter, FLAGS.ema_decay))
 
