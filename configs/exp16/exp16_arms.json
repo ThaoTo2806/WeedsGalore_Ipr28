@@ -1,0 +1,52 @@
+{
+  "version": "exp16-point-frozen-v1",
+  "description": "One-model B2 + raw LLR + 4096-point residual refine. No test.",
+  "arms": {
+    "E16_B2_SPECTRAL_POINT": {
+      "branch": "EXP14-ASCD-EXPLORATORY",
+      "stage": "exp16 seed0 val-only gate; test locked",
+      "flags": {
+        "backbone": "b2",
+        "head": "bilinear",
+        "use_low_level_refine": true,
+        "llr_source": "raw",
+        "input_scale": 1.0,
+        "lr_schedule": "cosine",
+        "warmup_epochs": 5,
+        "min_lr_ratio": 0.01,
+        "ema_decay": 0.99,
+        "amp": true,
+        "ascd_weight": 0.0,
+        "ascd_hard_alpha": 1.0,
+        "ascd_spectral_alpha": 1.0,
+        "ascd_spectral_temperature": 1.0,
+        "ascd_interface_radius": 3,
+        "vbb_weight": 0.0,
+        "vbb_radius": 3,
+        "exp15_lovasz_weight": 0.0,
+        "exp15_spectral_weight": 0.0,
+        "exp15_spectral_scale": 4,
+        "exp15_spectral_temperature": 0.8,
+        "exp15_spectral_radius": 2,
+        "exp16_point_refine": true,
+        "exp16_point_budget": 4096
+      },
+      "seeds": [
+        0
+      ],
+      "allowed_tta": [
+        "none",
+        "d4"
+      ],
+      "note": "B2 RawLLR AMP batch8; same network at inference; test remains locked"
+    }
+  },
+  "rp_bias_grid": [
+    -0.5,
+    0.25,
+    0.5,
+    0.75,
+    1.0,
+    1.5
+  ]
+}

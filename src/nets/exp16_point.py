@@ -55,5 +55,5 @@ class SpectralPointRefineSegFormer(SegFormer5Band):
         # Sparse differentiable replacement; operates strictly on x, never labels.
         correction = torch.zeros_like(coarse, dtype=torch.float32).flatten(2)
         correction = correction.scatter(2, ids.unsqueeze(1).expand(-1, delta.shape[-1], -1),
-                                         delta.transpose(1, 2))
+                                         delta.transpose(1, 2).to(dtype=correction.dtype))
         return coarse.float() + correction.reshape(b, -1, h, w)
