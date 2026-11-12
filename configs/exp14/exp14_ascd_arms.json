@@ -1,0 +1,166 @@
+{
+  "version": "exp14-ascd-v1",
+  "description": "ASCD seed0 validation screen, later multi-seed confirmation and ablation; never test for selection.",
+  "rp_bias_grid": [
+    -0.5,
+    0.25,
+    0.5,
+    0.75,
+    1.0,
+    1.5
+  ],
+  "arms": {
+    "E14_B2_AMP_REF": {
+      "branch": "EXP14-ASCD-EXPLORATORY",
+      "stage": "E14-SEED0-SCREEN",
+      "flags": {
+        "backbone": "b2",
+        "head": "bilinear",
+        "use_low_level_refine": true,
+        "llr_source": "raw",
+        "input_scale": 1.0,
+        "lr_schedule": "cosine",
+        "warmup_epochs": 5,
+        "min_lr_ratio": 0.01,
+        "ema_decay": 0.99,
+        "amp": true,
+        "ascd_weight": 0.0,
+        "ascd_hard_alpha": 1.0,
+        "ascd_spectral_alpha": 1.0,
+        "ascd_spectral_temperature": 1.0,
+        "ascd_interface_radius": 3
+      },
+      "seeds": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "allowed_tta": [
+        "none",
+        "d4"
+      ],
+      "note": "B2 RawLLR AMP batch8; same network at inference; test remains locked"
+    },
+    "E14_B2_AC": {
+      "branch": "EXP14-ASCD-EXPLORATORY",
+      "stage": "E14-SEED0-SCREEN",
+      "flags": {
+        "backbone": "b2",
+        "head": "bilinear",
+        "use_low_level_refine": true,
+        "llr_source": "raw",
+        "input_scale": 1.0,
+        "lr_schedule": "cosine",
+        "warmup_epochs": 5,
+        "min_lr_ratio": 0.01,
+        "ema_decay": 0.99,
+        "amp": true,
+        "ascd_weight": 0.15,
+        "ascd_hard_alpha": 1.0,
+        "ascd_spectral_alpha": 0.0,
+        "ascd_spectral_temperature": 1.0,
+        "ascd_interface_radius": 0
+      },
+      "seeds": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "allowed_tta": [
+        "none",
+        "d4"
+      ],
+      "note": "B2 RawLLR AMP batch8; same network at inference; test remains locked"
+    },
+    "E14_B2_AC_BI": {
+      "branch": "EXP14-ASCD-EXPLORATORY",
+      "stage": "E14-SEED0-SCREEN",
+      "flags": {
+        "backbone": "b2",
+        "head": "bilinear",
+        "use_low_level_refine": true,
+        "llr_source": "raw",
+        "input_scale": 1.0,
+        "lr_schedule": "cosine",
+        "warmup_epochs": 5,
+        "min_lr_ratio": 0.01,
+        "ema_decay": 0.99,
+        "amp": true,
+        "ascd_weight": 0.15,
+        "ascd_hard_alpha": 1.0,
+        "ascd_spectral_alpha": 0.0,
+        "ascd_spectral_temperature": 1.0,
+        "ascd_interface_radius": 3
+      },
+      "seeds": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "allowed_tta": [
+        "none",
+        "d4"
+      ],
+      "note": "B2 RawLLR AMP batch8; same network at inference; test remains locked"
+    },
+    "E14_B2_ASCD": {
+      "branch": "EXP14-ASCD-EXPLORATORY",
+      "stage": "E14-SEED0-SCREEN",
+      "flags": {
+        "backbone": "b2",
+        "head": "bilinear",
+        "use_low_level_refine": true,
+        "llr_source": "raw",
+        "input_scale": 1.0,
+        "lr_schedule": "cosine",
+        "warmup_epochs": 5,
+        "min_lr_ratio": 0.01,
+        "ema_decay": 0.99,
+        "amp": true,
+        "ascd_weight": 0.15,
+        "ascd_hard_alpha": 1.0,
+        "ascd_spectral_alpha": 1.0,
+        "ascd_spectral_temperature": 1.0,
+        "ascd_interface_radius": 3
+      },
+      "seeds": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "allowed_tta": [
+        "none",
+        "d4"
+      ],
+      "note": "B2 RawLLR AMP batch8; same network at inference; test remains locked"
+    }
+  }
+}

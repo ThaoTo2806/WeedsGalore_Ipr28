@@ -1,0 +1,76 @@
+{
+  "version": "exp14-vbb-v1",
+  "description": "Single-network B2 Raw LLR matched AMP comparison, validation only",
+  "arms": {
+    "E14_B2_AMP_REF_VBB": {
+      "branch": "EXP14-ASCD-EXPLORATORY",
+      "stage": "Exp14 matched AMP control seed0",
+      "flags": {
+        "backbone": "b2",
+        "head": "bilinear",
+        "use_low_level_refine": true,
+        "llr_source": "raw",
+        "input_scale": 1.0,
+        "lr_schedule": "cosine",
+        "warmup_epochs": 5,
+        "min_lr_ratio": 0.01,
+        "ema_decay": 0.99,
+        "amp": true,
+        "ascd_weight": 0.0,
+        "ascd_hard_alpha": 1.0,
+        "ascd_spectral_alpha": 1.0,
+        "ascd_spectral_temperature": 1.0,
+        "ascd_interface_radius": 3,
+        "vbb_weight": 0.0,
+        "vbb_radius": 3
+      },
+      "seeds": [
+        0
+      ],
+      "allowed_tta": [
+        "none",
+        "d4"
+      ],
+      "note": "B2 RawLLR AMP batch8; same network at inference; test remains locked"
+    },
+    "E14_B2_VBB": {
+      "branch": "EXP14-ASCD-EXPLORATORY",
+      "stage": "Exp14 VBB seed0 screen (not validated)",
+      "flags": {
+        "backbone": "b2",
+        "head": "bilinear",
+        "use_low_level_refine": true,
+        "llr_source": "raw",
+        "input_scale": 1.0,
+        "lr_schedule": "cosine",
+        "warmup_epochs": 5,
+        "min_lr_ratio": 0.01,
+        "ema_decay": 0.99,
+        "amp": true,
+        "ascd_weight": 0.0,
+        "ascd_hard_alpha": 1.0,
+        "ascd_spectral_alpha": 1.0,
+        "ascd_spectral_temperature": 1.0,
+        "ascd_interface_radius": 3,
+        "vbb_weight": 0.1,
+        "vbb_radius": 3
+      },
+      "seeds": [
+        0
+      ],
+      "allowed_tta": [
+        "none",
+        "d4"
+      ],
+      "note": "Training-only vegetation/background boundary BCE; keep test sealed."
+    }
+  },
+  "rp_bias_grid": [
+    -0.5,
+    0.25,
+    0.5,
+    0.75,
+    1.0,
+    1.5
+  ]
+}

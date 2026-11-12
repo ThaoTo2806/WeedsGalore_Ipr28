@@ -16,6 +16,8 @@ from nets.llr_subcell import (LLR_RESIDUAL_HEADS, LLR_SUBCELL_HEADS,
                                LLRResidualSubcellSegFormer, LLRSubcellSegFormer)
 from nets.sc_llr import SC_LLR_HEADS, SCLLRSegFormer
 import exp12_config
+from exp15_losses import cw_lovasz_loss, spectral_spatial_cw_loss
+from exp14_vbb import vbb_loss
 from exp14_ascd import ascd_loss
 from exp12_sched import ema_decay_at, lr_factor
 from exp12_utils import clean_state, ema_update, predict_labels, rescale_batch
@@ -107,6 +109,13 @@ flags.DEFINE_boolean('pretrained_backbone', True, 'set True to use pretrained Re
 flags.DEFINE_string('ckpt_resnet', 'ckpts/resnet50-19c8e357.pth', 'ckpt path for pretrained backbone')
 flags.DEFINE_integer('batch_size', 2, 'batch size')
 flags.DEFINE_float('ascd_weight', 0.0, 'Train-only ASCD weight')
+flags.DEFINE_float('vbb_weight', 0.0, 'Training-only vegetation boundary loss weight')
+flags.DEFINE_float('exp15_lovasz_weight', 0.0, 'Train-only crop weed Lovasz weight')
+flags.DEFINE_float('exp15_spectral_weight', 0.0, 'Train-only spectral-spatial CW interface loss weight')
+flags.DEFINE_integer('exp15_spectral_scale', 4, 'Spatial downsample for spectral loss')
+flags.DEFINE_float('exp15_spectral_temperature', 0.8, 'Spectral ambiguity temperature')
+flags.DEFINE_integer('exp15_spectral_radius', 2, 'Crop-weed interface radius at downsampled grid')
+flags.DEFINE_integer('vbb_radius', 3, 'Vegetation boundary radius in pixels')
 flags.DEFINE_float('ascd_hard_alpha', 1.0, 'Wrong CW class probability weighting')
 flags.DEFINE_float('ascd_spectral_alpha', 1.0, 'Spectral confusion weighting')
 flags.DEFINE_float('ascd_spectral_temperature', 1.0, 'Spectral confusion temperature')
@@ -557,6 +566,23 @@ def main(_):
             if FLAGS.head in SC_LLR_HEADS and extras:
                 epoch_sc_entropy += float(extras.get('sc_weight_entropy', 0.0))
             epoch_steps += 1
+            # EXP15_IOU_SPECTRAL_TRAIN_ONLY
+            if FLAGS.exp15_lovasz_weight > 0 or FLAGS.exp15_spectral_weight > 0:
+                if FLAGS.num_classes != 3 or FLAGS.head != "bilinear" or not FLAGS.segformer:
+                    raise ValueError("Exp15 expects 3-class bilinear SegFormer")
+            if FLAGS.exp15_lovasz_weight > 0:
+                loss = loss + FLAGS.exp15_lovasz_weight * cw_lovasz_loss(out, labels, ignore_index=FLAGS.ignore_index)
+            if FLAGS.exp15_spectral_weight > 0:
+                loss = loss + FLAGS.exp15_spectral_weight * spectral_spatial_cw_loss(
+                    out, labels, features, ignore_index=FLAGS.ignore_index,
+                    scale=FLAGS.exp15_spectral_scale,
+                    temperature=FLAGS.exp15_spectral_temperature, radius=FLAGS.exp15_spectral_radius)
+            # EXP14_VBB_TRAIN_ONLY
+            if FLAGS.vbb_weight > 0:
+                if FLAGS.num_classes != 3 or FLAGS.head != "bilinear" or not FLAGS.segformer:
+                    raise ValueError("VBB requires 3-class bilinear SegFormer")
+                loss = loss + FLAGS.vbb_weight * vbb_loss(
+                    out, labels, radius=FLAGS.vbb_radius, ignore_index=FLAGS.ignore_index)
             # EXP14_ASCD_TRAIN_ONLY
             if FLAGS.ascd_weight > 0:
                 if FLAGS.num_classes != 3 or FLAGS.head != "bilinear" or not FLAGS.segformer:
