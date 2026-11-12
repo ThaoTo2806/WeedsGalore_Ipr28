@@ -6,6 +6,7 @@ from absl import app, flags
 import torch
 import torch.nn.functional as F
 from datasets import WeedsGaloreDataset
+from exp18_curriculum import CurriculumTrainDataset, stage_for_epoch
 from torch.utils.data import DataLoader
 from nets import (deeplabv3plus_resnet50, deeplabv3plus_resnet50_do,
                   deeplabv3plus_resnet50_attn, deeplabv3plus_resnet34_spectral,
@@ -16,6 +17,8 @@ from nets.llr_subcell import (LLR_RESIDUAL_HEADS, LLR_SUBCELL_HEADS,
                                LLRResidualSubcellSegFormer, LLRSubcellSegFormer)
 from nets.sc_llr import SC_LLR_HEADS, SCLLRSegFormer
 import exp12_config
+from nets.exp16_point import SpectralPointRefineSegFormer
+from nets.exp17_gate import SpectralSafetyGateSegFormer, exp17_safety_loss
 from exp15_losses import cw_lovasz_loss, spectral_spatial_cw_loss
 from exp14_vbb import vbb_loss
 from exp14_ascd import ascd_loss
@@ -85,6 +88,7 @@ def soft_dice_loss(logits, labels, num_classes, ignore_index=-1, class_weights=N
 FLAGS = flags.FLAGS
 _ABSL_FLAGS = set(FLAGS)  # flags defined before this file's own (used by the Exp12 config check)
 
+flags.DEFINE_boolean('exp18_curriculum', False, 'Exp18 train-only 384 patch curriculum')
 flags.DEFINE_string('dataset_path', 'weedsgalore-dataset', 'dataset directory')
 flags.DEFINE_integer('dataset_size_train', 104, 'dataset size of train set')
 flags.DEFINE_integer('in_channels', 5, 'options: 3 (RGB), 5 (MSI)')
@@ -108,6 +112,10 @@ flags.DEFINE_boolean('use_attention', False, 'set True to insert a CBAM attentio
 flags.DEFINE_boolean('pretrained_backbone', True, 'set True to use pretrained ResNet50 backbone')
 flags.DEFINE_string('ckpt_resnet', 'ckpts/resnet50-19c8e357.pth', 'ckpt path for pretrained backbone')
 flags.DEFINE_integer('batch_size', 2, 'batch size')
+flags.DEFINE_bool('exp17_safety_gate', False, 'Exp17 gated refinement, single model')
+flags.DEFINE_float('exp17_safety_weight', 0.10, 'Exp17 train-only safety regularizer')
+flags.DEFINE_bool('exp16_point_refine', False, 'Experimental point refinement architecture')
+flags.DEFINE_integer('exp16_point_budget', 4096, 'Number of refined pixels per image')
 flags.DEFINE_float('ascd_weight', 0.0, 'Train-only ASCD weight')
 flags.DEFINE_float('vbb_weight', 0.0, 'Training-only vegetation boundary loss weight')
 flags.DEFINE_float('exp15_lovasz_weight', 0.0, 'Train-only crop weed Lovasz weight')
@@ -316,6 +324,14 @@ def main(_):
     val_dataset = WeedsGaloreDataset(dataset_path=FLAGS.dataset_path, dataset_size=None, in_bands=FLAGS.in_channels,
                                         num_classes=FLAGS.num_classes, is_training=False, split='val', augmentation=False)
 
+    # EXP18_CURRICULUM_HOOK -- changes train only; validation remains 26 full images.
+    if FLAGS.exp18_curriculum:
+        assert FLAGS.in_channels == 5 and FLAGS.num_classes == 3
+        assert not FLAGS.ccmc and not FLAGS.exp16_point_refine and not FLAGS.exp17_safety_gate
+        train_dataset = CurriculumTrainDataset(
+            FLAGS.dataset_path, FLAGS.dataset_size_train, FLAGS.in_channels,
+            FLAGS.num_classes, seed=FLAGS.seed, patch_size=384)
+
     # Dataloader
     train_dataloader = DataLoader(dataset=train_dataset, batch_size=FLAGS.batch_size, shuffle=True,
                                   num_workers=FLAGS.num_workers, collate_fn=None, drop_last=True,
@@ -386,7 +402,8 @@ def main(_):
     elif FLAGS.unet:
         net = UNet(in_channels=FLAGS.in_channels, num_classes=FLAGS.num_classes)
     elif FLAGS.segformer:
-        net = SegFormer5Band(num_classes=FLAGS.num_classes,
+        # EXP16_POINT_MODEL_TRAIN
+        net = (SpectralSafetyGateSegFormer if FLAGS.exp17_safety_gate else SpectralPointRefineSegFormer if FLAGS.exp16_point_refine else SegFormer5Band)(num_classes=FLAGS.num_classes,
                              pretrained_backbone=FLAGS.pretrained_backbone,
                              in_channels=FLAGS.in_channels,
                              use_low_level_refine=FLAGS.use_low_level_refine,
@@ -405,6 +422,13 @@ def main(_):
     # Modify first layer
     if FLAGS.in_channels == 5 and not FLAGS.spectral_guided and not FLAGS.segformer and not FLAGS.ccmc:
         net.backbone.conv1 = torch.nn.Conv2d(FLAGS.in_channels, net.backbone.conv1.out_channels, kernel_size=7, stride=2, padding=3, bias=False, device=device)
+
+    if FLAGS.exp17_safety_gate and not FLAGS.exp16_point_refine:
+        raise ValueError("Exp17 needs exp16_point_refine=True")
+    if FLAGS.exp16_point_refine:
+        if not FLAGS.segformer or FLAGS.head != "bilinear" or FLAGS.ccmc:
+            raise ValueError("Exp16 point refinement needs standard B2 SegFormer")
+        net.point_budget = FLAGS.exp16_point_budget
 
     # Model to device
     net.to(device=device)
@@ -527,6 +551,11 @@ def main(_):
 
     # Train
     for epoch in range(start_epoch, FLAGS.epochs):
+        if FLAGS.exp18_curriculum:
+            train_dataset.set_epoch(epoch)
+            if stage_for_epoch(epoch) == 'hard_negative' and (epoch == 35 or epoch % 5 == 0):
+                train_dataset.refresh_hard_negatives(net, device, epoch)
+
         epoch_start = time.time()
         net.train()
         train_iter = iter(train_dataloader)
@@ -594,6 +623,9 @@ def main(_):
                     interface_radius=FLAGS.ascd_interface_radius,
                     ignore_index=FLAGS.ignore_index)
                 loss = loss + FLAGS.ascd_weight * aux_ascd
+            # EXP17_SAFETY_TRAIN_ONLY
+            if FLAGS.exp17_safety_gate and FLAGS.exp17_safety_weight > 0:
+                loss = loss + FLAGS.exp17_safety_weight * exp17_safety_loss(net, labels)
             scaler.scale(loss).backward()
             factor = lr_factor(tot_iter, total_steps, warmup_steps, FLAGS.lr_schedule, FLAGS.min_lr_ratio)
             for group, base_lr in zip(optimizer.param_groups, base_lrs):

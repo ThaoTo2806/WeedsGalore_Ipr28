@@ -48,6 +48,9 @@ flags.DEFINE_float('boundary_ratio', 0.02, 'Boundary IoU dilation ratio of image
 flags.DEFINE_integer('boundary_px', 3, 'fixed Boundary IoU width in pixels. Ratio 0.02 gives '
                      '~17 px on 600x600, wider than most weeds (BIoU == IoU), so 3 px is used')
 flags.DEFINE_integer('min_bin_n', 20, 'bins with fewer instances are flagged exploratory')
+# EXP16_POINT_EVAL_FLAG
+flags.DEFINE_bool('exp17_safety_gate', False, 'Exp17 gated refinement')
+flags.DEFINE_bool('exp16_point_refine', False, 'Point refine architecture for Exp16 only')
 define_model_flags()
 flags.DEFINE_string('arm_id', '', 'Exp12 registered arm (empty for legacy evaluation)')
 flags.DEFINE_string('exp12_arms', 'configs/exp12/exp12_arms.json', 'Exp12 arm registry')

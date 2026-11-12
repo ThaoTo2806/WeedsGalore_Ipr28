@@ -4,6 +4,8 @@ import torch
 from absl import flags
 
 from nets import CCMCSegFormer, SegFormer5Band
+from nets.exp16_point import SpectralPointRefineSegFormer
+from nets.exp17_gate import SpectralSafetyGateSegFormer
 from nets.mcsd import MCSDSegFormer
 from nets.llr_subcell import (LLR_RESIDUAL_HEADS, LLR_SUBCELL_HEADS,
                                LLRResidualSubcellSegFormer, LLRSubcellSegFormer)
@@ -89,7 +91,9 @@ def build_model(F):
                              prior_mode=F.prior_mode, injection=F.injection,
                              prior_perturb=F.prior_perturb,
                              stages=[int(s) for s in F.ccmc_stages], eps=F.ccmc_eps)
-    return SegFormer5Band(num_classes=F.num_classes, pretrained_backbone=True,
+    # EXP16_POINT_MODEL_EVAL
+    model_cls = SpectralSafetyGateSegFormer if getattr(F, "exp17_safety_gate", False) else SpectralPointRefineSegFormer if getattr(F, "exp16_point_refine", False) else SegFormer5Band
+    return model_cls(num_classes=F.num_classes, pretrained_backbone=True,
                           in_channels=F.in_channels,
                           use_low_level_refine=F.use_low_level_refine,
                           use_multiscale_fusion=F.use_multiscale_fusion,
