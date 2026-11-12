@@ -1,0 +1,48 @@
+{
+  "version": "exp20-icr-1",
+  "description": "Single B2 + ICR, train 104; validation 26; test only explicit separate run",
+  "arms": {
+    "E20_B2_ICR": {
+      "branch": "EXP14-ASCD-EXPLORATORY",
+      "stage": "Exp20 one single SegFormer-B2 + ICR module, test exploratory if explicitly authorized",
+      "flags": {
+        "backbone": "b2",
+        "head": "bilinear",
+        "use_low_level_refine": true,
+        "llr_source": "raw",
+        "input_scale": 1.0,
+        "lr_schedule": "cosine",
+        "warmup_epochs": 5,
+        "min_lr_ratio": 0.01,
+        "ema_decay": 0.99,
+        "amp": true,
+        "ascd_weight": 0.0,
+        "ascd_hard_alpha": 1.0,
+        "ascd_spectral_alpha": 1.0,
+        "ascd_spectral_temperature": 1.0,
+        "ascd_interface_radius": 3,
+        "vbb_weight": 0.0,
+        "vbb_radius": 3,
+        "exp15_lovasz_weight": 0.0,
+        "exp15_spectral_weight": 0.0,
+        "exp15_spectral_scale": 4,
+        "exp15_spectral_temperature": 0.8,
+        "exp15_spectral_radius": 2,
+        "exp16_point_budget": 4096,
+        "exp16_point_refine": false,
+        "exp17_safety_gate": false,
+        "exp18_curriculum": false,
+        "exp20_icr": true
+      },
+      "seeds": [
+        0
+      ],
+      "allowed_tta": [
+        "none",
+        "d4"
+      ],
+      "note": "B2 RawLLR AMP batch8; same network at inference; test remains locked"
+    }
+  },
+  "rp_bias_grid": []
+}
