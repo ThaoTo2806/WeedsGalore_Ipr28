@@ -1,0 +1,35 @@
+{
+  "experiment": "EXP12_B2_EXPLORATORY_TEST",
+  "arm": "P_B2_LLR",
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "tta": "D4_8_transforms",
+  "checkpoints": {
+    "0": {
+      "path": "/kaggle/input/datasets/thanhthao28/exp12-backup/exp12/P_B2_LLR/seed0/final_ema.pth",
+      "sha256": "b80a5f7794efb6baca27d91dfd14ba63b73d83d43dad8efdae17d82c7b24adc6"
+    },
+    "1": {
+      "path": "/kaggle/input/datasets/thanhthao28/exp12-backup/exp12/P_B2_LLR/seed1/final_ema.pth",
+      "sha256": "d3730eafd7d50976010b2aae2df87deba6846f5a432cbee706c45c9ae171d7d8"
+    },
+    "2": {
+      "path": "/kaggle/input/datasets/thanhthao28/exp12-backup/exp12/P_B2_LLR/seed2/final_ema.pth",
+      "sha256": "85297b87b8588356ed12557e4070c84f5a2b9e4611b38fa4b62153459733bdf4"
+    },
+    "3": {
+      "path": "/kaggle/input/datasets/thanhthao28/exp12-backup/exp12/P_B2_LLR/seed3/final_ema.pth",
+      "sha256": "97ff2643f0a1695f2d24f5b5b62cc84467f1aceec990dea1badcfaf1642865a1"
+    },
+    "4": {
+      "path": "/kaggle/input/datasets/thanhthao28/exp12-backup/exp12/P_B2_LLR/seed4/final_ema.pth",
+      "sha256": "23503a41d8db8da5be5b35cee1593e41fa14291d39116af1aba515f223b4ea8b"
+    }
+  },
+  "protocol": "exploratory_not_confirmation"
+}

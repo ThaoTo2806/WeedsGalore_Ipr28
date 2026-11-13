@@ -1,0 +1,29 @@
+{
+  "seed": 0,
+  "arm": "P_B2_LLR",
+  "split": "test",
+  "tta": "d4_8_transforms",
+  "n_images": 26,
+  "checkpoint_sha256": "b80a5f7794efb6baca27d91dfd14ba63b73d83d43dad8efdae17d82c7b24adc6",
+  "confusion_matrix": [
+    [
+      8611798,
+      17374,
+      47007
+    ],
+    [
+      11710,
+      170531,
+      4344
+    ],
+    [
+      44184,
+      10305,
+      442747
+    ]
+  ],
+  "mIoU": 86.306200861818,
+  "IoU_bg": 98.6226065677646,
+  "IoU_crop": 79.5891983721017,
+  "IoU_weed": 80.70679764558767
+}
