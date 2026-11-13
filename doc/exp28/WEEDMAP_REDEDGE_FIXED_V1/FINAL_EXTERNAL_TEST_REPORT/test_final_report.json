@@ -1,0 +1,297 @@
+{
+  "dataset": "WeedMap RedEdge",
+  "protocol": "external domain adaptation / custom scene split",
+  "train_scenes": [
+    "000",
+    "001"
+  ],
+  "validation_scene": [
+    "002"
+  ],
+  "test_scene": [
+    "003"
+  ],
+  "test_images": 204,
+  "informative_test_images": 102,
+  "training_seeds": [
+    0,
+    1,
+    2
+  ],
+  "epochs": 10,
+  "tta": "none",
+  "frozen_protocol_sha256": "7439382e8237fec1a4906c7617fb69c5466c02012a9a11f5f91db151315c17a2",
+  "summary": [
+    {
+      "arm": "base",
+      "metric": "mIoU",
+      "seed0": 34.96390232804375,
+      "seed1": 34.96390232804375,
+      "seed2": 34.96390232804375,
+      "mean": 34.96390232804375,
+      "sd": 0.0
+    },
+    {
+      "arm": "base",
+      "metric": "IoU_bg",
+      "seed0": 95.02110341973075,
+      "seed1": 95.02110341973075,
+      "seed2": 95.02110341973075,
+      "mean": 95.02110341973075,
+      "sd": 0.0
+    },
+    {
+      "arm": "base",
+      "metric": "IoU_crop",
+      "seed0": 1.1545074920167036,
+      "seed1": 1.1545074920167036,
+      "seed2": 1.1545074920167036,
+      "mean": 1.1545074920167036,
+      "sd": 0.0
+    },
+    {
+      "arm": "base",
+      "metric": "IoU_weed",
+      "seed0": 8.716096072383792,
+      "seed1": 8.716096072383792,
+      "seed2": 8.716096072383792,
+      "mean": 8.716096072383792,
+      "sd": 0.0
+    },
+    {
+      "arm": "control",
+      "metric": "mIoU",
+      "seed0": 63.64323083945781,
+      "seed1": 60.38463045412126,
+      "seed2": 60.37704270127415,
+      "mean": 61.46830133161774,
+      "sd": 1.883548026080939
+    },
+    {
+      "arm": "control",
+      "metric": "IoU_bg",
+      "seed0": 93.09949544927645,
+      "seed1": 91.25485667613152,
+      "seed2": 91.40101485551165,
+      "mean": 91.91845566030652,
+      "sd": 1.0254178615069518
+    },
+    {
+      "arm": "control",
+      "metric": "IoU_crop",
+      "seed0": 50.09748041328473,
+      "seed1": 45.78093615676243,
+      "seed2": 46.120658514581685,
+      "mean": 47.33302502820962,
+      "sd": 2.4001068730691277
+    },
+    {
+      "arm": "control",
+      "metric": "IoU_weed",
+      "seed0": 47.73271665581226,
+      "seed1": 44.11809852946981,
+      "seed2": 43.60945473372911,
+      "mean": 45.15342330633706,
+      "sd": 2.248164866001074
+    },
+    {
+      "arm": "sbcl",
+      "metric": "mIoU",
+      "seed0": 63.10922674043028,
+      "seed1": 60.68609220296222,
+      "seed2": 60.950059226278235,
+      "mean": 61.58179272322358,
+      "sd": 1.3293647562049065
+    },
+    {
+      "arm": "sbcl",
+      "metric": "IoU_bg",
+      "seed0": 92.78962142179871,
+      "seed1": 91.43582426827274,
+      "seed2": 91.63520039182974,
+      "mean": 91.95354869396708,
+      "sd": 0.7308904940748956
+    },
+    {
+      "arm": "sbcl",
+      "metric": "IoU_crop",
+      "seed0": 48.95714939117155,
+      "seed1": 46.410612911281994,
+      "seed2": 46.807101517990866,
+      "mean": 47.39162127348147,
+      "sd": 1.3702041888971022
+    },
+    {
+      "arm": "sbcl",
+      "metric": "IoU_weed",
+      "seed0": 47.58090940832058,
+      "seed1": 44.21183942933195,
+      "seed2": 44.40787576901411,
+      "mean": 45.40020820222222,
+      "sd": 1.8910845761964592
+    },
+    {
+      "arm": "csbrl",
+      "metric": "mIoU",
+      "seed0": 60.693867855090026,
+      "seed1": 64.10412039783996,
+      "seed2": 59.47345535597449,
+      "mean": 61.4238145363015,
+      "sd": 2.4000794362994475
+    },
+    {
+      "arm": "csbrl",
+      "metric": "IoU_bg",
+      "seed0": 91.42743934892675,
+      "seed1": 93.15602160760324,
+      "seed2": 90.80069175860058,
+      "mean": 91.79471757171018,
+      "sd": 1.2198625513142618
+    },
+    {
+      "arm": "csbrl",
+      "metric": "IoU_crop",
+      "seed0": 45.43579089591649,
+      "seed1": 51.09317070050816,
+      "seed2": 44.45511094044718,
+      "mean": 46.99469084562394,
+      "sd": 3.5830972823011162
+    },
+    {
+      "arm": "csbrl",
+      "metric": "IoU_weed",
+      "seed0": 45.218373320426835,
+      "seed1": 48.06316888540851,
+      "seed2": 43.16456336887569,
+      "mean": 45.48203519157034,
+      "sd": 2.459923207820238
+    },
+    {
+      "arm": "random",
+      "metric": "mIoU",
+      "seed0": 61.0072002779301,
+      "seed1": 64.32858221444864,
+      "seed2": 60.15472410922971,
+      "mean": 61.830168867202815,
+      "sd": 2.205273417248435
+    },
+    {
+      "arm": "random",
+      "metric": "IoU_bg",
+      "seed0": 91.6249528861651,
+      "seed1": 93.32635556733054,
+      "seed2": 91.14641761316581,
+      "mean": 92.03257535555382,
+      "sd": 1.1457091381170394
+    },
+    {
+      "arm": "random",
+      "metric": "IoU_crop",
+      "seed0": 45.8542128704705,
+      "seed1": 51.508841919840755,
+      "seed2": 45.222831977216515,
+      "mean": 47.528628922509256,
+      "sd": 3.46139164010467
+    },
+    {
+      "arm": "random",
+      "metric": "IoU_weed",
+      "seed0": 45.542435077154686,
+      "seed1": 48.150549156174655,
+      "seed2": 44.094922737306845,
+      "mean": 45.92930232354539,
+      "sd": 2.0553043842949594
+    }
+  ],
+  "paired_seed_differences": [
+    {
+      "comparison": "csbrl_minus_control",
+      "metric": "mIoU",
+      "seed0": -2.949362984367781,
+      "seed1": 3.719489943718706,
+      "seed2": -0.9035873452996626,
+      "mean_delta_pp": -0.044486795316245775,
+      "sd_delta_pp": 3.416422128535683
+    },
+    {
+      "comparison": "csbrl_minus_control",
+      "metric": "IoU_crop",
+      "seed0": -4.661689517368238,
+      "seed1": 5.312234543745731,
+      "seed2": -1.6655475741345072,
+      "mean_delta_pp": -0.33833418258567133,
+      "sd_delta_pp": 5.117705719777854
+    },
+    {
+      "comparison": "csbrl_minus_control",
+      "metric": "IoU_weed",
+      "seed0": -2.5143433353854263,
+      "seed1": 3.9450703559386966,
+      "seed2": -0.44489136485341874,
+      "mean_delta_pp": 0.32861188523328383,
+      "sd_delta_pp": 3.2984445981913053
+    },
+    {
+      "comparison": "csbrl_minus_sbcl",
+      "metric": "mIoU",
+      "seed0": -2.415358885340254,
+      "seed1": 3.418028194877742,
+      "seed2": -1.476603870303748,
+      "mean_delta_pp": -0.15797818692208665,
+      "sd_delta_pp": 3.132280555213545
+    },
+    {
+      "comparison": "csbrl_minus_sbcl",
+      "metric": "IoU_crop",
+      "seed0": -3.5213584952550576,
+      "seed1": 4.682557789226166,
+      "seed2": -2.3519905775436882,
+      "mean_delta_pp": -0.3969304278575265,
+      "sd_delta_pp": 4.4376520528723535
+    },
+    {
+      "comparison": "csbrl_minus_sbcl",
+      "metric": "IoU_weed",
+      "seed0": -2.3625360878937443,
+      "seed1": 3.851329456076556,
+      "seed2": -1.2433124001384215,
+      "mean_delta_pp": 0.08182698934813004,
+      "sd_delta_pp": 3.312103115969055
+    },
+    {
+      "comparison": "csbrl_minus_random",
+      "metric": "mIoU",
+      "seed0": -0.3133324228400767,
+      "seed1": -0.22446181660868092,
+      "seed2": -0.6812687532552246,
+      "mean_delta_pp": -0.4063543309013274,
+      "sd_delta_pp": 0.24219403559257335
+    },
+    {
+      "comparison": "csbrl_minus_random",
+      "metric": "IoU_crop",
+      "seed0": -0.41842197455400765,
+      "seed1": -0.41567121933259443,
+      "seed2": -0.7677210367693377,
+      "mean_delta_pp": -0.5339380768853133,
+      "sd_delta_pp": 0.20246665382890477
+    },
+    {
+      "comparison": "csbrl_minus_random",
+      "metric": "IoU_weed",
+      "seed0": -0.32406175672785054,
+      "seed1": -0.08738027076614685,
+      "seed2": -0.9303593684311551,
+      "mean_delta_pp": -0.4472671319750508,
+      "sd_delta_pp": 0.43478513445422723
+    }
+  ],
+  "interpretation": "All methods were evaluated on the frozen external test. No CSBRL advantage should be claimed unless supported by results across seeds and appropriate controls.",
+  "limitations": [
+    "Custom WeedMap scene split, not official SOTA protocol.",
+    "Source-pretrained domain adaptation, not zero-shot.",
+    "Only three training seeds.",
+    "Images originate from one held-out scene.",
+    "Dataset-specific indexed-label and mask decoding."
+  ]
+}

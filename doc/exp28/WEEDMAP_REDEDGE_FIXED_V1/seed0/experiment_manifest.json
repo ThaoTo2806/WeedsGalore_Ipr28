@@ -1,0 +1,35 @@
+{
+  "experiment": "Exp28 WeedMap RedEdge Fixed V1",
+  "source_sha256": "dfc5c3d220d8b380b0c7d59ebd10f152e48042dea70f5e9176591ac8221e0d32",
+  "base_checkpoint": "/kaggle/input/datasets/thanhthao28/exp12-backup/exp12/P_B2_LLR/seed0/final_ema.pth",
+  "dataset_root": "/kaggle/working/weedmap_exp28_ready",
+  "train_scenes": [
+    "000",
+    "001"
+  ],
+  "validation_scenes": [
+    "002"
+  ],
+  "held_out_test_scene": [
+    "003"
+  ],
+  "dataset_specific_mapping": {
+    "0": "background",
+    "10000": "crop",
+    "2": "weed",
+    "mask_0": "valid",
+    "mask_255": "ignore"
+  },
+  "filtered_train_images": 214,
+  "epochs": 10,
+  "lr": 0.0001,
+  "sbcl_weight": 0.15,
+  "seed": 0,
+  "arms": [
+    "control",
+    "sbcl",
+    "csbrl",
+    "random"
+  ],
+  "tta": "none"
+}

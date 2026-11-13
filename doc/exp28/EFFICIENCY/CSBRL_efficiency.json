@@ -1,0 +1,23 @@
+{
+  "checkpoint": "/kaggle/working/WeedsGalore_Ipr28/results/exp27/E27_CSBRL/seed0/csbrl/final_ema.pth",
+  "params": 24607827,
+  "trainable_params_if_unfrozen": 24607827,
+  "device": "Tesla T4",
+  "size": [
+    600,
+    600
+  ],
+  "latency_ms": {
+    "none": {
+      "mean": 52.96906495996154,
+      "median": 52.954059000057896,
+      "p95": 54.221489000156
+    },
+    "d4": {
+      "mean": 452.47249934001957,
+      "median": 453.6297940003351,
+      "p95": 466.56985800018447
+    }
+  },
+  "note": "Latency includes model, D4 transformations/aggregation and argmax. No checkpoint ensemble."
+}

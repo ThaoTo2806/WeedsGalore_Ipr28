@@ -1,0 +1,134 @@
+{
+  "dataset": "WeedMap RedEdge",
+  "split": "val",
+  "scenes": [
+    "002"
+  ],
+  "tta": "none",
+  "n_seed": 3,
+  "n_images_total": 252,
+  "n_images_informative": 159,
+  "bootstrap_unit": "image within training seed",
+  "bootstrap_repetitions": 3000,
+  "bootstrap_rng_seed": 2028,
+  "bootstrap_ci": [
+    {
+      "seed": 0,
+      "comparison": "csbrl_minus_control",
+      "delta_mIoU_pp": -1.6726050017782654,
+      "ci95_low_pp": -2.3176723535325356,
+      "ci95_high_pp": -0.9287581304356983,
+      "bootstrap_repetitions": 3000,
+      "informative_images": 159
+    },
+    {
+      "seed": 0,
+      "comparison": "csbrl_minus_sbcl",
+      "delta_mIoU_pp": -1.2616821059132661,
+      "ci95_low_pp": -1.8109199675998346,
+      "ci95_high_pp": -0.6283023576531134,
+      "bootstrap_repetitions": 3000,
+      "informative_images": 159
+    },
+    {
+      "seed": 0,
+      "comparison": "csbrl_minus_random",
+      "delta_mIoU_pp": -0.14214020523095883,
+      "ci95_low_pp": -0.2573896920885703,
+      "ci95_high_pp": -0.010829186801526426,
+      "bootstrap_repetitions": 3000,
+      "informative_images": 159
+    },
+    {
+      "seed": 1,
+      "comparison": "csbrl_minus_control",
+      "delta_mIoU_pp": 1.7317929896649247,
+      "ci95_low_pp": 1.1724041194190704,
+      "ci95_high_pp": 2.291990895506844,
+      "bootstrap_repetitions": 3000,
+      "informative_images": 159
+    },
+    {
+      "seed": 1,
+      "comparison": "csbrl_minus_sbcl",
+      "delta_mIoU_pp": 1.663943160582221,
+      "ci95_low_pp": 1.0917600269353163,
+      "ci95_high_pp": 2.2575771134577343,
+      "bootstrap_repetitions": 3000,
+      "informative_images": 159
+    },
+    {
+      "seed": 1,
+      "comparison": "csbrl_minus_random",
+      "delta_mIoU_pp": 0.11099238210397289,
+      "ci95_low_pp": -0.01599039614271084,
+      "ci95_high_pp": 0.23758193686507953,
+      "bootstrap_repetitions": 3000,
+      "informative_images": 159
+    },
+    {
+      "seed": 2,
+      "comparison": "csbrl_minus_control",
+      "delta_mIoU_pp": -1.0429022459191373,
+      "ci95_low_pp": -1.7494314042506969,
+      "ci95_high_pp": -0.41530188117987726,
+      "bootstrap_repetitions": 3000,
+      "informative_images": 159
+    },
+    {
+      "seed": 2,
+      "comparison": "csbrl_minus_sbcl",
+      "delta_mIoU_pp": -1.3909461520924111,
+      "ci95_low_pp": -1.9874165141064968,
+      "ci95_high_pp": -0.8476288552709011,
+      "bootstrap_repetitions": 3000,
+      "informative_images": 159
+    },
+    {
+      "seed": 2,
+      "comparison": "csbrl_minus_random",
+      "delta_mIoU_pp": -0.44382830629837144,
+      "ci95_low_pp": -0.523636688648885,
+      "ci95_high_pp": -0.3458322835960036,
+      "bootstrap_repetitions": 3000,
+      "informative_images": 159
+    }
+  ],
+  "seed_level_differences": {
+    "control": {
+      "seed_differences_pp": [
+        -1.6726050017782654,
+        1.7317929896649247,
+        -1.0429022459191373
+      ],
+      "mean_difference_pp": -0.3279047526774927,
+      "sd_difference_pp": 1.8113247865973632
+    },
+    "sbcl": {
+      "seed_differences_pp": [
+        -1.2616821059132661,
+        1.663943160582221,
+        -1.3909461520924111
+      ],
+      "mean_difference_pp": -0.3295616991411521,
+      "sd_difference_pp": 1.727635238617857
+    },
+    "random": {
+      "seed_differences_pp": [
+        -0.14214020523095883,
+        0.11099238210397289,
+        -0.44382830629837144
+      ],
+      "mean_difference_pp": -0.15832537647511913,
+      "sd_difference_pp": 0.277764232571375
+    }
+  },
+  "limitations": [
+    "Image bootstrap describes validation image sampling uncertainty, not training-seed uncertainty.",
+    "Images from the same UAV scene may be spatially correlated; image bootstrap can underestimate uncertainty.",
+    "Only 3 training seeds; no claim of statistical significance.",
+    "Validation was used during experimental development.",
+    "Custom scene split and dataset-specific label decoding; not official WeedMap benchmark protocol.",
+    "Held-out test scene 003 not evaluated."
+  ]
+}

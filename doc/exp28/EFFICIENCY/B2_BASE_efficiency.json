@@ -1,0 +1,23 @@
+{
+  "checkpoint": "/kaggle/input/datasets/thanhthao28/exp12-backup/exp12/P_B2_LLR/seed0/final_ema.pth",
+  "params": 24607827,
+  "trainable_params_if_unfrozen": 24607827,
+  "device": "Tesla T4",
+  "size": [
+    600,
+    600
+  ],
+  "latency_ms": {
+    "none": {
+      "mean": 48.50434200998734,
+      "median": 48.40377999971679,
+      "p95": 49.51129800019771
+    },
+    "d4": {
+      "mean": 408.6142833899976,
+      "median": 406.83764799996425,
+      "p95": 421.05884099964896
+    }
+  },
+  "note": "Latency includes model, D4 transformations/aggregation and argmax. No checkpoint ensemble."
+}

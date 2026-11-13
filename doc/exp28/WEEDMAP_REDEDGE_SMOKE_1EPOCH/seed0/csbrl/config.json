@@ -1,0 +1,21 @@
+{
+  "split": {
+    "train": [
+      "000",
+      "001"
+    ],
+    "val": [
+      "002"
+    ],
+    "test": [
+      "003"
+    ]
+  },
+  "arm": "csbrl",
+  "seed": 0,
+  "source_checkpoint_sha256": "b80a5f7794efb6baca27d91dfd14ba63b73d83d43dad8efdae17d82c7b24adc6",
+  "epochs": 1,
+  "resize": 256,
+  "max_train": 0,
+  "domain": "WeedMap RedEdge, custom scene split, domain adaptation"
+}

@@ -1,0 +1,43 @@
+{
+  "dataset": "WeedMap RedEdge",
+  "split": "val",
+  "custom_scenes": [
+    "002"
+  ],
+  "paper_status": "external_domain_adaptation_custom_split_not_official_SOTA",
+  "source_checkpoint": "/kaggle/input/datasets/thanhthao28/exp12-backup/exp12/P_B2_LLR/seed0/final_ema.pth",
+  "n_images": 252,
+  "tta": "none",
+  "scores": {
+    "base": {
+      "mIoU": 35.6796988571048,
+      "IoU_bg": 97.2324363314255,
+      "IoU_crop": 0.6893876615476842,
+      "IoU_weed": 9.117272578341233
+    },
+    "control": {
+      "mIoU": 65.22883812017864,
+      "IoU_bg": 96.26856687797239,
+      "IoU_crop": 52.69616475788317,
+      "IoU_weed": 46.721782724680345
+    },
+    "sbcl": {
+      "mIoU": 65.57688202635191,
+      "IoU_bg": 96.35661832885525,
+      "IoU_crop": 53.325548772364286,
+      "IoU_weed": 47.048478977836204
+    },
+    "csbrl": {
+      "mIoU": 64.1859358742595,
+      "IoU_bg": 95.96542625407763,
+      "IoU_crop": 50.745161582698415,
+      "IoU_weed": 45.847219786002455
+    },
+    "random": {
+      "mIoU": 64.62976418055787,
+      "IoU_bg": 96.09722243969185,
+      "IoU_crop": 51.38045496314911,
+      "IoU_weed": 46.41161513883264
+    }
+  }
+}

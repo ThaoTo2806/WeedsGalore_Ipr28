@@ -1,0 +1,86 @@
+{
+  "000": {
+    "indexed": {
+      "0": 36481501,
+      "2": 822697,
+      "10000": 884602
+    },
+    "color": {
+      "red": 822697,
+      "green": 884602
+    },
+    "cross": {
+      "indexed_0_red": 0,
+      "indexed_0_green": 0,
+      "indexed_1_red": 0,
+      "indexed_1_green": 0,
+      "indexed_2_red": 822697,
+      "indexed_2_green": 0,
+      "indexed_10000_red": 0,
+      "indexed_10000_green": 884602
+    }
+  },
+  "001": {
+    "indexed": {
+      "0": 29037317,
+      "2": 820868,
+      "10000": 554615
+    },
+    "color": {
+      "red": 820868,
+      "green": 554615
+    },
+    "cross": {
+      "indexed_0_red": 0,
+      "indexed_0_green": 0,
+      "indexed_1_red": 0,
+      "indexed_1_green": 0,
+      "indexed_2_red": 820868,
+      "indexed_2_green": 0,
+      "indexed_10000_red": 0,
+      "indexed_10000_green": 554615
+    }
+  },
+  "002": {
+    "indexed": {
+      "0": 42488594,
+      "2": 316683,
+      "10000": 740323
+    },
+    "color": {
+      "red": 316683,
+      "green": 740323
+    },
+    "cross": {
+      "indexed_0_red": 0,
+      "indexed_0_green": 0,
+      "indexed_1_red": 0,
+      "indexed_1_green": 0,
+      "indexed_2_red": 316683,
+      "indexed_2_green": 0,
+      "indexed_10000_red": 0,
+      "indexed_10000_green": 740323
+    }
+  },
+  "004": {
+    "indexed": {
+      "0": 19560753,
+      "2": 232182,
+      "10000": 424665
+    },
+    "color": {
+      "red": 232182,
+      "green": 424665
+    },
+    "cross": {
+      "indexed_0_red": 0,
+      "indexed_0_green": 0,
+      "indexed_1_red": 0,
+      "indexed_1_green": 0,
+      "indexed_2_red": 232182,
+      "indexed_2_green": 0,
+      "indexed_10000_red": 0,
+      "indexed_10000_green": 424665
+    }
+  }
+}

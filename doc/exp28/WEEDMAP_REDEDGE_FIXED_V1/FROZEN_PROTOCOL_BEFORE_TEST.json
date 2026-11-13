@@ -1,0 +1,61 @@
+{
+  "experiment": "EXP28 WEEDMAP REDEDGE FIXED V1",
+  "status": "FROZEN BEFORE EXTERNAL TEST",
+  "source_sha256": "dfc5c3d220d8b380b0c7d59ebd10f152e48042dea70f5e9176591ac8221e0d32",
+  "base_checkpoint_sha256": "b80a5f7794efb6baca27d91dfd14ba63b73d83d43dad8efdae17d82c7b24adc6",
+  "checkpoint_sha256": {
+    "0": {
+      "control": "704bc7360bf31a7c052af22a62f3f99d9d209bdc35f4728eec5dd2176b60f96d",
+      "sbcl": "213958ea9a4c6f3886ee155ef1920bd44f0cf4184eeae657f1058b85ac15639f",
+      "csbrl": "601837c36f9af887b35949e0b392bc7e3ccfb8f0e8e1bbb75f779708e04b384e",
+      "random": "e8509c01cb2a6c6e33821ec12cfda88ed3f698545038412b4f59c000299b6937"
+    },
+    "1": {
+      "control": "942e48d6b0ec7da0fc9aaa19cf8db3342a89d36f9144ae51a21c0e88a4af6a0e",
+      "sbcl": "f254d00776db4213a8a99423de6fbbf6ff0659e78c9aa04fe24eba52367f1c4b",
+      "csbrl": "eac66860102e533d3a02f8d221ac6a1401e3be4d2ba498090c0848425b7f43c6",
+      "random": "dfdff35d1cda5e82ecd14bb9e31786160beb47930a58ac8969dd7f041c5affe6"
+    },
+    "2": {
+      "control": "d047bee3d4f2e25896d01535489c22438b8af4e921761b0648b2628a037b1d4e",
+      "sbcl": "717566967a4bafb997850c4ff86a4c469c1dbe37ce0ce20f8163f4814e7209b3",
+      "csbrl": "2f8ae6fd2ea6fc83d0e627fcaad82a2a0dbaf477ab4c08ce5cd009a57b3e1afb",
+      "random": "587f3fa7a35cfd176c9782d47ed01d85f1222e7c369a76316dd3b6de0a9f5975"
+    }
+  },
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "arms": [
+    "control",
+    "sbcl",
+    "csbrl",
+    "random"
+  ],
+  "train_scenes": [
+    "000",
+    "001"
+  ],
+  "validation_scenes": [
+    "002"
+  ],
+  "test_scenes": [
+    "003"
+  ],
+  "epochs": 10,
+  "learning_rate": 0.0001,
+  "sbcl_weight": 0.15,
+  "resize": 256,
+  "tta": "none",
+  "train_images_used": 214,
+  "label_mapping": {
+    "0": "background",
+    "10000": "crop",
+    "2": "weed",
+    "mask_0": "valid",
+    "mask_255": "ignore"
+  },
+  "protocol_note": "Custom scene split, source-pretrained domain adaptation. All trained arms evaluated without test-based selection. Not official WeedMap SOTA."
+}
