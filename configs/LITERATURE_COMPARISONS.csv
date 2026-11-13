@@ -1,0 +1,7 @@
+work,year,dataset,split,task,metric,value,source,comparable_directly,notes
+WeedsGalore official baseline,2025,WeedsGalore,official test,semantic weed maize segmentation,mIoU,,https://openaccess.thecvf.com/content/WACV2025/html/Celikkan_WeedsGalore_A_Multispectral_and_Multitemporal_UAV-Based_Dataset_for_Crop_and_WACV_2025_paper.html,NO,Read original evaluation protocol and original class mapping before filling score
+Old LiteSent B0 study,2026,WeedsGalore,user historical test 5 seeds,BG Crop Weed,mIoU,85.49,user supplied prior manuscript,CONDITIONAL,Must verify same exact splits/TTA/mode before paired comparison
+Exp12 B2 raw LLR D4,2026,WeedsGalore,exploratory test 5 seeds,BG Crop Weed,mIoU,86.25048,user uploaded outputs,YES for matched local Exp12 B0,Already exposed TEST
+Exp27 CSBRL seed0,2026,WeedsGalore,exploratory test seed0,BG Crop Weed,mIoU,86.37066,user supplied outputs,YES to Exp27 same-run control,Not statistically superior to controls
+WeedMap Sa et al.,2018,WeedMap,official paper split,BG Crop Weed,mIoU,,https://www.mdpi.com/2072-4292/10/9/1423,NO,External custom split is not original split
+PhenoBench Weyler et al.,2024,PhenoBench,official server test,BG Crop Weed,mIoU,,https://www.phenobench.org/benchmarks.html,NO,RGB and server-side private test; do not compare with WeedMap or WeedsGalore directly
